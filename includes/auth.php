@@ -113,7 +113,7 @@ function requireAuth() {
 }
 
 /**
- * Require admin authentication via Bearer token
+ * Require admin authentication via Bearer token or cookie
  * @return void (dies if not authenticated)
  */
 function requireAdminAuth() {
@@ -122,9 +122,19 @@ function requireAdminAuth() {
         die(json_encode(['status' => 'error', 'message' => 'Admin token not configured']));
     }
 
-    $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    $parts = explode(' ', $auth_header);
-    $token = $parts[1] ?? '';
+    $token = null;
+
+    // Check Authorization header first
+    $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if (!empty($auth_header)) {
+        $parts = explode(' ', $auth_header);
+        $token = $parts[1] ?? '';
+    }
+
+    // Fall back to admin session cookie
+    if (empty($token)) {
+        $token = $_COOKIE['admin_session_token'] ?? '';
+    }
 
     if ($token !== ADMIN_TOKEN) {
         http_response_code(401);
