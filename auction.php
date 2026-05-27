@@ -23,7 +23,10 @@ require_once __DIR__ . '/includes/notifications.php';
 // ============================================================
 
 class AuctionCLI {
+    private $argv = [];
+
     public function run($argv) {
+        $this->argv = $argv;
         $command = $argv[1] ?? 'help';
 
         switch ($command) {
@@ -44,6 +47,10 @@ class AuctionCLI {
                 $this->showHelp();
                 break;
         }
+    }
+
+    private function hasFlag($flag) {
+        return in_array($flag, $this->argv);
     }
 
     private function itemCreate() {
@@ -251,31 +258,41 @@ class AuctionCLI {
     }
 
     private function auctionClose() {
-        echo "\n" . str_repeat("=", 60) . "\n";
-        echo "CLOSE AUCTION\n";
-        echo str_repeat("=", 60) . "\n\n";
+        $force = $this->hasFlag('--force');
+
+        if (!$force) {
+            echo "\n" . str_repeat("=", 60) . "\n";
+            echo "CLOSE AUCTION\n";
+            echo str_repeat("=", 60) . "\n\n";
+        }
 
         // Get active items
         $active = dbCount('items', 'is_closed = 0');
 
         if ($active === 0) {
-            echo "No active items to close.\n";
+            if (!$force) {
+                echo "No active items to close.\n";
+            }
             return;
         }
 
-        echo "This will close $active active auction item(s) and:\n";
-        echo "  • Mark all items as closed\n";
-        echo "  • Process winners\n";
-        echo "  • Send winner notifications\n";
-        echo "  • Create payment transactions\n\n";
+        if (!$force) {
+            echo "This will close $active active auction item(s) and:\n";
+            echo "  • Mark all items as closed\n";
+            echo "  • Process winners\n";
+            echo "  • Send winner notifications\n";
+            echo "  • Create payment transactions\n\n";
 
-        $confirm = $this->confirm("Continue?");
-        if (!$confirm) {
-            echo "Cancelled.\n";
-            return;
+            $confirm = $this->confirm("Continue?");
+            if (!$confirm) {
+                echo "Cancelled.\n";
+                return;
+            }
         }
 
-        echo "\nClosing auctions...\n\n";
+        if (!$force) {
+            echo "\nClosing auctions...\n\n";
+        }
 
         // Close auctions
         $result = closeExpiredAuctions();
@@ -349,7 +366,8 @@ class AuctionCLI {
 
         echo "  auction:close\n";
         echo "    Manually close active auctions\n";
-        echo "    Usage: php auction.php auction:close\n\n";
+        echo "    Usage: php auction.php auction:close [--force]\n";
+        echo "    --force: Skip confirmation prompt (for automated cron jobs)\n\n";
 
         echo "  help\n";
         echo "    Show this help message\n";
