@@ -181,7 +181,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
 
         <!-- Navigation -->
         <section class="navigation-section">
-            <a href="/" class="btn btn-secondary">View All Items</a>
+            <a href="/items.php" class="btn btn-secondary">View All Items</a>
         </section>
     </div>
 
