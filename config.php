@@ -57,19 +57,20 @@ if (!defined('APP_NAME')) define('APP_NAME', 'Silent Bid Buddy');
 // ============================================================
 // COOKIE CONFIGURATION (for session persistence)
 // ============================================================
-// Determine the proper cookie domain from HTTP_HOST
-$cookie_domain = '';
-if (!empty($_SERVER['HTTP_HOST'])) {
-    $host = $_SERVER['HTTP_HOST'];
-    // Remove port if present
-    $host = preg_replace('/:.*$/', '', $host);
-    // For localhost/IPs, use empty domain (exact match only)
-    // For real domains, use the domain (allows subdomains)
-    if (!in_array($host, ['localhost', '127.0.0.1']) && !preg_match('/^\d+\.\d+\.\d+\.\d+/', $host)) {
-        $cookie_domain = '.' . $host;
+if (!defined('COOKIE_DOMAIN')) {
+    $cookie_domain = '';
+    // Auto-detect domain for cookie persistence
+    if (!empty($_SERVER['HTTP_HOST'])) {
+        $host = $_SERVER['HTTP_HOST'];
+        // Remove port if present
+        $host = preg_replace('/:.*$/', '', $host);
+        // For real domains (not localhost/IP), prepend dot for subdomain cookies
+        if ($host !== 'localhost' && $host !== '127.0.0.1' && !filter_var($host, FILTER_VALIDATE_IP)) {
+            $cookie_domain = '.' . $host;
+        }
     }
+    define('COOKIE_DOMAIN', $cookie_domain);
 }
-if (!defined('COOKIE_DOMAIN')) define('COOKIE_DOMAIN', $cookie_domain);
 
 // ============================================================
 // DATABASE CONNECTION SINGLETON
