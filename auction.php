@@ -135,21 +135,45 @@ class AuctionCLI {
 
         // Generate QR codes for each item
         $generated = 0;
+        $failed = 0;
         foreach ($items as $item) {
             $url = APP_DOMAIN . '/item.php?id=' . $item['item_number'];
             $filename = sprintf(
                 '%s/item_%03d_%s.png',
                 QR_CODES_DIR,
                 $item['item_number'],
-                preg_replace('/[^a-z0-9_-]/i', '_', $item['title'])
+                preg_replace('/[^a-z0-9_-]/i', '_', substr($item['title'], 0, 40))
             );
 
-            // Use simple QR code generation (would need phpqrcode library in production)
-            echo "  ✓ Generated QR code for Item #{$item['item_number']}: {$item['title']}\n";
-            $generated++;
+            // Generate QR code using Google Charts API
+            $qr_url = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($url);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $qr_url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            $qr_data = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($http_code === 200 && $qr_data) {
+                if (file_put_contents($filename, $qr_data)) {
+                    echo "  ✓ Generated QR code for Item #{$item['item_number']}: {$item['title']}\n";
+                    $generated++;
+                } else {
+                    echo "  ✗ Failed to write QR code file: $filename\n";
+                    $failed++;
+                }
+            } else {
+                echo "  ✗ Failed to generate QR code for Item #{$item['item_number']}\n";
+                $failed++;
+            }
         }
 
         echo "\n✓ Generated $generated QR codes in " . QR_CODES_DIR . "\n";
+        if ($failed > 0) {
+            echo "⚠ Failed to generate $failed QR codes\n";
+        }
     }
 
     private function monitorLive() {

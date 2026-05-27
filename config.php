@@ -48,6 +48,11 @@ if (!defined('MAX_VERIFICATION_ATTEMPTS')) define('MAX_VERIFICATION_ATTEMPTS', 5
 if (!defined('RATE_LIMIT_CODES_PER_MINUTE')) define('RATE_LIMIT_CODES_PER_MINUTE', 5);
 if (!defined('ANTI_SNIPING_MINUTES')) define('ANTI_SNIPING_MINUTES', 2);
 
+// ============================================================
+// ADMIN CONFIGURATION
+// ============================================================
+if (!defined('ADMIN_TOKEN')) define('ADMIN_TOKEN', $vault_admin_token ?? '');
+
 if (!defined('UPLOADS_DIR')) define('UPLOADS_DIR', __DIR__ . '/uploads/');
 if (!defined('QR_CODES_DIR')) define('QR_CODES_DIR', __DIR__ . '/qr_codes/');
 

@@ -113,6 +113,26 @@ function requireAuth() {
 }
 
 /**
+ * Require admin authentication via Bearer token
+ * @return void (dies if not authenticated)
+ */
+function requireAdminAuth() {
+    if (empty(ADMIN_TOKEN)) {
+        http_response_code(401);
+        die(json_encode(['status' => 'error', 'message' => 'Admin token not configured']));
+    }
+
+    $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $parts = explode(' ', $auth_header);
+    $token = $parts[1] ?? '';
+
+    if ($token !== ADMIN_TOKEN) {
+        http_response_code(401);
+        die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Invalid admin token.']));
+    }
+}
+
+/**
  * Create new session for user
  * @param int $user_id User ID
  * @return string Session token

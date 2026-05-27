@@ -8,6 +8,7 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
+require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/auction-engine.php';
 
 header('Content-Type: application/json');
@@ -18,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
 }
 
-// TODO: Add admin authentication check here
-// For now, we'll rely on server-side access control
+// Require admin authentication
+requireAdminAuth();
 
 $result = closeExpiredAuctions();
 
