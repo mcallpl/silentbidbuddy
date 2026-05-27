@@ -32,6 +32,20 @@ if (!$item) {
 $page_title = htmlspecialchars($item['title']) . ' - ' . APP_NAME;
 $user = getCurrentUser();
 $is_authenticated = $user !== false;
+
+// CRITICAL: If PHP auth failed but user has localStorage token, they may have logged in
+// This can happen if cookies aren't persisting properly. We'll let client-side JS handle it.
+$has_local_storage_token = false;
+if (!$is_authenticated) {
+    // Check if there's a token in GET param (fallback from client-side redirect)
+    if (!empty($_GET['auth_token'])) {
+        $token = validateSessionToken($_GET['auth_token']);
+        if ($token) {
+            $user = $token;
+            $is_authenticated = true;
+        }
+    }
+}
 $is_user_winning = $is_authenticated && $item['current_high_bidder_id'] == $user['id'];
 $time_remaining = strtotime($item['auction_end_time']) - time();
 $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
@@ -195,6 +209,17 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
         window.SBB.startingBid = <?php echo (float)$item['starting_bid']; ?>;
         window.SBB.isAuctionOpen = <?php echo $is_auction_open ? 'true' : 'false'; ?>;
         window.SBB.sessionToken = localStorage.getItem('session_token');
+
+        // PERSISTENCE FIX: If PHP says user not authenticated but localStorage has a token,
+        // reload with the token as a GET parameter so PHP can validate it.
+        // This handles cases where the HTTP-only cookie isn't persisting properly.
+        if (!window.SBB.isAuthenticated && window.SBB.sessionToken) {
+            const currentUrl = window.location.href;
+            if (!currentUrl.includes('auth_token=')) {
+                const separator = currentUrl.includes('?') ? '&' : '?';
+                window.location.href = currentUrl + separator + 'auth_token=' + encodeURIComponent(window.SBB.sessionToken);
+            }
+        }
     </script>
     <script src="/js/bidding.js"></script>
 </body>

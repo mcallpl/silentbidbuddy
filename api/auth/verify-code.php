@@ -4,11 +4,11 @@
 // POST /api/auth/verify-code.php
 // ============================================================
 
-header('Content-Type: application/json');
-
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
+
+header('Content-Type: application/json');
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -25,6 +25,7 @@ if (!$input) {
 
 $phone = $input['phone'] ?? '';
 $code = $input['code'] ?? '';
+$full_name = $input['full_name'] ?? '';
 
 if (empty($phone) || empty($code)) {
     http_response_code(400);
@@ -48,7 +49,7 @@ if (!verifyCode($normalized_phone, $code)) {
 }
 
 // Get or create user
-$user_id = getOrCreateUser($normalized_phone, '');
+$user_id = getOrCreateUser($normalized_phone, $full_name);
 
 if (!$user_id) {
     http_response_code(500);
@@ -60,6 +61,16 @@ if (!$user_id) {
 
 // Create session
 $session_token = createSession($user_id);
+
+// Set secure cookie for persistent session
+setcookie('session_token', $session_token, [
+    'expires' => time() + SESSION_LIFETIME,
+    'path' => '/',
+    'domain' => COOKIE_DOMAIN,
+    'secure' => !empty($_SERVER['HTTPS']),
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 
 // Get user data
 $user = dbGetRow(

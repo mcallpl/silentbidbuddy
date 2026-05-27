@@ -20,39 +20,56 @@ if (file_exists($local_config_path)) {
 // ============================================================
 // DATABASE CONFIGURATION
 // ============================================================
-define('DB_HOST', 'localhost');
-define('DB_USER', $vault_db_user ?? 'root');
-define('DB_PASS', $vault_db_pass ?? '');
-define('DB_NAME', 'silentbidbuddy');
+if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if (!defined('DB_USER')) define('DB_USER', $vault_db_user ?? 'root');
+if (!defined('DB_PASS')) define('DB_PASS', $vault_db_pass ?? '');
+if (!defined('DB_NAME')) define('DB_NAME', 'silentbidbuddy');
 
 // ============================================================
 // STRIPE CONFIGURATION
 // ============================================================
-define('STRIPE_SECRET_KEY', $vault_stripe_secret_key ?? '');
-define('STRIPE_PUBLISHABLE_KEY', $vault_stripe_publishable_key ?? '');
-define('STRIPE_WEBHOOK_SECRET', $vault_stripe_webhook_secrets['silentbidbuddy'] ?? '');
+if (!defined('STRIPE_SECRET_KEY')) define('STRIPE_SECRET_KEY', $vault_stripe_secret_key ?? '');
+if (!defined('STRIPE_PUBLISHABLE_KEY')) define('STRIPE_PUBLISHABLE_KEY', $vault_stripe_publishable_key ?? '');
+if (!defined('STRIPE_WEBHOOK_SECRET')) define('STRIPE_WEBHOOK_SECRET', $vault_stripe_webhook_secrets['silentbidbuddy'] ?? '');
 
 // ============================================================
 // TWILIO CONFIGURATION
 // ============================================================
-define('TWILIO_ACCOUNT_SID', $vault_twilio_sid ?? '');
-define('TWILIO_AUTH_TOKEN', $vault_twilio_token ?? '');
-define('TWILIO_PHONE_NUMBER', $vault_twilio_phone ?? '');
+if (!defined('TWILIO_ACCOUNT_SID')) define('TWILIO_ACCOUNT_SID', $vault_twilio_sid ?? '');
+if (!defined('TWILIO_AUTH_TOKEN')) define('TWILIO_AUTH_TOKEN', $vault_twilio_token ?? '');
+if (!defined('TWILIO_PHONE_NUMBER')) define('TWILIO_PHONE_NUMBER', $vault_twilio_phone ?? '');
 
 // ============================================================
 // APPLICATION CONFIGURATION
 // ============================================================
-define('SESSION_LIFETIME', 30 * 24 * 60 * 60); // 30 days in seconds
-define('VERIFICATION_CODE_LIFETIME', 15 * 60); // 15 minutes
-define('MAX_VERIFICATION_ATTEMPTS', 5);
-define('RATE_LIMIT_CODES_PER_MINUTE', 5);
-define('ANTI_SNIPING_MINUTES', 2);
+if (!defined('SESSION_LIFETIME')) define('SESSION_LIFETIME', 30 * 24 * 60 * 60);
+if (!defined('VERIFICATION_CODE_LIFETIME')) define('VERIFICATION_CODE_LIFETIME', 15 * 60);
+if (!defined('MAX_VERIFICATION_ATTEMPTS')) define('MAX_VERIFICATION_ATTEMPTS', 5);
+if (!defined('RATE_LIMIT_CODES_PER_MINUTE')) define('RATE_LIMIT_CODES_PER_MINUTE', 5);
+if (!defined('ANTI_SNIPING_MINUTES')) define('ANTI_SNIPING_MINUTES', 2);
 
-define('UPLOADS_DIR', __DIR__ . '/uploads/');
-define('QR_CODES_DIR', __DIR__ . '/qr_codes/');
+if (!defined('UPLOADS_DIR')) define('UPLOADS_DIR', __DIR__ . '/uploads/');
+if (!defined('QR_CODES_DIR')) define('QR_CODES_DIR', __DIR__ . '/qr_codes/');
 
-define('APP_DOMAIN', getenv('APP_DOMAIN') ?: 'http://localhost');
-define('APP_NAME', 'Silent Bid Buddy');
+if (!defined('APP_DOMAIN')) define('APP_DOMAIN', getenv('APP_DOMAIN') ?: 'http://localhost');
+if (!defined('APP_NAME')) define('APP_NAME', 'Silent Bid Buddy');
+
+// ============================================================
+// COOKIE CONFIGURATION (for session persistence)
+// ============================================================
+// Determine the proper cookie domain from HTTP_HOST
+$cookie_domain = '';
+if (!empty($_SERVER['HTTP_HOST'])) {
+    $host = $_SERVER['HTTP_HOST'];
+    // Remove port if present
+    $host = preg_replace('/:.*$/', '', $host);
+    // For localhost/IPs, use empty domain (exact match only)
+    // For real domains, use the domain (allows subdomains)
+    if (!in_array($host, ['localhost', '127.0.0.1']) && !preg_match('/^\d+\.\d+\.\d+\.\d+/', $host)) {
+        $cookie_domain = '.' . $host;
+    }
+}
+if (!defined('COOKIE_DOMAIN')) define('COOKIE_DOMAIN', $cookie_domain);
 
 // ============================================================
 // DATABASE CONNECTION SINGLETON
@@ -101,7 +118,7 @@ if (!is_dir(__DIR__ . '/logs')) {
 session_set_cookie_params([
     'lifetime' => SESSION_LIFETIME,
     'path' => '/',
-    'domain' => '',
+    'domain' => COOKIE_DOMAIN,
     'secure' => !empty($_SERVER['HTTPS']),
     'httponly' => true,
     'samesite' => 'Lax'
@@ -112,4 +129,3 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-?>
