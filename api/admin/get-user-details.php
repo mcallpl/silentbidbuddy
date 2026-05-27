@@ -45,7 +45,8 @@ $bid_history = dbGetAll(
         b.created_at,
         i.title as item_title,
         i.current_high_bidder_id,
-        i.current_high_bid
+        i.current_high_bid,
+        i.is_closed
      FROM bids b
      JOIN items i ON b.item_id = i.id
      WHERE b.user_id = ?
@@ -54,12 +55,21 @@ $bid_history = dbGetAll(
     [$user_id]
 );
 
-// Mark if this specific bid is the current winning bid
+// Determine status for each bid
 foreach ($bid_history as &$bid) {
     $bid['bid_amount'] = (float)$bid['bid_amount'];
     $bid['max_bid_amount'] = (float)($bid['max_bid_amount'] ?? 0);
     $bid['current_high_bid'] = (float)$bid['current_high_bid'];
-    $bid['is_winning'] = ($bid['bid_amount'] === $bid['current_high_bid'] && (int)$bid['current_high_bidder_id'] === $user_id);
+
+    $is_user_high_bidder = ((int)$bid['current_high_bidder_id'] === $user_id);
+    $is_this_bid_highest = ($bid['bid_amount'] === $bid['current_high_bid']);
+    $is_auction_closed = ((int)$bid['is_closed'] === 1);
+
+    if ($is_this_bid_highest && $is_user_high_bidder) {
+        $bid['status'] = $is_auction_closed ? 'WON' : 'CURRENT HIGH BID';
+    } else {
+        $bid['status'] = 'OUTBID';
+    }
 }
 
 // Get wins

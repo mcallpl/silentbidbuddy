@@ -482,7 +482,10 @@ const AdminDashboard = {
                     html += '<h3>Recent Bids</h3>';
                     html += '<table class="admin-table"><thead><tr><th>Item</th><th>Bid Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>';
                     data.bid_history.slice(0, 10).forEach(bid => {
-                        const status = bid.is_winning ? '<span class="badge badge-success">Winning</span>' : '<span class="badge badge-secondary">Outbid</span>';
+                        let badgeClass = 'badge-secondary';
+                        if (bid.status === 'WON') badgeClass = 'badge-success';
+                        else if (bid.status === 'CURRENT HIGH BID') badgeClass = 'badge-warning';
+                        const status = '<span class="badge ' + badgeClass + '">' + bid.status + '</span>';
                         const date = new Date(bid.created_at).toLocaleString();
                         html += '<tr><td>' + this.escapeHtml(bid.item_title) + '</td><td>$' + this.formatCurrency(bid.bid_amount) + '</td><td>' + status + '</td><td>' + date + '</td></tr>';
                     });
