@@ -48,6 +48,7 @@ const AdminDashboard = {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
                 });
+                // Note: login endpoint doesn't require auth header since we haven't logged in yet
 
                 const data = await response.json();
 
@@ -69,6 +70,9 @@ const AdminDashboard = {
     },
 
     setupDashboard() {
+        // Get admin token from cookie
+        this.getAdminTokenFromCookie();
+
         this.setupNav();
         this.setupModals();
         this.setupButtons();
@@ -79,6 +83,25 @@ const AdminDashboard = {
 
         // Start metrics polling
         this.startMetricsPolling();
+    },
+
+    getAdminTokenFromCookie() {
+        // Extract token from admin_session_token cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'admin_session_token') {
+                this.adminToken = decodeURIComponent(value);
+                return;
+            }
+        }
+    },
+
+    getAuthHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (this.adminToken || '')
+        };
     },
 
     setupNav() {
@@ -129,7 +152,9 @@ const AdminDashboard = {
 
     async loadMetrics() {
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/get-metrics.php');
+            const response = await fetch(this.config.apiBaseUrl + '/get-metrics.php', {
+                headers: this.getAuthHeaders()
+            });
             const data = await response.json();
 
             if (data.status === 'ok') {
@@ -212,7 +237,9 @@ const AdminDashboard = {
 
     async loadItems(page = 1) {
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/get-items.php?page=' + page + '&limit=25');
+            const response = await fetch(this.config.apiBaseUrl + '/get-items.php?page=' + page + '&limit=25', {
+                headers: this.getAuthHeaders()
+            });
             const data = await response.json();
 
             if (data.status === 'ok') {
@@ -284,7 +311,7 @@ const AdminDashboard = {
         try {
             const response = await fetch(this.config.apiBaseUrl + '/delete-item.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getAuthHeaders(),
                 body: JSON.stringify({ item_id: parseInt(itemId) })
             });
 
@@ -312,7 +339,9 @@ const AdminDashboard = {
                 url += '&status=' + encodeURIComponent(status);
             }
 
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: this.getAuthHeaders()
+            });
             const data = await response.json();
 
             if (data.status === 'ok') {
@@ -366,7 +395,9 @@ const AdminDashboard = {
                 url += '&search=' + encodeURIComponent(search);
             }
 
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: this.getAuthHeaders()
+            });
             const data = await response.json();
 
             if (data.status === 'ok') {
@@ -422,7 +453,9 @@ const AdminDashboard = {
         body.innerHTML = '<p class="loading">Loading user details...</p>';
 
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/get-user-details.php?user_id=' + userId);
+            const response = await fetch(this.config.apiBaseUrl + '/get-user-details.php?user_id=' + userId, {
+                headers: this.getAuthHeaders()
+            });
             const data = await response.json();
 
             if (data.status === 'ok') {
@@ -529,7 +562,7 @@ const AdminDashboard = {
 
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getAuthHeaders(),
                 body: JSON.stringify(itemId ? { item_id: itemId, ...data } : data)
             });
 
@@ -591,7 +624,8 @@ const AdminDashboard = {
     async logout() {
         try {
             await fetch(this.config.apiBaseUrl + '/logout.php', {
-                method: 'POST'
+                method: 'POST',
+                headers: this.getAuthHeaders()
             });
             window.location.reload();
         } catch (error) {
