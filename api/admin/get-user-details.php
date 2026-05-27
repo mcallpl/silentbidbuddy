@@ -54,12 +54,12 @@ $bid_history = dbGetAll(
     [$user_id]
 );
 
-// Mark if they're currently winning
+// Mark if this specific bid is the current winning bid
 foreach ($bid_history as &$bid) {
-    $bid['is_winning'] = ((int)$bid['current_high_bidder_id'] === $user_id);
     $bid['bid_amount'] = (float)$bid['bid_amount'];
     $bid['max_bid_amount'] = (float)($bid['max_bid_amount'] ?? 0);
     $bid['current_high_bid'] = (float)$bid['current_high_bid'];
+    $bid['is_winning'] = ($bid['bid_amount'] === $bid['current_high_bid'] && (int)$bid['current_high_bidder_id'] === $user_id);
 }
 
 // Get wins
