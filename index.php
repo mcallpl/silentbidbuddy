@@ -46,16 +46,19 @@ $page_title = APP_NAME . ' - Bid Now';
                 <p class="form-description">Enter your info and we'll send a verification code.</p>
 
                 <div class="form-group">
+                    <label for="nameInput" class="form-label">Your Name <span class="required">*</span></label>
                     <input
                         type="text"
                         id="nameInput"
                         class="form-input"
                         placeholder="Your Name"
                         autocomplete="name"
+                        required
                     />
                 </div>
 
                 <div class="form-group">
+                    <label for="phoneInput" class="form-label">Phone Number <span class="required">*</span></label>
                     <input
                         type="tel"
                         id="phoneInput"
@@ -63,6 +66,7 @@ $page_title = APP_NAME . ' - Bid Now';
                         placeholder="(555) 123-4567"
                         autocomplete="tel"
                         inputmode="tel"
+                        required
                     />
                 </div>
 

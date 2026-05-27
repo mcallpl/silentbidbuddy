@@ -187,6 +187,19 @@ body {
     font-family: 'Courier New', monospace;
 }
 
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 600;
+    color: var(--color-dark);
+    font-size: var(--font-size-sm);
+}
+
+.required {
+    color: var(--color-error);
+    margin-left: var(--spacing-xs);
+}
+
 .error-message {
     color: var(--color-error);
     font-size: var(--font-size-sm);

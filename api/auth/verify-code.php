@@ -27,9 +27,9 @@ $phone = $input['phone'] ?? '';
 $code = $input['code'] ?? '';
 $full_name = $input['full_name'] ?? '';
 
-if (empty($phone) || empty($code)) {
+if (empty($phone) || empty($code) || empty($full_name)) {
     http_response_code(400);
-    die(json_encode(['status' => 'error', 'message' => 'Phone and code required']));
+    die(json_encode(['status' => 'error', 'message' => 'Phone, name, and code are required']));
 }
 
 // Normalize phone
