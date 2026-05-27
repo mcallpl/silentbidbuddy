@@ -80,6 +80,7 @@ $page_title = 'Checkout - ' . APP_NAME;
         </section>
     </div>
 
+    <script src="/js/app.js"></script>
     <script>
         window.SBB = window.SBB || {};
         window.SBB.itemId = <?php echo (int)$item['id']; ?>;
@@ -88,4 +89,3 @@ $page_title = 'Checkout - ' . APP_NAME;
     </script>
     <script src="/js/stripe-checkout.js"></script>
 </body>
-</html>
