@@ -182,6 +182,13 @@ function getOrCreateUser($phone, $full_name = '') {
     );
 
     if ($user) {
+        // Update name if provided (allows users to update their name on re-login)
+        if (!empty($full_name)) {
+            dbUpdate(
+                "UPDATE users SET full_name = ? WHERE id = ?",
+                [$full_name, (int)$user['id']]
+            );
+        }
         return $user['id'];
     }
 
