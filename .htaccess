@@ -23,12 +23,6 @@
         Deny from all
     </FilesMatch>
 
-    # Prevent direct access to API files
-    <DirectoryMatch "^/api">
-        Order Deny,Allow
-        Allow from all
-    </DirectoryMatch>
-
     # Force HTTPS (uncomment when deployed to production with SSL)
     # RewriteCond %{HTTPS} off
     # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
