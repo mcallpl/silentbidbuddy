@@ -221,4 +221,3 @@ function getUserTransactions($user_id) {
     );
 }
 
-?>

@@ -52,12 +52,6 @@ function validateSessionToken($token) {
         return false;
     }
 
-    // Update last activity
-    dbUpdate(
-        "UPDATE sessions SET updated_at = NOW() WHERE session_token = ?",
-        [(string)$token]
-    );
-
     return [
         'id' => $session['id'],
         'phone_number' => $session['phone_number'],
@@ -67,11 +61,11 @@ function validateSessionToken($token) {
 }
 
 /**
- * Get session token from Authorization header or request body
+ * Get session token from Authorization header, request body, GET param, or cookie
  * @return string|null
  */
 function getSessionToken() {
-    // Check Authorization header
+    // Check Authorization header (for API calls)
     if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
         $auth_header = $_SERVER['HTTP_AUTHORIZATION'];
         if (preg_match('/Bearer\s+(.*)$/', $auth_header, $matches)) {
@@ -83,6 +77,16 @@ function getSessionToken() {
     $input = json_decode(file_get_contents('php://input'), true);
     if (!empty($input['session_token'])) {
         return $input['session_token'];
+    }
+
+    // Check GET parameter (for page loads from client redirects)
+    if (!empty($_GET['session_token'])) {
+        return $_GET['session_token'];
+    }
+
+    // Check cookie
+    if (!empty($_COOKIE['session_token'])) {
+        return $_COOKIE['session_token'];
     }
 
     return null;
@@ -280,4 +284,3 @@ function isAuthenticated() {
     return getCurrentUser() !== false;
 }
 
-?>

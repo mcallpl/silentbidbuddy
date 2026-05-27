@@ -230,4 +230,3 @@ function getUserBidHistory($user_id) {
     );
 }
 
-?>

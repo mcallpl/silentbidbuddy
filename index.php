@@ -42,8 +42,18 @@ $page_title = APP_NAME . ' - Bid Now';
 
             <!-- Phone Entry Form -->
             <div class="auth-form" id="phoneForm">
-                <h2>Enter Your Phone to Bid</h2>
-                <p class="form-description">We'll send you a verification code via SMS.</p>
+                <h2>Sign Up to Bid</h2>
+                <p class="form-description">Enter your info and we'll send a verification code.</p>
+
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="nameInput"
+                        class="form-input"
+                        placeholder="Your Name"
+                        autocomplete="name"
+                    />
+                </div>
 
                 <div class="form-group">
                     <input
@@ -109,4 +119,3 @@ $page_title = APP_NAME . ' - Bid Now';
         });
     </script>
 </body>
-</html>

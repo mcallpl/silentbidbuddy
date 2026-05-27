@@ -342,4 +342,3 @@ class AuctionCLI {
 $cli = new AuctionCLI();
 $cli->run($argv);
 
-?>

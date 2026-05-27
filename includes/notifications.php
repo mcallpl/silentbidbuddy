@@ -109,4 +109,3 @@ function sendAuctionClosedNotification($admin_phone, $item_count, $total_raised)
     return sendTwilioSMS($admin_phone, $message);
 }
 
-?>

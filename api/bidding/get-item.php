@@ -4,12 +4,13 @@
 // GET /api/bidding/get-item.php?id=ITEM_ID
 // ============================================================
 
-header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/bidding.php';
+
+header('Content-Type: application/json');
 
 // Only allow GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

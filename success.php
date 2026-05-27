@@ -73,4 +73,3 @@ $page_title = 'Payment Successful - ' . APP_NAME;
         </section>
     </div>
 </body>
-</html>

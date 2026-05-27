@@ -214,4 +214,3 @@ function dbCount($table, $where = '', $params = []) {
     return (int)($count ?? 0);
 }
 
-?>

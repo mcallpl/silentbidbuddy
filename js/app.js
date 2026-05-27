@@ -52,6 +52,7 @@ SBB.API = {
 // ============================================================
 SBB.Auth = {
     currentPhone: null,
+    currentName: null,
 
     init() {
         this.setupEventListeners();
@@ -92,14 +93,16 @@ SBB.Auth = {
     },
 
     async sendCode() {
+        const nameInput = document.getElementById('nameInput');
         const phoneInput = document.getElementById('phoneInput');
+        const name = nameInput.value.trim();
         const phone = phoneInput.value.trim();
         const error = document.getElementById('phoneError');
 
         error.style.display = 'none';
 
-        if (!phone) {
-            error.textContent = 'Please enter a phone number';
+        if (!name || !phone) {
+            error.textContent = 'Please enter your name and phone number';
             error.style.display = 'block';
             return;
         }
@@ -115,6 +118,7 @@ SBB.Auth = {
 
             if (response.status === 'ok') {
                 this.currentPhone = phone;
+                this.currentName = name;
                 this.showCodeForm();
             } else {
                 error.textContent = response.message || 'Failed to send code';
@@ -152,18 +156,20 @@ SBB.Auth = {
         try {
             const response = await SBB.API.post('/api/auth/verify-code.php', {
                 phone: this.currentPhone,
+                full_name: this.currentName,
                 code: code
             });
 
             if (response.status === 'ok') {
-                // Save session token
+                // Save session token and user info to localStorage
                 localStorage.setItem('session_token', response.session_token);
                 localStorage.setItem('user_id', response.user.id);
+                localStorage.setItem('user_name', response.user.full_name || this.currentName);
 
                 // Show success
                 this.showSuccessMessage();
 
-                // Redirect after 2 seconds
+                // Redirect after 2 seconds to first active item
                 setTimeout(() => {
                     window.location.href = '/item.php?id=1';
                 }, 2000);

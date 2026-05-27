@@ -4,9 +4,10 @@
 // POST /api/checkout/webhook.php
 // ============================================================
 
-require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/stripe-utils.php';
+
+header('Content-Type: application/json');
 
 header('Content-Type: application/json');
 

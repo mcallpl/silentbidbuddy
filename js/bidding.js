@@ -107,11 +107,17 @@ SBB.Bidding = {
                 '/api/bidding/get-live-feed.php?id=' + this.itemId + '&limit=20'
             );
 
-            if (response.status === 'ok') {
+            console.log('Bid feed response:', response);
+
+            if (response && response.status === 'ok' && Array.isArray(response.bids)) {
                 this.renderBidFeed(response.bids);
+            } else {
+                console.warn('Invalid bid feed response:', response);
+                this.renderBidFeed([]);
             }
         } catch (err) {
             console.error('Error loading bid feed:', err);
+            this.renderBidFeed([]);
         }
     },
 

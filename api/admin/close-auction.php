@@ -4,12 +4,13 @@
 // POST /api/admin/close-auction.php
 // Manually triggers auction closing and winner processing
 // ============================================================
-
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auction-engine.php';
+
+header('Content-Type: application/json');
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

@@ -4,13 +4,13 @@
 // POST /api/bidding/place-bid.php
 // ============================================================
 
-header('Content-Type: application/json');
-
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/bidding.php';
 require_once __DIR__ . '/../../includes/notifications.php';
+
+header('Content-Type: application/json');
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
