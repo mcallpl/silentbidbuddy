@@ -34,7 +34,7 @@ $items = dbGetAll(
      FROM items
      ORDER BY item_number ASC
      LIMIT ? OFFSET ?",
-    ['ii', $limit, $offset]
+    [$limit, $offset]
 );
 
 // Calculate time remaining for each item

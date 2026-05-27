@@ -31,7 +31,6 @@ $params = [];
 
 if (!empty($status)) {
     $where .= " AND t.status = ?";
-    $params[] = 's';
     $params[] = $status;
 }
 
@@ -61,7 +60,6 @@ $query = "SELECT
          ORDER BY t.created_at DESC
          LIMIT ? OFFSET ?";
 
-$params[] = 'ii';
 $params[] = $limit;
 $params[] = $offset;
 

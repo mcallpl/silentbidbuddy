@@ -32,18 +32,15 @@ $params = [];
 if (!empty($search)) {
     $where .= " AND (full_name LIKE ? OR phone_number LIKE ?)";
     $search_term = '%' . $search . '%';
-    $params[] = 'ss';
     $params[] = $search_term;
     $params[] = $search_term;
-} else {
-    $params[] = '';
 }
 
 // Get total count
 if (!empty($search)) {
     $total = dbGetRow(
         "SELECT COUNT(*) as count FROM users WHERE full_name LIKE ? OR phone_number LIKE ?",
-        ['ss', '%' . $search . '%', '%' . $search . '%']
+        ['%' . $search . '%', '%' . $search . '%']
     )['count'];
 } else {
     $total = dbCount('users');
@@ -65,7 +62,6 @@ $query = "SELECT
          ORDER BY MAX(b.created_at) DESC
          LIMIT ? OFFSET ?";
 
-$params[] = 'ii';
 $params[] = $limit;
 $params[] = $offset;
 
