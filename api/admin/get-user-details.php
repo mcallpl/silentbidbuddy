@@ -27,7 +27,7 @@ if (!$user_id) {
 // Get user info
 $user = dbGetRow(
     "SELECT id, full_name, phone_number, stripe_customer_id, created_at FROM users WHERE id = ?",
-    ['i', $user_id]
+    [$user_id]
 );
 
 if (!$user) {
@@ -51,7 +51,7 @@ $bid_history = dbGetAll(
      WHERE b.user_id = ?
      ORDER BY b.created_at DESC
      LIMIT 50",
-    ['i', $user_id]
+    [$user_id]
 );
 
 // Mark if they're currently winning
@@ -75,7 +75,7 @@ $wins = dbGetAll(
      LEFT JOIN transactions t ON i.id = t.item_id AND t.user_id = ?
      WHERE i.current_high_bidder_id = ? AND i.is_closed = 1
      ORDER BY i.auction_end_time DESC",
-    ['ii', $user_id, $user_id]
+    [$user_id, $user_id]
 );
 
 // Format wins
