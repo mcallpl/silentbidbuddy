@@ -183,6 +183,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
         </div>
     </div>
 
+    <script src="/js/app.js"></script>
     <script>
         // Pass data to JavaScript
         window.SBB = window.SBB || {};
@@ -197,4 +198,3 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
     </script>
     <script src="/js/bidding.js"></script>
 </body>
-</html>
