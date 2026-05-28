@@ -92,7 +92,7 @@ $item_data = [
 try {
     // Generate document
     $pdf_gen = new ItemPDFGenerator($item_data);
-    $pdf_gen->generate($item['short_url'], $item['qr_code_url']);
+    $pdf_gen->generate($item['short_url']);
 
     http_response_code(200);
     echo json_encode([

@@ -14,9 +14,10 @@ class ItemPDFGenerator {
         $this->item = $item;
     }
 
-    public function generate($shortUrl, $qrCodeUrl) {
+    public function generate($shortUrl, $qrCodeUrl = null) {
         $this->shortUrl = $shortUrl;
-        $this->qrCodeUrl = $qrCodeUrl;
+        // Generate QR code image URL using qr-server API (reliable image endpoint)
+        $this->qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($shortUrl);
 
         // Create HTML content
         $html = $this->buildHTML();

@@ -118,9 +118,9 @@ if ($result) {
 
     // Regenerate document if QR code exists
     try {
-        if ($item && $item['qr_code_url'] && $item['short_url']) {
+        if ($item && $item['short_url']) {
             $pdf_gen = new ItemPDFGenerator($item);
-            $pdf_gen->generate($item['short_url'], $item['qr_code_url']);
+            $pdf_gen->generate($item['short_url']);
         }
     } catch (Exception $e) {
         error_log("Error regenerating document: " . $e->getMessage());

@@ -91,7 +91,7 @@ try {
         if ($item) {
             // Generate document
             $pdf_gen = new ItemPDFGenerator($item);
-            $pdf_gen->generate($short_url, $qr_code_url);
+            $pdf_gen->generate($short_url);
             $document_url = $pdf_gen->getDocumentPath();
         }
     }
