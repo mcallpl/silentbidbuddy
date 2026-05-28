@@ -40,48 +40,40 @@ if (!$item) {
 // Build update query dynamically
 $updates = [];
 $params = [];
-$types = '';
 
 if (isset($input['title'])) {
     $updates[] = "title = ?";
-    $types .= 's';
     $params[] = $input['title'];
 }
 
 if (isset($input['description'])) {
     $updates[] = "description = ?";
-    $types .= 's';
     $params[] = $input['description'];
 }
 
 if (isset($input['image_url'])) {
     $updates[] = "image_url = ?";
-    $types .= 's';
     $params[] = $input['image_url'];
 }
 
 if (isset($input['fair_market_value'])) {
     $updates[] = "fair_market_value = ?";
-    $types .= 'd';
-    $params[] = (float)$input['fair_market_value'];
+    $params[] = !empty($input['fair_market_value']) ? (float)$input['fair_market_value'] : null;
 }
 
 if (isset($input['starting_bid'])) {
     $updates[] = "starting_bid = ?";
-    $types .= 'd';
     $params[] = (float)$input['starting_bid'];
 }
 
 if (isset($input['min_increment'])) {
     $updates[] = "min_increment = ?";
-    $types .= 'd';
     $params[] = (float)$input['min_increment'];
 }
 
 if (isset($input['buy_now_price'])) {
     $updates[] = "buy_now_price = ?";
-    $types .= 'd';
-    $params[] = (float)$input['buy_now_price'];
+    $params[] = !empty($input['buy_now_price']) ? (float)$input['buy_now_price'] : null;
 }
 
 if (empty($updates)) {
@@ -89,11 +81,10 @@ if (empty($updates)) {
     die(json_encode(['status' => 'error', 'message' => 'No fields to update']));
 }
 
-$types .= 'i';
 $params[] = $item_id;
 
 $query = "UPDATE items SET " . implode(", ", $updates) . " WHERE id = ?";
-$result = dbQuery($query, $types, ...$params);
+$result = dbQuery($query, $params);
 
 if ($result) {
     // Regenerate document if QR code exists
