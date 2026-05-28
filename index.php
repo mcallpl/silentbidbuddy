@@ -11,15 +11,9 @@ require_once __DIR__ . '/includes/auth.php';
 // Session persists for 30 days via HTTP-only secure cookie
 // This is stored in the 'session_token' cookie and validated on every page load
 if (isAuthenticated()) {
-    // User has valid session - redirect to first active auction item
-    $first_item = dbGetRow(
-        "SELECT id, item_number FROM items WHERE is_closed = 0 AND auction_end_time > NOW() ORDER BY auction_start_time LIMIT 1"
-    );
-
-    if ($first_item) {
-        header('Location: /item.php?id=' . $first_item['item_number']);
-        exit;
-    }
+    // User has valid session - redirect to items page (all available items)
+    header('Location: /items.php');
+    exit;
 }
 
 $page_title = APP_NAME . ' - Bid Now';
