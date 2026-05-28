@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/session-manager.php';
 
 header('Content-Type: application/json');
 
@@ -62,15 +63,8 @@ if (!$user_id) {
 // Create session
 $session_token = createSession($user_id);
 
-// Set secure cookie for persistent session
-setcookie('session_token', $session_token, [
-    'expires' => time() + SESSION_LIFETIME,
-    'path' => '/',
-    'domain' => COOKIE_DOMAIN,
-    'secure' => !empty($_SERVER['HTTPS']),
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
+// Set secure cookie for persistent session (works on all PHP versions)
+setSessionCookie(SESSION_COOKIE_NAME, $session_token, SESSION_COOKIE_LIFETIME);
 
 // Get user data
 $user = dbGetRow(

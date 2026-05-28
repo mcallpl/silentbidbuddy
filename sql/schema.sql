@@ -155,6 +155,26 @@ CREATE TABLE IF NOT EXISTS audit_log (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- ADMIN ACCOUNTS TABLE (Admin user management)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS admin_accounts (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    full_name VARCHAR(255),
+    is_active TINYINT(1) DEFAULT 1,
+    last_login DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_username (username),
+    INDEX idx_is_active (is_active),
+    INDEX idx_last_login (last_login),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- Cleanup Task: Remove expired verification codes (run periodically)
 -- ============================================================
 -- DELETE FROM verification_codes WHERE expires_at < NOW() AND is_used = 1;

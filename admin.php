@@ -28,14 +28,26 @@ $page_title = APP_NAME . ' — Admin Dashboard';
 
             <form id="loginForm" class="admin-form">
                 <div class="form-group">
-                    <label for="adminTokenInput" class="form-label">Admin Token</label>
+                    <label for="adminUsername" class="form-label">Username</label>
+                    <input
+                        type="text"
+                        id="adminUsername"
+                        class="form-input"
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="adminPassword" class="form-label">Password</label>
                     <input
                         type="password"
-                        id="adminTokenInput"
+                        id="adminPassword"
                         class="form-input"
-                        placeholder="Enter your admin token"
+                        placeholder="Enter your password"
                         required
-                        autocomplete="off"
+                        autocomplete="current-password"
                     />
                 </div>
 

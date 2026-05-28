@@ -33,29 +33,35 @@ const AdminDashboard = {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const token = document.getElementById('adminTokenInput').value;
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
             const btn = loginForm.querySelector('.btn');
             const btnText = btn.querySelector('.btn-text');
             const btnSpinner = btn.querySelector('.btn-spinner');
+
+            if (!username || !password) {
+                loginError.textContent = 'Username and password are required';
+                loginError.style.display = 'block';
+                return;
+            }
 
             btnText.style.display = 'none';
             btnSpinner.style.display = 'inline';
             btn.disabled = true;
 
             try {
-                const response = await fetch(this.config.apiBaseUrl + '/login.php', {
+                const response = await fetch(this.config.apiBaseUrl + '/login-account.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
+                    body: JSON.stringify({ username, password })
                 });
-                // Note: login endpoint doesn't require auth header since we haven't logged in yet
 
                 const data = await response.json();
 
                 if (response.ok && data.status === 'ok') {
                     window.location.reload();
                 } else {
-                    loginError.textContent = data.message || 'Invalid token';
+                    loginError.textContent = data.message || 'Invalid username or password';
                     loginError.style.display = 'block';
                 }
             } catch (error) {
@@ -65,6 +71,7 @@ const AdminDashboard = {
                 btnText.style.display = 'inline';
                 btnSpinner.style.display = 'none';
                 btn.disabled = false;
+                document.getElementById('adminPassword').value = '';
             }
         });
     },
@@ -932,9 +939,9 @@ const AdminDashboard = {
 
     async logout() {
         try {
-            await fetch(this.config.apiBaseUrl + '/logout.php', {
+            await fetch(this.config.apiBaseUrl + '/logout-account.php', {
                 method: 'POST',
-                headers: this.getAuthHeaders()
+                headers: { 'Content-Type': 'application/json' }
             });
             window.location.reload();
         } catch (error) {
