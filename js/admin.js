@@ -1101,14 +1101,18 @@ const AdminDashboard = {
         const container = document.getElementById('adminsContainer');
         try {
             const response = await fetch(this.config.apiBaseUrl + '/crud-admins.php?action=list', {
-                headers: this.getAuthHeaders()
+                method: 'GET',
+                headers: this.getAuthHeaders(),
+                credentials: 'include' // CRITICAL: Send session cookie
             });
-            const data = await response.json();
 
             if (!response.ok) {
-                container.innerHTML = `<p class="error">${data.message}</p>`;
+                const data = await response.json().catch(() => ({}));
+                container.innerHTML = `<p class="error">Error: ${data.message || response.statusText}</p>`;
                 return;
             }
+
+            const data = await response.json();
 
             let html = '<table style="width: 100%; border-collapse: collapse;">';
             html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead><tbody>';
@@ -1139,14 +1143,18 @@ const AdminDashboard = {
         const container = document.getElementById('usersManageContainer');
         try {
             const response = await fetch(this.config.apiBaseUrl + '/crud-users.php?action=list&page=1&limit=20', {
-                headers: this.getAuthHeaders()
+                method: 'GET',
+                headers: this.getAuthHeaders(),
+                credentials: 'include' // CRITICAL: Send session cookie
             });
-            const data = await response.json();
 
             if (!response.ok) {
-                container.innerHTML = `<p class="error">${data.message}</p>`;
+                const data = await response.json().catch(() => ({}));
+                container.innerHTML = `<p class="error">Error: ${data.message || response.statusText}</p>`;
                 return;
             }
+
+            const data = await response.json();
 
             let html = '<table style="width: 100%; border-collapse: collapse;">';
             html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Name</th><th>Phone</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
@@ -1178,14 +1186,18 @@ const AdminDashboard = {
         const container = document.getElementById('itemsManageContainer');
         try {
             const response = await fetch(this.config.apiBaseUrl + '/crud-items.php?action=list&page=1&limit=20', {
-                headers: this.getAuthHeaders()
+                method: 'GET',
+                headers: this.getAuthHeaders(),
+                credentials: 'include' // CRITICAL: Send session cookie
             });
-            const data = await response.json();
 
             if (!response.ok) {
-                container.innerHTML = `<p class="error">${data.message}</p>`;
+                const data = await response.json().catch(() => ({}));
+                container.innerHTML = `<p class="error">Error: ${data.message || response.statusText}</p>`;
                 return;
             }
+
+            const data = await response.json();
 
             let html = '<table style="width: 100%; border-collapse: collapse;">';
             html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Title</th><th>Starting Bid</th><th>Current High</th><th>Status</th><th>Ends</th><th>Actions</th></tr></thead><tbody>';

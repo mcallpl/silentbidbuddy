@@ -242,8 +242,8 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <!-- User Management Tab -->
                 <div id="usersManageTab" class="admin-control-content" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>All Bidders</h3>
-                        <button id="createUserBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add User</button>
+                        <h3>User Management</h3>
+                        <button id="createUserBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create User</button>
                     </div>
                     <div id="usersManageContainer" class="data-table">
                         <p class="loading">Loading users...</p>
@@ -254,7 +254,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <!-- Items Management Tab -->
                 <div id="itemsManageTab" class="admin-control-content" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>All Items</h3>
+                        <h3>Item Management</h3>
                         <button id="createItemManageBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create Item</button>
                     </div>
                     <div id="itemsManageContainer" class="data-table">
@@ -265,7 +265,10 @@ $page_title = APP_NAME . ' — Admin Dashboard';
 
                 <!-- Transactions Tab -->
                 <div id="transactionsManageTab" class="admin-control-content" style="display: none;">
-                    <h3>All Transactions</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Transaction Management</h3>
+                        <button id="editTransactionBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">⚙️ Edit Transactions</button>
+                    </div>
                     <div id="transactionsManageContainer" class="data-table">
                         <p class="loading">Loading transactions...</p>
                     </div>

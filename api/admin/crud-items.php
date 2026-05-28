@@ -11,7 +11,11 @@ require_once __DIR__ . '/../../includes/session-manager.php';
 
 header('Content-Type: application/json');
 
-requireAdminSessionAuth();
+// Check if admin is logged in
+if (!isAdminLoggedIn()) {
+    http_response_code(401);
+    die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Admin session required.']));
+}
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
