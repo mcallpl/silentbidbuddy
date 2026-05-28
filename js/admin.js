@@ -1114,25 +1114,50 @@ const AdminDashboard = {
 
             const data = await response.json();
 
-            let html = '<table style="width: 100%; border-collapse: collapse;">';
-            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead><tbody>';
+            if (!data.data || data.data.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No admin accounts found</p>';
+                return;
+            }
 
-            (data.data || []).forEach(admin => {
-                const role = admin.is_super_admin ? '<span style="background: #ffeaa7; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.85rem;">Super Admin</span>' : 'Admin';
-                const status = admin.is_active ? '<span style="color: #27ae60;">Active</span>' : '<span style="color: #e74c3c;">Inactive</span>';
-                const lastLogin = admin.last_login ? new Date(admin.last_login).toLocaleDateString() : 'Never';
+            let html = `<div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; border-radius: 6px;">
+                <thead>
+                    <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Username</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Email</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Name</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Role</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Status</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Last Login</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>`;
 
-                html += `<tr style="border-bottom: 1px solid #eee;">`;
-                html += `<td style="padding: 0.8rem;">${this.escapeHtml(admin.username)}</td>`;
-                html += `<td>${this.escapeHtml(admin.email || '-')}</td>`;
-                html += `<td>${role}</td>`;
-                html += `<td>${status}</td>`;
-                html += `<td>${lastLogin}</td>`;
-                html += `<td><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="AdminDashboard.editAdmin(${admin.id})">Edit</button></td>`;
+            (data.data || []).forEach((admin, idx) => {
+                const role = admin.is_super_admin
+                    ? '<span style="background: #ffeaa7; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Super Admin</span>'
+                    : '<span style="background: #e8f4f8; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem;">Admin</span>';
+                const status = admin.is_active
+                    ? '<span style="color: #27ae60; font-weight: 600;">✓ Active</span>'
+                    : '<span style="color: #e74c3c; font-weight: 600;">✗ Inactive</span>';
+                const lastLogin = admin.last_login
+                    ? new Date(admin.last_login).toLocaleDateString() + ' ' + new Date(admin.last_login).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    : '<span style="color: #999;">Never</span>';
+                const bgColor = idx % 2 === 0 ? '#fafafa' : 'white';
+
+                html += `<tr style="border-bottom: 1px solid #eee; background: ${bgColor};">`;
+                html += `<td style="padding: 1rem;"><strong>${this.escapeHtml(admin.username)}</strong></td>`;
+                html += `<td style="padding: 1rem;">${this.escapeHtml(admin.email || '-')}</td>`;
+                html += `<td style="padding: 1rem;">${this.escapeHtml(admin.full_name || '-')}</td>`;
+                html += `<td style="padding: 1rem; text-align: center;">${role}</td>`;
+                html += `<td style="padding: 1rem; text-align: center;">${status}</td>`;
+                html += `<td style="padding: 1rem; text-align: center; font-size: 0.9rem;">${lastLogin}</td>`;
+                html += `<td style="padding: 1rem; text-align: center;"><button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="AdminDashboard.editAdmin(${admin.id})">Edit</button></td>`;
                 html += `</tr>`;
             });
 
-            html += '</tbody></table>';
+            html += `</tbody></table></div>`;
             container.innerHTML = html;
         } catch (error) {
             container.innerHTML = `<p class="error">Error loading admin accounts: ${error.message}</p>`;
@@ -1156,20 +1181,38 @@ const AdminDashboard = {
 
             const data = await response.json();
 
-            let html = '<table style="width: 100%; border-collapse: collapse;">';
-            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Name</th><th>Phone</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+            if (!data.data || data.data.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No users found</p>';
+                return;
+            }
 
-            (data.data || []).forEach(user => {
+            let html = `<div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; border-radius: 6px;">
+                <thead>
+                    <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Name</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Phone</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Stripe ID</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Joined</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            (data.data || []).forEach((user, idx) => {
                 const joined = new Date(user.created_at).toLocaleDateString();
-                html += `<tr style="border-bottom: 1px solid #eee;">`;
-                html += `<td style="padding: 0.8rem;">${this.escapeHtml(user.full_name)}</td>`;
-                html += `<td>${this.escapeHtml(user.phone_number)}</td>`;
-                html += `<td>${joined}</td>`;
-                html += `<td><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="AdminDashboard.editUser(${user.id})">Edit</button></td>`;
+                const bgColor = idx % 2 === 0 ? '#fafafa' : 'white';
+
+                html += `<tr style="border-bottom: 1px solid #eee; background: ${bgColor};">`;
+                html += `<td style="padding: 1rem;"><strong>${this.escapeHtml(user.full_name)}</strong></td>`;
+                html += `<td style="padding: 1rem; font-family: monospace; font-size: 0.9rem;">${this.escapeHtml(user.phone_number)}</td>`;
+                html += `<td style="padding: 1rem; font-size: 0.85rem; color: #666;">${this.escapeHtml(user.stripe_customer_id || '-')}</td>`;
+                html += `<td style="padding: 1rem; font-size: 0.9rem;">${joined}</td>`;
+                html += `<td style="padding: 1rem; text-align: center;"><button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="AdminDashboard.editUser(${user.id})">Edit</button></td>`;
                 html += `</tr>`;
             });
 
-            html += '</tbody></table>';
+            html += `</tbody></table></div>`;
             container.innerHTML = html;
 
             // Handle pagination
@@ -1199,23 +1242,45 @@ const AdminDashboard = {
 
             const data = await response.json();
 
-            let html = '<table style="width: 100%; border-collapse: collapse;">';
-            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Title</th><th>Starting Bid</th><th>Current High</th><th>Status</th><th>Ends</th><th>Actions</th></tr></thead><tbody>';
+            if (!data.data || data.data.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No items found</p>';
+                return;
+            }
 
-            (data.data || []).forEach(item => {
-                const status = item.is_closed ? '<span style="color: #e74c3c;">Closed</span>' : '<span style="color: #27ae60;">Active</span>';
+            let html = `<div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; border-radius: 6px;">
+                <thead>
+                    <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Item #</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Title</th>
+                        <th style="text-align: right; padding: 1rem; font-weight: 600; color: #333;">Starting</th>
+                        <th style="text-align: right; padding: 1rem; font-weight: 600; color: #333;">Current High</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Status</th>
+                        <th style="text-align: left; padding: 1rem; font-weight: 600; color: #333;">Ends</th>
+                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            (data.data || []).forEach((item, idx) => {
+                const status = item.is_closed
+                    ? '<span style="background: #ffe0e0; color: #e74c3c; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Closed</span>'
+                    : '<span style="background: #e0ffe0; color: #27ae60; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Active</span>';
                 const endTime = new Date(item.auction_end_time).toLocaleDateString();
-                html += `<tr style="border-bottom: 1px solid #eee;">`;
-                html += `<td style="padding: 0.8rem;">${this.escapeHtml(item.title)}</td>`;
-                html += `<td>$${parseFloat(item.starting_bid).toFixed(2)}</td>`;
-                html += `<td>$${parseFloat(item.current_high_bid || 0).toFixed(2)}</td>`;
-                html += `<td>${status}</td>`;
-                html += `<td>${endTime}</td>`;
-                html += `<td><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="AdminDashboard.editItem(${item.id})">Edit</button></td>`;
+                const bgColor = idx % 2 === 0 ? '#fafafa' : 'white';
+
+                html += `<tr style="border-bottom: 1px solid #eee; background: ${bgColor};">`;
+                html += `<td style="padding: 1rem; font-weight: 600; color: #667eea;">#${item.item_number}</td>`;
+                html += `<td style="padding: 1rem;"><strong>${this.escapeHtml(item.title)}</strong></td>`;
+                html += `<td style="padding: 1rem; text-align: right; color: #666;">$${parseFloat(item.starting_bid).toFixed(2)}</td>`;
+                html += `<td style="padding: 1rem; text-align: right;"><strong style="color: #27ae60;">$${parseFloat(item.current_high_bid || 0).toFixed(2)}</strong></td>`;
+                html += `<td style="padding: 1rem; text-align: center;">${status}</td>`;
+                html += `<td style="padding: 1rem; font-size: 0.9rem;">${endTime}</td>`;
+                html += `<td style="padding: 1rem; text-align: center;"><button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="AdminDashboard.editItem(${item.id})">Edit</button></td>`;
                 html += `</tr>`;
             });
 
-            html += '</tbody></table>';
+            html += `</tbody></table></div>`;
             container.innerHTML = html;
 
             // Handle pagination
