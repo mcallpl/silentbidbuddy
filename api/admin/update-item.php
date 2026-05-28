@@ -31,7 +31,7 @@ if (!$item_id) {
 }
 
 // Verify item exists
-$item = dbGetRow("SELECT id FROM items WHERE id = ?", ['i', $item_id]);
+$item = dbGetRow("SELECT id FROM items WHERE id = ?", [$item_id]);
 if (!$item) {
     http_response_code(404);
     die(json_encode(['status' => 'error', 'message' => 'Item not found']));
