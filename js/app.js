@@ -169,9 +169,15 @@ SBB.Auth = {
                 // Show success
                 this.showSuccessMessage();
 
-                // Redirect after 2 seconds to first active item
+                // Redirect after 2 seconds to return URL or default item
                 setTimeout(() => {
-                    window.location.href = '/item.php?id=1';
+                    const params = new URLSearchParams(window.location.search);
+                    const returnUrl = params.get('return');
+                    if (returnUrl) {
+                        window.location.href = decodeURIComponent(returnUrl);
+                    } else {
+                        window.location.href = '/item.php?id=1';
+                    }
                 }, 2000);
             } else {
                 error.textContent = response.message || 'Invalid code';

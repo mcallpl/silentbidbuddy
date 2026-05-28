@@ -23,7 +23,7 @@ if (isAuthenticated()) {
 } else {
     // User not logged in - redirect to registration with return URL
     $return_url = urlencode('/item.php?id=' . $item_id);
-    $register_url = '/register.php?return=' . $return_url;
+    $register_url = '/?return=' . $return_url;
     header("Location: " . $register_url);
     exit;
 }
