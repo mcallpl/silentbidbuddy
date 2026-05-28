@@ -6,6 +6,7 @@
 // ============================================================
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/admin-accounts.php';
 
 // Create admin account
@@ -23,11 +24,19 @@ try {
     $admin_id = createAdminAccount($username, $password, $email, $full_name);
 
     if ($admin_id) {
-        echo "✓ Admin account created successfully!\n";
+        // Make this the first admin account a super admin
+        dbUpdate(
+            "UPDATE admin_accounts SET is_super_admin = 1 WHERE id = ?",
+            [(int)$admin_id]
+        );
+
+        echo "✓ Super Admin account created successfully!\n";
         echo "  Admin ID: $admin_id\n";
+        echo "  Super Admin: YES\n";
         echo "  You can now login at /admin.php\n";
         echo "\n  Username: $username\n";
         echo "  Password: (the password you provided)\n";
+        echo "\n✓ Full CRUD permissions for all tables\n";
     } else {
         echo "✗ Failed to create admin account.\n";
         echo "  Possible reasons:\n";

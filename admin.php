@@ -77,8 +77,10 @@ $page_title = APP_NAME . ' — Admin Dashboard';
         <nav class="admin-nav">
             <button class="nav-tab active" data-section="dashboard">Dashboard</button>
             <button class="nav-tab" data-section="items">Items</button>
+            <button class="nav-tab" data-section="users">Bidders</button>
+            <button class="nav-tab" data-section="bids">Bids</button>
             <button class="nav-tab" data-section="transactions">Transactions</button>
-            <button class="nav-tab" data-section="users">Users</button>
+            <button class="nav-tab" data-section="admins" style="background-color: #e8f4f8; font-weight: bold;">👤 Admin Control</button>
         </nav>
 
         <!-- Main Content -->
@@ -195,6 +197,80 @@ $page_title = APP_NAME . ' — Admin Dashboard';
 
                 <!-- Pagination -->
                 <div id="usersPagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+            </section>
+
+            <!-- Bids Section -->
+            <section id="bidsSection" class="admin-section">
+                <h2>All Bids</h2>
+                <div class="filter-group">
+                    <select id="bidStatusFilter" class="form-input" style="width: 200px;">
+                        <option value="">All Bids</option>
+                        <option value="active">Active Bids</option>
+                        <option value="winning">Winning Bids</option>
+                    </select>
+                </div>
+                <div id="bidsContainer" class="data-table">
+                    <p class="loading">Loading bids...</p>
+                </div>
+                <div id="bidsPagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+            </section>
+
+            <!-- Admin Control Section (Super Admin Only) -->
+            <section id="adminsSection" class="admin-section">
+                <h2>👤 Admin Control Panel</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Manage admin accounts, users, items, and all database records</p>
+
+                <!-- Tabs for different admin controls -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                    <button class="admin-control-tab active" data-target="adminAccountsTab">Admin Accounts</button>
+                    <button class="admin-control-tab" data-target="usersManageTab">User Management</button>
+                    <button class="admin-control-tab" data-target="itemsManageTab">Item Management</button>
+                    <button class="admin-control-tab" data-target="transactionsManageTab">Transactions</button>
+                </div>
+
+                <!-- Admin Accounts Tab -->
+                <div id="adminAccountsTab" class="admin-control-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Admin Accounts</h3>
+                        <button id="createAdminBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create Admin</button>
+                    </div>
+                    <div id="adminsContainer" class="data-table">
+                        <p class="loading">Loading admin accounts...</p>
+                    </div>
+                </div>
+
+                <!-- User Management Tab -->
+                <div id="usersManageTab" class="admin-control-content" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>All Bidders</h3>
+                        <button id="createUserBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add User</button>
+                    </div>
+                    <div id="usersManageContainer" class="data-table">
+                        <p class="loading">Loading users...</p>
+                    </div>
+                    <div id="usersManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                </div>
+
+                <!-- Items Management Tab -->
+                <div id="itemsManageTab" class="admin-control-content" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>All Items</h3>
+                        <button id="createItemManageBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create Item</button>
+                    </div>
+                    <div id="itemsManageContainer" class="data-table">
+                        <p class="loading">Loading items...</p>
+                    </div>
+                    <div id="itemsManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div id="transactionsManageTab" class="admin-control-content" style="display: none;">
+                    <h3>All Transactions</h3>
+                    <div id="transactionsManageContainer" class="data-table">
+                        <p class="loading">Loading transactions...</p>
+                    </div>
+                    <div id="transactionsManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                </div>
             </section>
         </main>
     </div>

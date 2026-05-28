@@ -84,6 +84,7 @@ const AdminDashboard = {
         this.setupModals();
         this.setupButtons();
         this.setupFilters();
+        this.setupAdminControls();
 
         // Load initial dashboard
         this.showSection('dashboard');
@@ -141,6 +142,20 @@ const AdminDashboard = {
             this.loadTransactions(1);
         } else if (section === 'users') {
             this.loadUsers(1);
+        } else if (section === 'bids') {
+            this.loadBids(1);
+        } else if (section === 'admins') {
+            this.loadAdminAccounts();
+        }
+    },
+
+    async loadBids(page = 1) {
+        const container = document.getElementById('bidsContainer');
+        try {
+            // Placeholder for bids loading
+            container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Bids list coming soon</p>';
+        } catch (error) {
+            container.innerHTML = `<p class="error">Error loading bids: ${error.message}</p>`;
         }
     },
 
@@ -1036,5 +1051,192 @@ const AdminDashboard = {
             "'": '&#039;'
         };
         return String(text).replace(/[&<>"']/g, m => map[m]);
+    },
+
+    // ============================================================
+    // SUPER ADMIN CRUD OPERATIONS
+    // ============================================================
+
+    setupAdminControls() {
+        // Admin control tab switching
+        document.querySelectorAll('.admin-control-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.target;
+                document.querySelectorAll('.admin-control-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-control-content').forEach(c => c.style.display = 'none');
+                tab.classList.add('active');
+                document.getElementById(target).style.display = 'block';
+
+                // Load content based on tab
+                if (target === 'adminAccountsTab') {
+                    this.loadAdminAccounts();
+                } else if (target === 'usersManageTab') {
+                    this.loadUsersManagement();
+                } else if (target === 'itemsManageTab') {
+                    this.loadItemsManagement();
+                }
+            });
+        });
+
+        // Create buttons
+        const createAdminBtn = document.getElementById('createAdminBtn');
+        const createUserBtn = document.getElementById('createUserBtn');
+        const createItemManageBtn = document.getElementById('createItemManageBtn');
+
+        if (createAdminBtn) {
+            createAdminBtn.addEventListener('click', () => this.showCreateAdminForm());
+        }
+        if (createUserBtn) {
+            createUserBtn.addEventListener('click', () => this.showCreateUserForm());
+        }
+        if (createItemManageBtn) {
+            createItemManageBtn.addEventListener('click', () => this.showCreateItemForm());
+        }
+
+        // Load initial content
+        this.loadAdminAccounts();
+    },
+
+    async loadAdminAccounts() {
+        const container = document.getElementById('adminsContainer');
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/crud-admins.php?action=list', {
+                headers: this.getAuthHeaders()
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                container.innerHTML = `<p class="error">${data.message}</p>`;
+                return;
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead><tbody>';
+
+            (data.data || []).forEach(admin => {
+                const role = admin.is_super_admin ? '<span style="background: #ffeaa7; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.85rem;">Super Admin</span>' : 'Admin';
+                const status = admin.is_active ? '<span style="color: #27ae60;">Active</span>' : '<span style="color: #e74c3c;">Inactive</span>';
+                const lastLogin = admin.last_login ? new Date(admin.last_login).toLocaleDateString() : 'Never';
+
+                html += `<tr style="border-bottom: 1px solid #eee;">`;
+                html += `<td style="padding: 0.8rem;">${this.escapeHtml(admin.username)}</td>`;
+                html += `<td>${this.escapeHtml(admin.email || '-')}</td>`;
+                html += `<td>${role}</td>`;
+                html += `<td>${status}</td>`;
+                html += `<td>${lastLogin}</td>`;
+                html += `<td><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="AdminDashboard.editAdmin(${admin.id})">Edit</button></td>`;
+                html += `</tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = `<p class="error">Error loading admin accounts: ${error.message}</p>`;
+        }
+    },
+
+    async loadUsersManagement() {
+        const container = document.getElementById('usersManageContainer');
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/crud-users.php?action=list&page=1&limit=20', {
+                headers: this.getAuthHeaders()
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                container.innerHTML = `<p class="error">${data.message}</p>`;
+                return;
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Name</th><th>Phone</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+
+            (data.data || []).forEach(user => {
+                const joined = new Date(user.created_at).toLocaleDateString();
+                html += `<tr style="border-bottom: 1px solid #eee;">`;
+                html += `<td style="padding: 0.8rem;">${this.escapeHtml(user.full_name)}</td>`;
+                html += `<td>${this.escapeHtml(user.phone_number)}</td>`;
+                html += `<td>${joined}</td>`;
+                html += `<td><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="AdminDashboard.editUser(${user.id})">Edit</button></td>`;
+                html += `</tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            // Handle pagination
+            if (data.pagination) {
+                this.renderPagination('usersManagePagination', data.pagination.page, data.pagination.pages,
+                    (page) => this.loadUsersManagementPage(page));
+            }
+        } catch (error) {
+            container.innerHTML = `<p class="error">Error loading users: ${error.message}</p>`;
+        }
+    },
+
+    async loadItemsManagement() {
+        const container = document.getElementById('itemsManageContainer');
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/crud-items.php?action=list&page=1&limit=20', {
+                headers: this.getAuthHeaders()
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                container.innerHTML = `<p class="error">${data.message}</p>`;
+                return;
+            }
+
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="border-bottom: 2px solid #ddd;"><th style="text-align: left; padding: 0.8rem;">Title</th><th>Starting Bid</th><th>Current High</th><th>Status</th><th>Ends</th><th>Actions</th></tr></thead><tbody>';
+
+            (data.data || []).forEach(item => {
+                const status = item.is_closed ? '<span style="color: #e74c3c;">Closed</span>' : '<span style="color: #27ae60;">Active</span>';
+                const endTime = new Date(item.auction_end_time).toLocaleDateString();
+                html += `<tr style="border-bottom: 1px solid #eee;">`;
+                html += `<td style="padding: 0.8rem;">${this.escapeHtml(item.title)}</td>`;
+                html += `<td>$${parseFloat(item.starting_bid).toFixed(2)}</td>`;
+                html += `<td>$${parseFloat(item.current_high_bid || 0).toFixed(2)}</td>`;
+                html += `<td>${status}</td>`;
+                html += `<td>${endTime}</td>`;
+                html += `<td><button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="AdminDashboard.editItem(${item.id})">Edit</button></td>`;
+                html += `</tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            // Handle pagination
+            if (data.pagination) {
+                this.renderPagination('itemsManagePagination', data.pagination.page, data.pagination.pages,
+                    (page) => this.loadItemsManagementPage(page));
+            }
+        } catch (error) {
+            container.innerHTML = `<p class="error">Error loading items: ${error.message}</p>`;
+        }
+    },
+
+    showCreateAdminForm() {
+        alert('Admin creation form coming soon. Use /api/admin/crud-admins.php?action=create');
+    },
+
+    showCreateUserForm() {
+        alert('User creation form coming soon. Use /api/admin/crud-users.php?action=create');
+    },
+
+    showCreateItemForm() {
+        alert('Item creation form coming soon. Use existing item creation modal');
+    },
+
+    editAdmin(adminId) {
+        alert('Edit admin form coming soon. Use /api/admin/crud-admins.php?action=get&admin_id=' + adminId);
+    },
+
+    editUser(userId) {
+        alert('Edit user form coming soon. Use /api/admin/crud-users.php?action=get&user_id=' + userId);
+    },
+
+    editItem(itemId) {
+        alert('Edit item form coming soon. Use /api/admin/crud-items.php?action=get&item_id=' + itemId);
     }
 };

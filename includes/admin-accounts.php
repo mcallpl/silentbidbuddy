@@ -207,6 +207,37 @@ function requireAdminSessionAuth() {
 }
 
 /**
+ * Check if an admin account is super admin
+ * @param int $admin_id
+ * @return bool
+ */
+function isAdminSuperAdmin($admin_id) {
+    $admin = dbGetRow(
+        "SELECT is_super_admin FROM admin_accounts WHERE id = ?",
+        [(int)$admin_id]
+    );
+
+    return $admin && $admin['is_super_admin'];
+}
+
+/**
+ * Require super admin privileges
+ * Dies with JSON error if not super admin
+ * @param int $admin_id
+ * @return bool Always true if super admin
+ */
+function requireSuperAdmin($admin_id) {
+    if (!isAdminSuperAdmin($admin_id)) {
+        http_response_code(403);
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Forbidden. Super admin privileges required.'
+        ]));
+    }
+    return true;
+}
+
+/**
  * Change admin password
  * @param int $admin_id
  * @param string $old_password
