@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/pdf-generator.php';
+require_once __DIR__ . '/../../includes/rebrandly-utils.php';
 
 header('Content-Type: application/json');
 
@@ -87,9 +88,36 @@ $query = "UPDATE items SET " . implode(", ", $updates) . " WHERE id = ?";
 $result = dbQuery($query, $params);
 
 if ($result) {
+    // Get updated item
+    $item = dbGetRow("SELECT * FROM items WHERE id = ?", [$item_id]);
+
+    // Generate QR code if it doesn't exist yet
+    if ($item && (!$item['qr_code_url'] || !$item['short_url'])) {
+        try {
+            $qr_target_url = APP_DOMAIN . '/item-qr.php?id=' . $item_id;
+            $short_url = RebrandlyUtils::createShortUrl($qr_target_url, 'Item ' . $item['item_number'] . ': ' . $item['title']);
+
+            if ($short_url) {
+                $qr_code_url = RebrandlyUtils::getQRCode($short_url);
+
+                // Store QR code URLs in database
+                dbUpdate(
+                    "UPDATE items SET qr_code_url = ?, short_url = ? WHERE id = ?",
+                    [$qr_code_url, $short_url, $item_id]
+                );
+
+                // Update item object with new QR codes
+                $item['qr_code_url'] = $qr_code_url;
+                $item['short_url'] = $short_url;
+            }
+        } catch (Exception $e) {
+            error_log("Error generating QR code: " . $e->getMessage());
+            // Continue without QR code - not critical
+        }
+    }
+
     // Regenerate document if QR code exists
     try {
-        $item = dbGetRow("SELECT * FROM items WHERE id = ?", [$item_id]);
         if ($item && $item['qr_code_url'] && $item['short_url']) {
             $pdf_gen = new ItemPDFGenerator($item);
             $pdf_gen->generate($item['short_url'], $item['qr_code_url']);
