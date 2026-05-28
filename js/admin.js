@@ -372,6 +372,9 @@ const AdminDashboard = {
             } else {
                 document.getElementById('itemQRDisplay').style.display = 'none';
             }
+
+            // Validate and show Create PDF button if all requirements met
+            this.validatePDFRequirements();
         } catch (error) {
             console.error('Error loading item:', error);
             this.showToast('Error loading item details', 'error');
@@ -600,6 +603,16 @@ const AdminDashboard = {
 
         // Item form submission
         document.getElementById('itemForm').addEventListener('submit', (e) => this.handleItemFormSubmit(e));
+
+        // Form field changes for PDF validation
+        const form = document.getElementById('itemForm');
+        ['title', 'starting_bid', 'min_increment'].forEach(fieldName => {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.addEventListener('input', () => this.validatePDFRequirements());
+                field.addEventListener('change', () => this.validatePDFRequirements());
+            }
+        });
     },
 
     async handleItemFormSubmit(e) {
@@ -680,14 +693,87 @@ const AdminDashboard = {
             document.getElementById('itemFormError').style.display = 'none';
             document.getElementById('imagePreview').style.display = 'none';
             document.getElementById('uploadPlaceholder').style.display = 'block';
+            document.getElementById('createPDFBtn').style.display = 'none';
             document.getElementById('itemModal').style.display = 'block';
             this.setupImageUpload();
+        });
+
+        // Create PDF button
+        document.getElementById('createPDFBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleCreatePDF();
         });
 
         // Logout button
         document.getElementById('logoutBtn').addEventListener('click', () => {
             this.logout();
         });
+    },
+
+    validatePDFRequirements() {
+        const form = document.getElementById('itemForm');
+        const title = form.querySelector('[name="title"]').value.trim();
+        const startingBid = form.querySelector('[name="starting_bid"]').value.trim();
+        const minIncrement = form.querySelector('[name="min_increment"]').value.trim();
+        const itemId = form.dataset.itemId;
+
+        // Only show Create PDF button for existing items with all required fields
+        const createPDFBtn = document.getElementById('createPDFBtn');
+        if (itemId && title && startingBid && minIncrement) {
+            createPDFBtn.style.display = 'inline-block';
+        } else {
+            createPDFBtn.style.display = 'none';
+        }
+    },
+
+    async handleCreatePDF() {
+        const form = document.getElementById('itemForm');
+        const itemId = form.dataset.itemId;
+
+        if (!itemId) {
+            this.showToast('Please save the item first', 'error');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = {
+            item_id: parseInt(itemId),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            image_url: formData.get('image_url'),
+            fair_market_value: formData.get('fair_market_value') ? parseFloat(formData.get('fair_market_value')) : null,
+            starting_bid: parseFloat(formData.get('starting_bid')),
+            min_increment: parseFloat(formData.get('min_increment')),
+            buy_now_price: formData.get('buy_now_price') ? parseFloat(formData.get('buy_now_price')) : null,
+            auction_duration_seconds: this.calculateAuctionDuration(formData)
+        };
+
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/create-item-document.php', {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.status === 'ok') {
+                this.showToast('Document created successfully!', 'success');
+                // Download the document
+                window.open(result.document_url, '_blank');
+            } else {
+                this.showToast(result.message || 'Error creating document', 'error');
+            }
+        } catch (error) {
+            this.showToast('Error: ' + error.message, 'error');
+        }
+    },
+
+    calculateAuctionDuration(formData) {
+        const hours = parseInt(formData.get('duration_hours')) || 0;
+        const minutes = parseInt(formData.get('duration_minutes')) || 0;
+        const seconds = parseInt(formData.get('duration_seconds')) || 0;
+        return (hours * 3600) + (minutes * 60) + seconds;
     },
 
     setupImageUpload() {

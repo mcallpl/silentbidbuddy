@@ -1,0 +1,86 @@
+<?php
+// ============================================================
+// API ENDPOINT: Create/Regenerate Item Document
+// POST /api/admin/create-item-document.php
+// ============================================================
+
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/db-helpers.php';
+require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/pdf-generator.php';
+
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    die(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
+}
+
+requireAdminAuth();
+
+$input = json_decode(file_get_contents('php://input'), true);
+if (!$input) {
+    http_response_code(400);
+    die(json_encode(['status' => 'error', 'message' => 'Invalid JSON']));
+}
+
+$item_id = (int)($input['item_id'] ?? 0);
+if (!$item_id) {
+    http_response_code(400);
+    die(json_encode(['status' => 'error', 'message' => 'item_id is required']));
+}
+
+// Verify item exists
+$item = dbGetRow("SELECT * FROM items WHERE id = ?", [$item_id]);
+if (!$item) {
+    http_response_code(404);
+    die(json_encode(['status' => 'error', 'message' => 'Item not found']));
+}
+
+// Validate required fields
+$required = ['title', 'starting_bid', 'min_increment'];
+foreach ($required as $field) {
+    if (empty($input[$field])) {
+        http_response_code(400);
+        die(json_encode(['status' => 'error', 'message' => "$field is required for PDF generation"]));
+    }
+}
+
+// Verify QR code exists
+if (empty($item['qr_code_url']) || empty($item['short_url'])) {
+    http_response_code(400);
+    die(json_encode(['status' => 'error', 'message' => 'QR code not generated yet. Please save the item first.']));
+}
+
+// Build item object with current form values
+$item_data = [
+    'id' => $item['id'],
+    'item_number' => $item['item_number'],
+    'title' => $input['title'],
+    'description' => $input['description'] ?? $item['description'] ?? '',
+    'image_url' => $input['image_url'] ?? $item['image_url'] ?? '',
+    'fair_market_value' => !empty($input['fair_market_value']) ? (float)$input['fair_market_value'] : null,
+    'starting_bid' => (float)$input['starting_bid'],
+    'min_increment' => (float)$input['min_increment'],
+    'buy_now_price' => !empty($input['buy_now_price']) ? (float)$input['buy_now_price'] : null,
+    'auction_duration_seconds' => $input['auction_duration_seconds'] ?? $item['auction_duration_seconds'] ?? 0
+];
+
+try {
+    // Generate document
+    $pdf_gen = new ItemPDFGenerator($item_data);
+    $pdf_gen->generate($item['short_url'], $item['qr_code_url']);
+
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'ok',
+        'message' => 'Document created successfully',
+        'document_url' => $pdf_gen->getDocumentPath()
+    ]);
+} catch (Exception $e) {
+    error_log("Error creating document: " . $e->getMessage());
+    http_response_code(500);
+    die(json_encode(['status' => 'error', 'message' => 'Error creating document: ' . $e->getMessage()]));
+}
+
+?>

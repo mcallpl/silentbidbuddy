@@ -270,6 +270,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <div id="itemFormError" class="error-message" style="display: none;"></div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save Item</button>
+                    <button type="button" id="createPDFBtn" class="btn btn-secondary" style="display: none;">📄 Create PDF</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
