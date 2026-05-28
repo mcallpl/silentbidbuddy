@@ -51,7 +51,13 @@ if (!defined('ANTI_SNIPING_MINUTES')) define('ANTI_SNIPING_MINUTES', 2);
 // ============================================================
 // ADMIN CONFIGURATION
 // ============================================================
-if (!defined('ADMIN_TOKEN')) define('ADMIN_TOKEN', $vault_admin_token ?? '');
+if (!defined('ADMIN_TOKEN')) {
+    define('ADMIN_TOKEN', $vault_admin_token ?? '');
+    if (empty(ADMIN_TOKEN)) {
+        error_log("FATAL: ADMIN_TOKEN not configured in vault/secrets.php");
+        die("Configuration Error: Admin token not found. Contact administrator.");
+    }
+}
 
 if (!defined('UPLOADS_DIR')) define('UPLOADS_DIR', __DIR__ . '/uploads/');
 if (!defined('QR_CODES_DIR')) define('QR_CODES_DIR', __DIR__ . '/qr_codes/');
