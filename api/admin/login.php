@@ -14,6 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
 }
 
+// Ensure ADMIN_TOKEN is configured
+if (empty(ADMIN_TOKEN)) {
+    http_response_code(500);
+    error_log("FATAL: ADMIN_TOKEN not configured");
+    die(json_encode(['status' => 'error', 'message' => 'Server configuration error: admin token not found']));
+}
+
 $input = json_decode(file_get_contents('php://input'), true);
 if (!$input) {
     http_response_code(400);
@@ -27,12 +34,19 @@ if (empty($token)) {
     die(json_encode(['status' => 'error', 'message' => 'Token is required']));
 }
 
-if (!validateAdminToken($token)) {
+// Validate token matches ADMIN_TOKEN exactly (strict comparison)
+if ($token !== ADMIN_TOKEN) {
     http_response_code(401);
     die(json_encode(['status' => 'error', 'message' => 'Invalid admin token']));
 }
 
+// Set the admin cookie
 setAdminCookie($token);
+
+// Verify cookie was actually set (defensive check)
+if (empty($_COOKIE[ADMIN_COOKIE_NAME] ?? '')) {
+    error_log("WARNING: Admin cookie not immediately readable after setAdminCookie() call");
+}
 
 http_response_code(200);
 echo json_encode([

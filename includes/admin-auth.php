@@ -15,40 +15,48 @@ function validateAdminToken($token) {
 }
 
 function setAdminCookie($admin_token) {
-    $cookie_options = [
-        'expires' => time() + ADMIN_COOKIE_LIFETIME,
-        'path' => '/',
-        'domain' => COOKIE_DOMAIN ?: '',
-        'secure' => !empty($_SERVER['HTTPS']),
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ];
+    $expires = time() + ADMIN_COOKIE_LIFETIME;
+    $path = '/';
+    $domain = COOKIE_DOMAIN ?: '';
+    $secure = !empty($_SERVER['HTTPS']);
+    $httponly = true;
 
-    // Use setcookie() with array syntax for PHP 7.3+
+    // PHP 7.3+ supports array syntax, older versions use positional args
     if (PHP_VERSION_ID >= 70300) {
-        setcookie(ADMIN_COOKIE_NAME, $admin_token, $cookie_options);
+        setcookie(ADMIN_COOKIE_NAME, $admin_token, [
+            'expires' => $expires,
+            'path' => $path,
+            'domain' => $domain,
+            'secure' => $secure,
+            'httponly' => $httponly,
+            'samesite' => 'Lax'
+        ]);
     } else {
-        setcookie(
-            ADMIN_COOKIE_NAME,
-            $admin_token,
-            $cookie_options['expires'],
-            $cookie_options['path'],
-            $cookie_options['domain'],
-            $cookie_options['secure'],
-            $cookie_options['httponly']
-        );
+        // For PHP < 7.3: use positional parameters
+        // Note: PHP < 5.2 doesn't have httponly, but we assume >= 5.2
+        setcookie(ADMIN_COOKIE_NAME, $admin_token, $expires, $path, $domain, $secure, $httponly);
     }
 }
 
 function clearAdminCookie() {
-    setcookie(ADMIN_COOKIE_NAME, '', [
-        'expires' => time() - 3600,
-        'path' => '/',
-        'domain' => COOKIE_DOMAIN ?: '',
-        'secure' => !empty($_SERVER['HTTPS']),
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
+    $expires = time() - 3600;
+    $path = '/';
+    $domain = COOKIE_DOMAIN ?: '';
+    $secure = !empty($_SERVER['HTTPS']);
+    $httponly = true;
+
+    if (PHP_VERSION_ID >= 70300) {
+        setcookie(ADMIN_COOKIE_NAME, '', [
+            'expires' => $expires,
+            'path' => $path,
+            'domain' => $domain,
+            'secure' => $secure,
+            'httponly' => $httponly,
+            'samesite' => 'Lax'
+        ]);
+    } else {
+        setcookie(ADMIN_COOKIE_NAME, '', $expires, $path, $domain, $secure, $httponly);
+    }
 }
 
 function getAdminToken() {
