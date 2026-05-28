@@ -214,8 +214,8 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                                 <polyline points="17 8 12 3 7 8"></polyline>
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
-                            <p class="upload-text">Drag image here or <button type="button" class="upload-btn" id="browseImageBtn">browse from Mac Photo</button></p>
-                            <p class="upload-hint">Supports JPG, PNG, GIF, WebP</p>
+                            <p class="upload-text">Drag image or URL here or <button type="button" class="upload-btn" id="browseImageBtn">browse from Mac Photo</button></p>
+                            <p class="upload-hint">File (JPG, PNG, GIF, WebP) or image URL</p>
                         </div>
                         <div class="image-preview" id="imagePreview" style="display: none;">
                             <img id="previewImg" alt="Preview" />

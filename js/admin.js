@@ -652,14 +652,28 @@ const AdminDashboard = {
             e.stopPropagation();
             zone.classList.remove('drag-over');
 
+            // Try to handle file drop first
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 const file = files[0];
                 if (file.type.startsWith('image/')) {
                     this.handleImageFile(file);
-                } else {
-                    this.showToast('Please drop an image file', 'error');
+                    return;
                 }
+            }
+
+            // Try to handle text URL drop
+            const text = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('text/uri-list');
+            if (text) {
+                const trimmedText = text.trim();
+                // Check if it looks like a URL
+                if (trimmedText.startsWith('http://') || trimmedText.startsWith('https://')) {
+                    this.handleImageURL(trimmedText);
+                } else {
+                    this.showToast('Please drop an image file or image URL', 'error');
+                }
+            } else if (files.length === 0) {
+                this.showToast('Please drop an image file or image URL', 'error');
             }
         });
     },
@@ -682,6 +696,29 @@ const AdminDashboard = {
             this.showToast('Error reading image file', 'error');
         };
         reader.readAsDataURL(file);
+    },
+
+    handleImageURL(url) {
+        // Show loading state
+        const previewImg = document.getElementById('previewImg');
+        previewImg.alt = 'Loading...';
+        document.getElementById('imageUrlInput').value = url;
+        document.getElementById('imagePreview').style.display = 'flex';
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+
+        // Test if the URL is a valid image
+        const img = new Image();
+        img.onload = () => {
+            // URL is valid, update preview
+            previewImg.src = url;
+            previewImg.alt = 'Preview';
+            this.showToast('Image URL loaded', 'success');
+        };
+        img.onerror = () => {
+            this.showToast('Invalid image URL or image not accessible', 'error');
+            this.clearImage();
+        };
+        img.src = url;
     },
 
     clearImage() {
