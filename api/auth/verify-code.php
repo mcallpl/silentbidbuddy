@@ -63,8 +63,28 @@ if (!$user_id) {
 // Create session
 $session_token = createSession($user_id);
 
-// Set secure cookie for persistent session (works on all PHP versions)
-setSessionCookie(SESSION_COOKIE_NAME, $session_token, SESSION_COOKIE_LIFETIME);
+// Set PERSISTENT session cookie - 30 days, works on ALL PHP versions
+// This is critical for user experience - users should NOT need to re-verify every visit
+$expires = time() + (30 * 24 * 60 * 60); // 30 days
+$path = '/';
+$domain = COOKIE_DOMAIN ?: ''; // Auto-detected from config.php
+$secure = !empty($_SERVER['HTTPS']); // HTTPS only on production
+$httponly = true; // Never expose to JavaScript
+
+if (PHP_VERSION_ID >= 70300) {
+    // PHP 7.3+ array syntax
+    setcookie(SESSION_COOKIE_NAME, $session_token, [
+        'expires' => $expires,
+        'path' => $path,
+        'domain' => $domain,
+        'secure' => $secure,
+        'httponly' => $httponly,
+        'samesite' => 'Lax'
+    ]);
+} else {
+    // PHP < 7.3 compatible syntax
+    setcookie(SESSION_COOKIE_NAME, $session_token, $expires, $path, $domain, $secure, $httponly);
+}
 
 // Get user data
 $user = dbGetRow(

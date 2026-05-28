@@ -31,6 +31,7 @@ function normalizePhone($phone) {
 
 /**
  * Validate session token and return user data if valid
+ * CRITICAL: Users must stay logged in for 30 days without re-verification
  * @param string $token Session token
  * @return array|false User data or false if invalid
  */
@@ -39,7 +40,8 @@ function validateSessionToken($token) {
         return false;
     }
 
-    // Fetch session record
+    // Fetch session record - check if token exists and is not expired
+    // Sessions expire after 30 days (SESSION_LIFETIME = 30 * 24 * 60 * 60)
     $session = dbGetRow(
         "SELECT s.user_id, s.expires_at, u.id, u.phone_number, u.full_name, u.stripe_customer_id
          FROM sessions s
@@ -52,8 +54,9 @@ function validateSessionToken($token) {
         return false;
     }
 
+    // Session is valid - return user data
     return [
-        'id' => $session['id'],
+        'id' => $session['user_id'],
         'phone_number' => $session['phone_number'],
         'full_name' => $session['full_name'],
         'stripe_customer_id' => $session['stripe_customer_id']
