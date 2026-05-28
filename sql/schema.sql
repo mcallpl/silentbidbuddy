@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS items (
     auction_start_time DATETIME,
     auction_end_time DATETIME NOT NULL,
     is_closed TINYINT(1) DEFAULT 0,
+    qr_code_url VARCHAR(500),
+    short_url VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
