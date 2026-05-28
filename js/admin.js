@@ -299,7 +299,12 @@ const AdminDashboard = {
         // Open modal and populate with item data
         const modal = document.getElementById('itemModal');
         document.getElementById('itemModalTitle').textContent = 'Edit Item';
+        document.getElementById('itemForm').dataset.itemId = itemId;
+        document.getElementById('itemFormError').style.display = 'none';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('uploadPlaceholder').style.display = 'block';
         modal.style.display = 'block';
+        this.setupImageUpload();
         // TODO: Load item data and populate form
     },
 
@@ -595,13 +600,96 @@ const AdminDashboard = {
             document.getElementById('itemForm').reset();
             document.getElementById('itemForm').dataset.itemId = '';
             document.getElementById('itemFormError').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('uploadPlaceholder').style.display = 'block';
             document.getElementById('itemModal').style.display = 'block';
+            this.setupImageUpload();
         });
 
         // Logout button
         document.getElementById('logoutBtn').addEventListener('click', () => {
             this.logout();
         });
+    },
+
+    setupImageUpload() {
+        const zone = document.getElementById('imageUploadZone');
+        const fileInput = document.getElementById('imageFileInput');
+        const browseBtn = document.getElementById('browseImageBtn');
+        const removeBtn = document.getElementById('removeImageBtn');
+
+        if (!zone) return;
+
+        browseBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) this.handleImageFile(file);
+        });
+
+        removeBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.clearImage();
+        });
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    this.handleImageFile(file);
+                } else {
+                    this.showToast('Please drop an image file', 'error');
+                }
+            }
+        });
+    },
+
+    handleImageFile(file) {
+        if (file.size > 10 * 1024 * 1024) {
+            this.showToast('Image must be smaller than 10MB', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            document.getElementById('imageUrlInput').value = dataUrl;
+            document.getElementById('previewImg').src = dataUrl;
+            document.getElementById('imagePreview').style.display = 'flex';
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+        };
+        reader.onerror = () => {
+            this.showToast('Error reading image file', 'error');
+        };
+        reader.readAsDataURL(file);
+    },
+
+    clearImage() {
+        document.getElementById('imageFileInput').value = '';
+        document.getElementById('imageUrlInput').value = '';
+        document.getElementById('previewImg').src = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('uploadPlaceholder').style.display = 'block';
     },
 
     setupFilters() {

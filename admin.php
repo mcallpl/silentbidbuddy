@@ -204,8 +204,24 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                     <textarea name="description" class="form-input" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Image URL</label>
-                    <input type="url" name="image_url" class="form-input" />
+                    <label class="form-label">Item Image</label>
+                    <div class="image-upload-zone" id="imageUploadZone">
+                        <input type="file" id="imageFileInput" name="image_file" accept="image/*" style="display: none;" />
+                        <input type="hidden" name="image_url" id="imageUrlInput" />
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p class="upload-text">Drag image here or <button type="button" class="upload-btn" id="browseImageBtn">browse from Mac Photo</button></p>
+                            <p class="upload-hint">Supports JPG, PNG, GIF, WebP</p>
+                        </div>
+                        <div class="image-preview" id="imagePreview" style="display: none;">
+                            <img id="previewImg" alt="Preview" />
+                            <button type="button" class="remove-image-btn" id="removeImageBtn">✕ Remove</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Fair Market Value</label>
