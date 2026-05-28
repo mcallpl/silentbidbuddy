@@ -79,7 +79,7 @@ try {
         $qr_code_url = RebrandlyUtils::getQRCode($short_url);
 
         // Store QR code URLs in database
-        dbExecute(
+        dbUpdate(
             "UPDATE items SET qr_code_url = ?, short_url = ? WHERE id = ?",
             [$qr_code_url, $short_url, $item_id]
         );
@@ -103,7 +103,7 @@ try {
 dbInsert(
     "INSERT INTO audit_log (event_type, item_id, description, created_at)
      VALUES (?, ?, ?, NOW())",
-    ['ITEM_CREATED', (int)$item_id, 'Item created: ' . $input['title']]
+    ['ITEM_CREATED', $item_id, 'Item created: ' . $input['title']]
 );
 
 http_response_code(201);
