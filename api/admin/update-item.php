@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/pdf-generator.php';
 
 header('Content-Type: application/json');
 
@@ -95,6 +96,18 @@ $query = "UPDATE items SET " . implode(", ", $updates) . " WHERE id = ?";
 $result = dbQuery($query, $types, ...$params);
 
 if ($result) {
+    // Regenerate document if QR code exists
+    try {
+        $item = dbGetRow("SELECT * FROM items WHERE id = ?", [$item_id]);
+        if ($item && $item['qr_code_url'] && $item['short_url']) {
+            $pdf_gen = new ItemPDFGenerator($item);
+            $pdf_gen->generate($item['short_url'], $item['qr_code_url']);
+        }
+    } catch (Exception $e) {
+        error_log("Error regenerating document: " . $e->getMessage());
+        // Don't fail the update if document generation fails
+    }
+
     http_response_code(200);
     echo json_encode([
         'status' => 'ok',

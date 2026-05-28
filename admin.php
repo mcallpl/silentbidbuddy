@@ -203,6 +203,24 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                     <label class="form-label">Description</label>
                     <textarea name="description" class="form-input" rows="3"></textarea>
                 </div>
+                <!-- QR Code Display (for existing items) -->
+                <div id="itemQRDisplay" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: #f0f4ff; border-radius: 8px; border-left: 3px solid #667eea;">
+                    <label class="form-label" style="margin-bottom: 1rem;">QR Code & Document</label>
+                    <div style="display: flex; gap: 2rem; align-items: center;">
+                        <div style="text-align: center;">
+                            <img id="modalQRCode" src="" alt="QR Code" style="max-width: 150px; border-radius: 6px; background: white; padding: 8px;" />
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                                <a id="modalQRLink" href="#" target="_blank" style="color: #667eea; text-decoration: none;">View QR URL</a>
+                            </p>
+                        </div>
+                        <div style="flex: 1;">
+                            <p style="font-size: 0.95rem; color: #333; margin-bottom: 0.5rem;"><strong>Print-Ready Document</strong></p>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">Download the professional PDF with QR code for printing and table placement.</p>
+                            <a id="modalDocumentLink" href="#" target="_blank" class="btn btn-primary" style="display: inline-block;">📄 Download Document</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Item Image</label>
                     <div class="image-upload-zone" id="imageUploadZone">

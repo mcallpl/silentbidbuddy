@@ -78,6 +78,12 @@ try {
         // Get QR code for short URL
         $qr_code_url = RebrandlyUtils::getQRCode($short_url);
 
+        // Store QR code URLs in database
+        dbExecute(
+            "UPDATE items SET qr_code_url = ?, short_url = ? WHERE id = ?",
+            [$qr_code_url, $short_url, $item_id]
+        );
+
         // Get item details for PDF
         $item = dbGetRow("SELECT * FROM items WHERE id = ?", [$item_id]);
 

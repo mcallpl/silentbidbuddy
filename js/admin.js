@@ -296,7 +296,6 @@ const AdminDashboard = {
     },
 
     editItem(itemId) {
-        // Open modal and populate with item data
         const modal = document.getElementById('itemModal');
         document.getElementById('itemModalTitle').textContent = 'Edit Item';
         document.getElementById('itemForm').dataset.itemId = itemId;
@@ -305,7 +304,78 @@ const AdminDashboard = {
         document.getElementById('uploadPlaceholder').style.display = 'block';
         modal.style.display = 'block';
         this.setupImageUpload();
-        // TODO: Load item data and populate form
+
+        // Load item data
+        this.loadItemForEdit(itemId);
+    },
+
+    async loadItemForEdit(itemId) {
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/get-item.php?id=' + itemId, {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load item');
+            }
+
+            const data = await response.json();
+            if (data.status !== 'ok' || !data.item) {
+                throw new Error('Item not found');
+            }
+
+            const item = data.item;
+
+            // Populate form fields
+            const form = document.getElementById('itemForm');
+            form.querySelector('[name="title"]').value = item.title || '';
+            form.querySelector('[name="description"]').value = item.description || '';
+            form.querySelector('[name="fair_market_value"]').value = item.fair_market_value || '';
+            form.querySelector('[name="starting_bid"]').value = item.starting_bid || '';
+            form.querySelector('[name="min_increment"]').value = item.min_increment || '';
+            form.querySelector('[name="buy_now_price"]').value = item.buy_now_price || '';
+
+            // Calculate and fill duration fields
+            if (item.auction_end_time) {
+                const endTime = new Date(item.auction_end_time);
+                const startTime = new Date(item.auction_start_time);
+                const diffMs = endTime - startTime;
+                const diffSeconds = Math.floor(diffMs / 1000);
+                const hours = Math.floor(diffSeconds / 3600);
+                const minutes = Math.floor((diffSeconds % 3600) / 60);
+                const seconds = diffSeconds % 60;
+
+                form.querySelector('[name="duration_hours"]').value = hours;
+                form.querySelector('[name="duration_minutes"]').value = minutes;
+                form.querySelector('[name="duration_seconds"]').value = seconds;
+            }
+
+            // Show image if exists
+            if (item.image_url) {
+                document.getElementById('imageUrlInput').value = item.image_url;
+                document.getElementById('previewImg').src = item.image_url;
+                document.getElementById('imagePreview').style.display = 'flex';
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+            }
+
+            // Display QR code if exists
+            if (item.qr_code_url) {
+                document.getElementById('itemQRDisplay').style.display = 'block';
+                document.getElementById('modalQRCode').src = item.qr_code_url;
+                if (item.short_url) {
+                    document.getElementById('modalQRLink').href = item.short_url;
+                    document.getElementById('modalQRLink').textContent = item.short_url;
+                }
+                // Generate document link
+                const docPath = 'documents/item-' + item.id + '.html';
+                document.getElementById('modalDocumentLink').href = docPath;
+            } else {
+                document.getElementById('itemQRDisplay').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error loading item:', error);
+            this.showToast('Error loading item details', 'error');
+        }
     },
 
     async deleteItem(itemId) {
