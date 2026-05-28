@@ -578,6 +578,14 @@ const AdminDashboard = {
 
             if (response.ok && result.status === 'ok') {
                 this.showToast(itemId ? 'Item updated' : 'Item created', 'success');
+
+                // For new items, show QR code and document
+                if (!itemId && result.item && result.item.document_url) {
+                    setTimeout(() => {
+                        this.showItemQRModal(result.item);
+                    }, 500);
+                }
+
                 document.getElementById('itemModal').style.display = 'none';
                 form.reset();
                 this.loadItems(this.state.currentPage.items || 1);
@@ -727,6 +735,19 @@ const AdminDashboard = {
         document.getElementById('previewImg').src = '';
         document.getElementById('imagePreview').style.display = 'none';
         document.getElementById('uploadPlaceholder').style.display = 'block';
+    },
+
+    showItemQRModal(item) {
+        const modal = document.getElementById('itemQRModal');
+        if (!modal) return; // Will be added to HTML
+
+        document.getElementById('qrItemTitle').textContent = 'Item #' + item.item_number + ': ' + item.title;
+        document.getElementById('qrCodeImage').src = item.qr_code_image;
+        document.getElementById('qrCodeURL').textContent = item.qr_url;
+        document.getElementById('qrCodeURL').href = item.qr_url;
+        document.getElementById('documentLink').href = item.document_url;
+
+        modal.style.display = 'block';
     },
 
     setupFilters() {

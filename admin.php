@@ -271,6 +271,33 @@ $page_title = APP_NAME . ' — Admin Dashboard';
         </div>
     </div>
 
+    <!-- Item QR Code Modal -->
+    <div id="itemQRModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="qrItemTitle">Item QR Code</h2>
+                <button class="modal-close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 2rem;">
+                <p style="color: #666; margin-bottom: 1.5rem;">Your item has been created! Share the QR code and document with bidders.</p>
+
+                <div style="background: #f9f9f9; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                    <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 250px; height: auto; margin: 0 auto; display: block;" />
+                </div>
+
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">QR Code URL:</p>
+                <div style="background: #f0f4ff; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; word-break: break-all;">
+                    <a id="qrCodeURL" href="#" style="color: #667eea; text-decoration: none; font-weight: 500;" target="_blank">Copy URL</a>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a id="documentLink" href="#" target="_blank" class="btn btn-primary">📄 Download Document</a>
+                    <button class="btn btn-secondary" data-dismiss="modal">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div id="toastContainer" class="toast-container"></div>
 

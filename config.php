@@ -59,6 +59,11 @@ if (!defined('ADMIN_TOKEN')) {
     }
 }
 
+// ============================================================
+// REBRANDLY CONFIGURATION
+// ============================================================
+if (!defined('REBRANDLY_API_KEY')) define('REBRANDLY_API_KEY', $vault_rebrandly_api_key ?? '');
+
 if (!defined('UPLOADS_DIR')) define('UPLOADS_DIR', __DIR__ . '/uploads/');
 if (!defined('QR_CODES_DIR')) define('QR_CODES_DIR', __DIR__ . '/qr_codes/');
 

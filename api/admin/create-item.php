@@ -8,6 +8,8 @@
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../includes/db-helpers.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/rebrandly-utils.php';
+require_once __DIR__ . '/../../includes/pdf-generator.php';
 
 header('Content-Type: application/json');
 
@@ -62,6 +64,35 @@ if (!$item_id) {
     die(json_encode(['status' => 'error', 'message' => 'Failed to create item']));
 }
 
+// Generate QR code and document
+$qr_code_url = null;
+$short_url = null;
+$document_url = null;
+
+try {
+    // Create short URL for QR code
+    $qr_target_url = APP_DOMAIN . '/item-qr.php?id=' . $item_id;
+    $short_url = RebrandlyUtils::createShortUrl($qr_target_url, 'Item ' . $next_item_number . ': ' . $input['title']);
+
+    if ($short_url) {
+        // Get QR code for short URL
+        $qr_code_url = RebrandlyUtils::getQRCode($short_url);
+
+        // Get item details for PDF
+        $item = dbGetRow("SELECT * FROM items WHERE id = ?", [$item_id]);
+
+        if ($item) {
+            // Generate document
+            $pdf_gen = new ItemPDFGenerator($item);
+            $pdf_gen->generate($short_url, $qr_code_url);
+            $document_url = $pdf_gen->getDocumentPath();
+        }
+    }
+} catch (Exception $e) {
+    error_log("Error generating QR code: " . $e->getMessage());
+    // Continue without QR code - not critical to block item creation
+}
+
 // Log audit event
 dbInsert(
     "INSERT INTO audit_log (event_type, item_id, description, created_at)
@@ -77,7 +108,9 @@ echo json_encode([
         'id' => $item_id,
         'item_number' => $next_item_number,
         'title' => $input['title'],
-        'qr_url' => APP_DOMAIN . '/item.php?id=' . urlencode($next_item_number)
+        'qr_url' => $short_url,
+        'document_url' => $document_url,
+        'qr_code_image' => $qr_code_url
     ]
 ]);
 
