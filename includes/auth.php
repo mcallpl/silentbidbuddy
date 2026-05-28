@@ -251,9 +251,9 @@ function createVerificationCode($phone) {
  * @return bool
  */
 function verifyCode($phone, $code) {
-    // Get the code record
+    // Get the code record, fetching Unix timestamp to avoid timezone issues
     $record = dbGetRow(
-        "SELECT id, attempts, is_used, expires_at FROM verification_codes
+        "SELECT id, attempts, is_used, UNIX_TIMESTAMP(expires_at) as expires_ts FROM verification_codes
          WHERE phone_number = ? AND code = ? AND is_used = 0
          ORDER BY created_at DESC LIMIT 1",
         [$phone, (string)$code]
@@ -263,8 +263,8 @@ function verifyCode($phone, $code) {
         return false;
     }
 
-    // Check if expired
-    if (strtotime($record['expires_at']) < time()) {
+    // Check if expired (compare using Unix timestamps to avoid timezone confusion)
+    if ((int)$record['expires_ts'] < time()) {
         return false;
     }
 
