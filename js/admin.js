@@ -604,6 +604,16 @@ const AdminDashboard = {
         // Item form submission
         document.getElementById('itemForm').addEventListener('submit', (e) => this.handleItemFormSubmit(e));
 
+        // Create PDF button with direct reference
+        const createPDFBtn = document.getElementById('createPDFBtn');
+        if (createPDFBtn) {
+            createPDFBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Create PDF clicked');
+                this.handleCreatePDF();
+            });
+        }
+
         // Form field changes for PDF validation
         const form = document.getElementById('itemForm');
         ['title', 'starting_bid', 'min_increment'].forEach(fieldName => {
@@ -696,12 +706,6 @@ const AdminDashboard = {
             document.getElementById('createPDFBtn').style.display = 'none';
             document.getElementById('itemModal').style.display = 'block';
             this.setupImageUpload();
-        });
-
-        // Create PDF button
-        document.getElementById('createPDFBtn')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.handleCreatePDF();
         });
 
         // Logout button
