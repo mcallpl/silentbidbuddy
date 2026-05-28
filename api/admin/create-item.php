@@ -55,7 +55,8 @@ $item_id = dbInsert(
         !empty($input['buy_now_price']) ? (float)$input['buy_now_price'] : null,
         0.00,
         date('Y-m-d H:i:s'), // Now
-        $input['auction_end_time']
+        $input['auction_end_time'],
+        0 // is_closed - new items start not closed
     ]
 );
 
