@@ -796,15 +796,21 @@ const AdminDashboard = {
         const form = document.getElementById('itemForm');
         const itemId = form.dataset.itemId;
 
+        console.log('[PDF CREATE] itemId from form:', itemId);
+        console.log('[PDF CREATE] form.dataset:', form.dataset);
+
         if (!itemId) {
             this.showToast('Please save the item first', 'error');
             return;
         }
 
         const formData = new FormData(form);
+        const title = formData.get('title');
+        console.log('[PDF CREATE] title from form:', title);
+
         const data = {
             item_id: parseInt(itemId),
-            title: formData.get('title'),
+            title: title,
             description: formData.get('description'),
             image_url: formData.get('image_url'),
             fair_market_value: formData.get('fair_market_value') ? parseFloat(formData.get('fair_market_value')) : null,
@@ -814,14 +820,18 @@ const AdminDashboard = {
             auction_duration_seconds: this.calculateAuctionDuration(formData)
         };
 
+        console.log('[PDF CREATE] Sending to API:', data);
+
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/create-item-document.php', {
+            const response = await fetch(this.config.apiBaseUrl + '/admin/create-item-document.php', {
                 method: 'POST',
                 headers: this.getAuthHeaders(),
                 body: JSON.stringify(data)
             });
 
             const result = await response.json();
+
+            console.log('[PDF CREATE] API response:', result);
 
             if (response.ok && result.status === 'ok') {
                 this.showToast('Document created successfully!', 'success');
