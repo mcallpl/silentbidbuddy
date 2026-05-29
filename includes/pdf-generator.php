@@ -33,8 +33,11 @@ class ItemPDFGenerator {
         $fmv = $item['fair_market_value'] ? '$' . number_format((float)$item['fair_market_value'], 0) : 'N/A';
         $increment = '$' . number_format((float)($item['min_increment'] ?? 50), 0);
         $timeRemaining = $this->getTimeRemaining();
-        $url = htmlspecialchars($this->shortUrl);
-        $qrUrl = QRCodeGenerator::getQRUrl($this->shortUrl);
+
+        // Use item ID directly if no short URL provided
+        $bidUrl = $this->shortUrl ?? (APP_DOMAIN . '/item.php?id=' . (int)$item['id']);
+        $url = htmlspecialchars($bidUrl);
+        $qrUrl = QRCodeGenerator::getQRUrl($bidUrl);
 
         return <<<HTML
 <!DOCTYPE html>
