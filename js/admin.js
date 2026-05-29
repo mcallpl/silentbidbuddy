@@ -312,11 +312,21 @@ const AdminDashboard = {
 
     editItem(itemId) {
         const modal = document.getElementById('itemModal');
+        const form = document.getElementById('itemForm');
+
+        console.log('[EDIT ITEM] Opening item:', itemId);
+
+        // CRITICAL: Reset form and modal completely before loading new item
+        form.reset();
+        form.dataset.itemId = itemId;
         document.getElementById('itemModalTitle').textContent = 'Edit Item';
-        document.getElementById('itemForm').dataset.itemId = itemId;
         document.getElementById('itemFormError').style.display = 'none';
         document.getElementById('imagePreview').style.display = 'none';
         document.getElementById('uploadPlaceholder').style.display = 'block';
+        document.getElementById('itemQRDisplay').style.display = 'none';
+        document.getElementById('createPDFBtn').style.display = 'none';
+        document.getElementById('modalDocumentLink').href = '#';
+
         modal.style.display = 'block';
         this.setupImageUpload();
 
