@@ -164,7 +164,7 @@ function getLiveMetrics() {
     );
 
     $high_traffic_items = dbGetAll(
-        "SELECT i.id, i.title, COUNT(b.id) as bid_count, i.current_high_bid
+        "SELECT i.id, i.title, i.image_url, COUNT(b.id) as bid_count, i.current_high_bid
          FROM items i
          LEFT JOIN bids b ON b.item_id = i.id
          WHERE i.is_closed = 0
