@@ -326,29 +326,75 @@ const AdminDashboard = {
 
     async loadItemForEdit(itemId) {
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/crud-items.php?action=get&item_id=' + itemId, {
+            console.log('[EDIT ITEM] Loading item ID:', itemId);
+
+            const url = this.config.apiBaseUrl + '/crud-items.php?action=get&item_id=' + itemId;
+            console.log('[EDIT ITEM] Fetching from:', url);
+
+            const response = await fetch(url, {
                 headers: this.getAuthHeaders()
             });
 
+            console.log('[EDIT ITEM] Response status:', response.status, response.ok);
+
             if (!response.ok) {
-                throw new Error('Failed to load item');
+                throw new Error('Failed to load item. Status: ' + response.status);
             }
 
             const data = await response.json();
+            console.log('[EDIT ITEM] API response:', data);
+
             if (data.status !== 'ok' || !data.data) {
-                throw new Error('Item not found');
+                throw new Error('Item not found or invalid response: ' + JSON.stringify(data));
             }
 
             const item = data.data;
+            console.log('[EDIT ITEM] Item data:', item);
 
             // Populate form fields
             const form = document.getElementById('itemForm');
-            form.querySelector('[name="title"]').value = item.title || '';
-            form.querySelector('[name="description"]').value = item.description || '';
-            form.querySelector('[name="fair_market_value"]').value = item.fair_market_value || '';
-            form.querySelector('[name="starting_bid"]').value = item.starting_bid || '';
-            form.querySelector('[name="min_increment"]').value = item.min_increment || '';
-            form.querySelector('[name="buy_now_price"]').value = item.buy_now_price || '';
+
+            // Check if form exists
+            if (!form) {
+                console.error('[EDIT ITEM] ❌ Form not found!');
+                throw new Error('Form element not found');
+            }
+
+            // Populate each field with validation
+            const titleField = form.querySelector('[name="title"]');
+            if (titleField) {
+                titleField.value = item.title || '';
+                console.log('[EDIT ITEM] Set title:', titleField.value);
+            } else {
+                console.warn('[EDIT ITEM] ⚠️ Title field not found');
+            }
+
+            const descField = form.querySelector('[name="description"]');
+            if (descField) {
+                descField.value = item.description || '';
+                console.log('[EDIT ITEM] Set description length:', descField.value.length);
+            }
+
+            const fmvField = form.querySelector('[name="fair_market_value"]');
+            if (fmvField) {
+                fmvField.value = item.fair_market_value || '';
+            }
+
+            const startField = form.querySelector('[name="starting_bid"]');
+            if (startField) {
+                startField.value = item.starting_bid || '';
+                console.log('[EDIT ITEM] Set starting_bid:', startField.value);
+            }
+
+            const minField = form.querySelector('[name="min_increment"]');
+            if (minField) {
+                minField.value = item.min_increment || '';
+            }
+
+            const buyNowField = form.querySelector('[name="buy_now_price"]');
+            if (buyNowField) {
+                buyNowField.value = item.buy_now_price || '';
+            }
 
             // Calculate and fill duration fields
             if (item.auction_end_time) {
@@ -372,6 +418,8 @@ const AdminDashboard = {
                 document.getElementById('imagePreview').style.display = 'flex';
                 document.getElementById('uploadPlaceholder').style.display = 'none';
             }
+
+            console.log('[EDIT ITEM] ✓ Form populated successfully');
 
             // Display QR code if exists
             if (item.qr_code_url) {
