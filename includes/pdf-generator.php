@@ -69,14 +69,58 @@ class ItemPDFGenerator {
         .cta { margin-top: 30px; text-align: center; font-size: 13px; color: #666; }
         .cta-text { background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 3px solid #667eea; }
         .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 11px; color: #999; }
+        .print-button { display: inline-block; margin-bottom: 30px; padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .print-button:hover { background: #5568d3; }
         @media print {
-            body { background: white; }
-            .container { padding: 20px; }
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            .print-button {
+                display: none !important;
+            }
+            .container {
+                padding: 0.5in;
+                max-width: 100%;
+            }
+            .header {
+                page-break-after: avoid;
+            }
+            .content {
+                display: block;
+                page-break-inside: avoid;
+            }
+            .image-section {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            .details-section {
+                page-break-inside: avoid;
+            }
+            .qr-section {
+                page-break-inside: avoid;
+                margin-top: 20px;
+            }
+            .footer {
+                page-break-before: avoid;
+            }
+            a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            @page {
+                margin: 0.5in;
+                size: letter;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Print Button -->
+        <button class="print-button" onclick="window.print()">🖨️ Print This Item</button>
+
         <!-- Header -->
         <div class="header">
             <div class="subtitle">Silent Bid Buddy Auction</div>
