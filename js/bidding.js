@@ -196,12 +196,21 @@ SBB.Bidding = {
         confirmBtn.classList.add('loading');
         confirmBtn.textContent = 'Placing bid...';
 
+        console.log('[BID ATTEMPT] User placing bid:', {
+            itemId: this.itemId,
+            amount: this.pendingBid.amount,
+            maxBid: this.pendingBid.maxBid,
+            token: this.sessionToken ? 'YES' : 'NO'
+        });
+
         try {
             const response = await SBB.API.post('/api/bidding/place-bid.php', {
                 item_id: this.itemId,
                 bid_amount: this.pendingBid.amount,
                 max_bid_amount: this.pendingBid.maxBid
             });
+
+            console.log('[BID RESPONSE]', response);
 
             if (response.status === 'success') {
                 console.log('[BID SYNC] ✓ Bid placed successfully:', response);

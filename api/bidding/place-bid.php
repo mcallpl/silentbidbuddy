@@ -24,7 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Require authentication
-$user = requireAuth();
+try {
+    $user = requireAuth();
+} catch (Exception $e) {
+    error_log('[BID ERROR] Auth failed: ' . $e->getMessage());
+    throw $e;
+}
 
 // Get input
 $input = json_decode(file_get_contents('php://input'), true);
@@ -42,13 +47,22 @@ if (!$item_id || $bid_amount <= 0) {
     die(json_encode(['status' => 'error', 'message' => 'Invalid item or bid amount']));
 }
 
+// Log attempt
+error_log('[BID] User ' . $user['id'] . ' attempting bid of $' . $bid_amount . ' on item ' . $item_id);
+
 // Place bid
 $result = placeBid($item_id, $user['id'], $bid_amount, $max_bid_amount);
 
+// Log result
+error_log('[BID] Result: ' . json_encode($result));
+
 if ($result['status'] !== 'success') {
+    error_log('[BID] ❌ FAILED - ' . $result['message']);
     http_response_code(400);
     die(json_encode($result));
 }
+
+error_log('[BID] ✓ SUCCESS - Bid ' . $result['bid_id'] . ' placed for $' . $bid_amount);
 
 // Send outbid alert to previous bidder if applicable
 if ($result['previous_high_bidder_id']) {
