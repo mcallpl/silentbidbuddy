@@ -34,8 +34,8 @@ class ItemPDFGenerator {
         $increment = '$' . number_format((float)($item['min_increment'] ?? 50), 0);
         $timeRemaining = $this->getTimeRemaining();
 
-        // Use item ID directly if no short URL provided
-        $bidUrl = $this->shortUrl ?? (APP_DOMAIN . '/item.php?id=' . (int)$item['id']);
+        // Use item number (consistent across environments) if no short URL provided
+        $bidUrl = $this->shortUrl ?? (APP_DOMAIN . '/item.php?id=' . (int)$item['item_number']);
         $url = htmlspecialchars($bidUrl);
         $qrUrl = QRCodeGenerator::getQRUrl($bidUrl);
 
