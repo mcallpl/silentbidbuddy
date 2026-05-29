@@ -75,18 +75,18 @@ if (empty($item['qr_code_url']) || empty($item['short_url'])) {
     }
 }
 
-// Build item object with current form values
+// Use database values, not form values - ensures PDF always matches saved data
 $item_data = [
     'id' => $item['id'],
     'item_number' => $item['item_number'],
-    'title' => $input['title'],
-    'description' => $input['description'] ?? $item['description'] ?? '',
-    'image_url' => $input['image_url'] ?? $item['image_url'] ?? '',
-    'fair_market_value' => !empty($input['fair_market_value']) ? (float)$input['fair_market_value'] : null,
-    'starting_bid' => (float)$input['starting_bid'],
-    'min_increment' => (float)$input['min_increment'],
-    'buy_now_price' => !empty($input['buy_now_price']) ? (float)$input['buy_now_price'] : null,
-    'auction_duration_seconds' => $input['auction_duration_seconds'] ?? $item['auction_duration_seconds'] ?? 0
+    'title' => $item['title'],
+    'description' => $item['description'] ?? '',
+    'image_url' => $item['image_url'] ?? '',
+    'fair_market_value' => $item['fair_market_value'],
+    'starting_bid' => $item['starting_bid'],
+    'min_increment' => $item['min_increment'],
+    'buy_now_price' => $item['buy_now_price'],
+    'auction_duration_seconds' => $input['auction_duration_seconds'] ?? 0
 ];
 
 try {
