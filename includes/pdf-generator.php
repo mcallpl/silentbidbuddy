@@ -32,6 +32,7 @@ class ItemPDFGenerator {
         $increment = '$' . number_format((float)($item['min_increment'] ?? 50), 0);
         $timeRemaining = $this->getTimeRemaining();
         $url = htmlspecialchars($this->shortUrl);
+        $qrUrl = urlencode($this->shortUrl);
 
         return <<<HTML
 <!DOCTYPE html>
@@ -350,7 +351,7 @@ class ItemPDFGenerator {
 
             <div class="right-column">
                 <div class="qr-section">
-                    <img src="https://chart.googleapis.com/chart?chs=200x200&chld=L|0&cht=qr&chl={$url}" alt="Bid QR Code" class="qr-image" onerror="this.style.display='none'">
+                    <img src="https://chart.googleapis.com/chart?chs=200x200&chld=L|0&cht=qr&chl={$qrUrl}" alt="Bid QR Code" class="qr-image" onerror="this.style.display='none'">
                     <div class="qr-label">SCAN TO BID</div>
                 </div>
 
