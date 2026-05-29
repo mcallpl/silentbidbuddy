@@ -195,8 +195,36 @@ class ItemPDFGenerator {
         .right-column {
             display: flex;
             flex-direction: column;
-            gap: 0.08in;
+            gap: 0.06in;
             align-items: center;
+            justify-content: flex-start;
+        }
+
+        .qr-section {
+            width: 100%;
+            background: white;
+            padding: 0.08in;
+            border-radius: 3px;
+            border: 2px solid #1e40af;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.15);
+        }
+
+        .qr-image {
+            width: 100%;
+            height: auto;
+            max-width: 0.85in;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .qr-label {
+            font-size: 7px;
+            font-weight: 700;
+            color: #1e40af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
         }
 
         .info-box {
@@ -321,6 +349,11 @@ class ItemPDFGenerator {
             </div>
 
             <div class="right-column">
+                <div class="qr-section">
+                    <img src="https://chart.googleapis.com/chart?chs=200x200&chld=L|0&cht=qr&chl={$url}" alt="Bid QR Code" class="qr-image" onerror="this.style.display='none'">
+                    <div class="qr-label">SCAN TO BID</div>
+                </div>
+
                 <div class="info-box">
                     <span class="info-box-label">HOUSE</span>
                     <span class="company-name">Silent</span>
