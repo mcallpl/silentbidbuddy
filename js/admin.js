@@ -326,7 +326,7 @@ const AdminDashboard = {
 
     async loadItemForEdit(itemId) {
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/get-item.php?id=' + itemId, {
+            const response = await fetch(this.config.apiBaseUrl + '/crud-items.php?action=get&item_id=' + itemId, {
                 headers: this.getAuthHeaders()
             });
 
@@ -335,11 +335,11 @@ const AdminDashboard = {
             }
 
             const data = await response.json();
-            if (data.status !== 'ok' || !data.item) {
+            if (data.status !== 'ok' || !data.data) {
                 throw new Error('Item not found');
             }
 
-            const item = data.item;
+            const item = data.data;
 
             // Populate form fields
             const form = document.getElementById('itemForm');
@@ -402,10 +402,9 @@ const AdminDashboard = {
         }
 
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/delete-item.php', {
+            const response = await fetch(this.config.apiBaseUrl + '/crud-items.php?action=delete&item_id=' + itemId, {
                 method: 'POST',
-                headers: this.getAuthHeaders(),
-                body: JSON.stringify({ item_id: parseInt(itemId) })
+                headers: this.getAuthHeaders()
             });
 
             const data = await response.json();
@@ -673,13 +672,13 @@ const AdminDashboard = {
 
         try {
             const url = itemId
-                ? this.config.apiBaseUrl + '/update-item.php'
-                : this.config.apiBaseUrl + '/create-item.php';
+                ? this.config.apiBaseUrl + '/crud-items.php?action=update&item_id=' + itemId
+                : this.config.apiBaseUrl + '/crud-items.php?action=create';
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: this.getAuthHeaders(),
-                body: JSON.stringify(itemId ? { item_id: itemId, ...data } : data)
+                body: JSON.stringify(data)
             });
 
             const result = await response.json();
