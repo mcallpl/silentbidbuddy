@@ -222,4 +222,13 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
         }
     </script>
     <script src="/js/bidding.js"></script>
+    <script>
+        // CRITICAL: Initialize the bidding system when page loads
+        if (window.SBB && window.SBB.Bidding) {
+            window.SBB.Bidding.init();
+            console.log('[INIT] Bidding system started for item ID:', window.SBB.itemId);
+        } else {
+            console.error('[ERROR] Bidding module not loaded!');
+        }
+    </script>
 </body>
