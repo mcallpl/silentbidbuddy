@@ -148,7 +148,7 @@ function handleUpdateItem() {
     $updates = [];
     $params = [];
 
-    $updatable = ['title', 'description', 'starting_bid', 'min_increment', 'auction_start_time', 'auction_end_time', 'is_closed'];
+    $updatable = ['title', 'description', 'image_url', 'fair_market_value', 'starting_bid', 'min_increment', 'buy_now_price', 'auction_start_time', 'auction_end_time', 'is_closed'];
     foreach ($updatable as $field) {
         if (isset($input[$field])) {
             $updates[] = "$field = ?";
