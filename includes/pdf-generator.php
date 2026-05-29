@@ -43,32 +43,183 @@ class ItemPDFGenerator {
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; color: #333; }
-        .container { max-width: 8.5in; margin: 0 auto; padding: 0.3in; height: 11in; display: flex; flex-direction: column; }
-        .header { text-align: center; margin-bottom: 0.15in; flex-shrink: 0; }
-        .title { font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; line-height: 1.2; }
-        .subtitle { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-        .content { display: grid; grid-template-columns: 2in 3.5in; gap: 0.15in; flex: 1; min-height: 0; }
-        .image-section { display: flex; flex-direction: column; }
-        .image-wrapper { background: #f5f5f5; border-radius: 6px; overflow: hidden; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 2in; }
-        .image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 3px; }
-        .no-image { text-align: center; color: #999; font-size: 11px; padding: 10px; }
-        .qr-section { text-align: center; padding-top: 3px; }
-        .qr-code { display: inline-block; }
-        .qr-code img { width: 1.2in; height: 1.2in; display: block; }
-        .qr-text { font-size: 8px; color: #999; margin-top: 2px; }
-        .qr-url { font-size: 8px; color: #667eea; word-break: break-all; margin-top: 2px; font-weight: 500; }
-        .details-section { overflow-y: auto; }
-        .section { margin-bottom: 0.1in; }
-        .section-title { font-size: 9px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
-        .description { font-size: 10px; color: #555; line-height: 1.3; }
-        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .detail-item { background: #f9f9f9; padding: 5px 8px; border-radius: 4px; border-left: 2px solid #667eea; }
-        .detail-label { font-size: 8px; color: #999; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
-        .detail-value { font-size: 12px; font-weight: 600; color: #1a1a1a; }
-        .cta { margin-top: 0.1in; font-size: 9px; color: #666; background: #f0f4ff; padding: 5px; border-radius: 4px; border-left: 2px solid #667eea; line-height: 1.3; }
-        .footer { text-align: center; padding-top: 3px; border-top: 1px solid #eee; font-size: 8px; color: #999; flex-shrink: 0; margin-top: 0.1in; }
-        .print-button { display: inline-block; margin-bottom: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .container { width: 8.5in; height: 11in; margin: 0 auto; padding: 0.25in; display: flex; flex-direction: column; }
+
+        /* Hero Image Section - 60% of page */
+        .hero-section {
+            flex: 0 0 5.8in;
+            background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.15in;
+            position: relative;
+        }
+
+        .image-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.2in;
+        }
+
+        .image-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .no-image {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .lot-badge {
+            position: absolute;
+            top: 0.15in;
+            right: 0.15in;
+            background: #667eea;
+            color: white;
+            padding: 0.1in 0.15in;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 11px;
+        }
+
+        /* Details Section - Bottom 40% */
+        .details-section {
+            flex: 0 0 4.7in;
+            display: grid;
+            grid-template-columns: 1fr 0.9in;
+            gap: 0.1in;
+            overflow: hidden;
+        }
+
+        .info-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.08in;
+        }
+
+        .title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.15;
+            flex-shrink: 0;
+        }
+
+        .description {
+            font-size: 9px;
+            color: #555;
+            line-height: 1.25;
+            flex-shrink: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .bid-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.05in;
+            flex-shrink: 0;
+        }
+
+        .bid-item {
+            background: #f9f9f9;
+            padding: 0.05in 0.08in;
+            border-left: 1.5px solid #667eea;
+            border-radius: 2px;
+        }
+
+        .bid-label {
+            font-size: 7px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 1px;
+        }
+
+        .bid-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .cta-small {
+            font-size: 8px;
+            color: #666;
+            background: #f0f4ff;
+            padding: 0.04in 0.06in;
+            border-radius: 2px;
+            border-left: 1.5px solid #667eea;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        /* QR Code Column */
+        .qr-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.04in;
+            justify-content: flex-start;
+        }
+
+        .qr-code {
+            width: 0.85in;
+            height: 0.85in;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 3px;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .qr-label {
+            font-size: 7px;
+            color: #999;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 7px;
+            color: #999;
+            padding-top: 0.05in;
+            border-top: 0.5pt solid #eee;
+            flex-shrink: 0;
+        }
+
+        .print-button {
+            display: inline-block;
+            margin-bottom: 15px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         .print-button:hover { background: #5568d3; }
+
         @media print {
             body {
                 background: white;
@@ -80,25 +231,17 @@ class ItemPDFGenerator {
             }
             .container {
                 height: auto;
-                padding: 0.3in;
                 page-break-after: avoid;
                 page-break-inside: avoid;
             }
-            .content {
-                page-break-inside: avoid;
-            }
-            .image-wrapper {
+            .hero-section {
                 page-break-inside: avoid;
             }
             .details-section {
                 page-break-inside: avoid;
             }
-            a {
-                color: #667eea;
-                text-decoration: none;
-            }
             @page {
-                margin: 0.3in;
+                margin: 0.25in;
                 size: letter;
             }
         }
@@ -106,68 +249,52 @@ class ItemPDFGenerator {
 </head>
 <body>
     <div class="container">
-        <!-- Print Button -->
+        <!-- Print Button (hidden in print) -->
         <button class="print-button" onclick="window.print()">🖨️ Print This Item</button>
 
-        <!-- Header -->
-        <div class="header">
-            <div class="subtitle">Silent Bid Buddy Auction</div>
-            <h1 class="title">{$item['title']}</h1>
+        <!-- Hero Image Section - DOMINANT FEATURE -->
+        <div class="hero-section">
+            <div class="lot-badge">LOT #{$item['item_number']}</div>
+            <div class="image-wrapper">
+                {$this->getImageHTML()}
+            </div>
         </div>
 
-        <!-- Content -->
-        <div class="content">
-            <!-- Image Section -->
-            <div class="image-section">
-                <div class="image-wrapper">
-                    {$this->getImageHTML()}
+        <!-- Details Section -->
+        <div class="details-section">
+            <!-- Left Column: Info -->
+            <div class="info-column">
+                <div class="title">{$item['title']}</div>
+                {$this->getDescriptionSmallHTML()}
+                <div class="bid-info">
+                    <div class="bid-item">
+                        <div class="bid-label">Starting Bid</div>
+                        <div class="bid-value">{$startBid}</div>
+                    </div>
+                    <div class="bid-item">
+                        <div class="bid-label">Increment</div>
+                        <div class="bid-value">\${$item['min_increment']}</div>
+                    </div>
+                    {$this->getFMVSmallHTML($fmv)}
+                    {$this->getBuyNowSmallHTML()}
+                </div>
+                <div class="cta-small">
+                    📱 Scan QR code to bid instantly
                 </div>
             </div>
 
-            <!-- Details Section -->
-            <div class="details-section">
-                <!-- Description -->
-                {$this->getDescriptionHTML()}
-
-                <!-- Bid Details -->
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Starting Bid</div>
-                        <div class="detail-value">{$startBid}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Minimum Increment</div>
-                        <div class="detail-value">\${$item['min_increment']}</div>
-                    </div>
-                    {$this->getFMVHTML($fmv)}
-                    {$this->getBuyNowHTML()}
-                    <div class="detail-item">
-                        <div class="detail-label">Duration</div>
-                        <div class="detail-value">{$duration}</div>
-                    </div>
+            <!-- Right Column: QR Code -->
+            <div class="qr-column">
+                <div class="qr-code">
+                    <img src="{$this->qrCodeUrl}" alt="Bid QR Code" />
                 </div>
-
-                <!-- QR Code -->
-                <div class="qr-section">
-                    <div class="qr-code">
-                        <img src="{$this->qrCodeUrl}" alt="Bid QR Code" />
-                    </div>
-                    <div class="qr-text">Scan to start bidding instantly</div>
-                    <div class="qr-url">{$this->shortUrl}</div>
-                </div>
-
-                <!-- CTA -->
-                <div class="cta">
-                    <div class="cta-text">
-                        📱 Not registered? Scan the QR code and you'll be guided to register before bidding
-                    </div>
-                </div>
+                <div class="qr-label">Scan to Bid</div>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>Silent Bid Buddy • Professional Auction Platform • {$this->getFormattedDate()}</p>
+            Silent Bid Buddy • {$this->getFormattedDate()}
         </div>
     </div>
 </body>
@@ -194,6 +321,14 @@ HTML;
         ';
     }
 
+    private function getDescriptionSmallHTML() {
+        if (empty($this->item['description'])) {
+            return '';
+        }
+        $desc = substr($this->item['description'], 0, 150);
+        return '<div class="description">' . htmlspecialchars($desc) . '...</div>';
+    }
+
     private function getFMVHTML($fmv) {
         if (empty($this->item['fair_market_value'])) {
             return '';
@@ -206,6 +341,18 @@ HTML;
         ';
     }
 
+    private function getFMVSmallHTML($fmv) {
+        if (empty($this->item['fair_market_value'])) {
+            return '';
+        }
+        return '
+            <div class="bid-item">
+                <div class="bid-label">Fair Market Value</div>
+                <div class="bid-value">' . $fmv . '</div>
+            </div>
+        ';
+    }
+
     private function getBuyNowHTML() {
         if (empty($this->item['buy_now_price'])) {
             return '';
@@ -214,6 +361,18 @@ HTML;
             <div class="detail-item">
                 <div class="detail-label">Buy Now Price</div>
                 <div class="detail-value">$' . number_format($this->item['buy_now_price'], 2) . '</div>
+            </div>
+        ';
+    }
+
+    private function getBuyNowSmallHTML() {
+        if (empty($this->item['buy_now_price'])) {
+            return '';
+        }
+        return '
+            <div class="bid-item">
+                <div class="bid-label">Buy Now</div>
+                <div class="bid-value">$' . number_format($this->item['buy_now_price'], 2) . '</div>
             </div>
         ';
     }
