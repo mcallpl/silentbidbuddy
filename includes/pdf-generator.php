@@ -43,33 +43,31 @@ class ItemPDFGenerator {
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: white; color: #333; }
-        .container { max-width: 850px; margin: 0 auto; padding: 40px 30px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .title { font-size: 32px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
-        .subtitle { font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-        .content { display: flex; gap: 40px; align-items: flex-start; }
-        .image-section { flex: 1; }
-        .image-wrapper { background: #f5f5f5; border-radius: 12px; overflow: hidden; margin-bottom: 20px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-        .image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .no-image { text-align: center; color: #999; font-size: 14px; padding: 40px; }
-        .details-section { flex: 1; }
-        .section { margin-bottom: 30px; }
-        .section-title { font-size: 12px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .section-content { font-size: 16px; color: #333; line-height: 1.6; }
-        .description { font-size: 15px; color: #555; line-height: 1.8; }
-        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .detail-item { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #667eea; }
-        .detail-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-        .detail-value { font-size: 18px; font-weight: 600; color: #1a1a1a; }
-        .qr-section { text-align: center; margin-top: 30px; padding-top: 30px; border-top: 1px solid #eee; }
-        .qr-code { display: inline-block; padding: 20px; background: white; border-radius: 12px; }
-        .qr-code img { max-width: 180px; height: auto; display: block; }
-        .qr-text { font-size: 12px; color: #999; margin-top: 12px; }
-        .qr-url { font-size: 13px; color: #667eea; word-break: break-all; margin-top: 8px; font-weight: 500; }
-        .cta { margin-top: 30px; text-align: center; font-size: 13px; color: #666; }
-        .cta-text { background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 3px solid #667eea; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 11px; color: #999; }
-        .print-button { display: inline-block; margin-bottom: 30px; padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .container { max-width: 8.5in; margin: 0 auto; padding: 0.3in; height: 11in; display: flex; flex-direction: column; }
+        .header { text-align: center; margin-bottom: 0.15in; flex-shrink: 0; }
+        .title { font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; line-height: 1.2; }
+        .subtitle { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .content { display: grid; grid-template-columns: 2in 3.5in; gap: 0.15in; flex: 1; min-height: 0; }
+        .image-section { display: flex; flex-direction: column; }
+        .image-wrapper { background: #f5f5f5; border-radius: 6px; overflow: hidden; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 2in; }
+        .image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 3px; }
+        .no-image { text-align: center; color: #999; font-size: 11px; padding: 10px; }
+        .qr-section { text-align: center; padding-top: 3px; }
+        .qr-code { display: inline-block; }
+        .qr-code img { width: 1.2in; height: 1.2in; display: block; }
+        .qr-text { font-size: 8px; color: #999; margin-top: 2px; }
+        .qr-url { font-size: 8px; color: #667eea; word-break: break-all; margin-top: 2px; font-weight: 500; }
+        .details-section { overflow-y: auto; }
+        .section { margin-bottom: 0.1in; }
+        .section-title { font-size: 9px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+        .description { font-size: 10px; color: #555; line-height: 1.3; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .detail-item { background: #f9f9f9; padding: 5px 8px; border-radius: 4px; border-left: 2px solid #667eea; }
+        .detail-label { font-size: 8px; color: #999; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+        .detail-value { font-size: 12px; font-weight: 600; color: #1a1a1a; }
+        .cta { margin-top: 0.1in; font-size: 9px; color: #666; background: #f0f4ff; padding: 5px; border-radius: 4px; border-left: 2px solid #667eea; line-height: 1.3; }
+        .footer { text-align: center; padding-top: 3px; border-top: 1px solid #eee; font-size: 8px; color: #999; flex-shrink: 0; margin-top: 0.1in; }
+        .print-button { display: inline-block; margin-bottom: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .print-button:hover { background: #5568d3; }
         @media print {
             body {
@@ -81,36 +79,26 @@ class ItemPDFGenerator {
                 display: none !important;
             }
             .container {
-                padding: 0.5in;
-                max-width: 100%;
-            }
-            .header {
+                height: auto;
+                padding: 0.3in;
                 page-break-after: avoid;
+                page-break-inside: avoid;
             }
             .content {
-                display: block;
                 page-break-inside: avoid;
             }
-            .image-section {
+            .image-wrapper {
                 page-break-inside: avoid;
-                margin-bottom: 20px;
             }
             .details-section {
                 page-break-inside: avoid;
-            }
-            .qr-section {
-                page-break-inside: avoid;
-                margin-top: 20px;
-            }
-            .footer {
-                page-break-before: avoid;
             }
             a {
                 color: #667eea;
                 text-decoration: none;
             }
             @page {
-                margin: 0.5in;
+                margin: 0.3in;
                 size: letter;
             }
         }
