@@ -131,9 +131,18 @@ function handleUpdateItem() {
     $input = json_decode(file_get_contents('php://input'), true);
     $item_id = (int)($_GET['item_id'] ?? 0);
 
+    error_log('[ADMIN CRUD UPDATE] Item ID: ' . $item_id . ', Input: ' . json_encode($input));
+
     if (!$item_id || !$input) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'item_id and body required']));
+    }
+
+    // Verify item exists
+    $item_check = dbGetRow("SELECT id FROM items WHERE id = ?", [$item_id]);
+    if (!$item_check) {
+        http_response_code(404);
+        die(json_encode(['status' => 'error', 'message' => 'Item not found']));
     }
 
     $updates = [];
@@ -144,6 +153,7 @@ function handleUpdateItem() {
         if (isset($input[$field])) {
             $updates[] = "$field = ?";
             $params[] = $input[$field];
+            error_log('[ADMIN CRUD UPDATE] Setting ' . $field . ' = ' . (is_array($input[$field]) ? json_encode($input[$field]) : $input[$field]));
         }
     }
 
@@ -155,14 +165,15 @@ function handleUpdateItem() {
     $params[] = $item_id;
 
     $sql = "UPDATE items SET " . implode(', ', $updates) . " WHERE id = ?";
-    error_log('[ADMIN CRUD] Updating item ' . $item_id . ' with fields: ' . implode(', ', $updates));
+    error_log('[ADMIN CRUD UPDATE] SQL: ' . $sql . ' with params: ' . json_encode($params));
 
     $success = dbUpdate($sql, $params);
 
     if (!$success) {
-        error_log('[ADMIN CRUD] ❌ Update failed for item ' . $item_id . ' - SQL: ' . $sql);
+        error_log('[ADMIN CRUD UPDATE] ❌ Update failed for item ' . $item_id);
+        http_response_code(400);
     } else {
-        error_log('[ADMIN CRUD] ✓ Update successful for item ' . $item_id);
+        error_log('[ADMIN CRUD UPDATE] ✓ Update successful for item ' . $item_id);
     }
 
     echo json_encode([

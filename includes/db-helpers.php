@@ -158,7 +158,9 @@ function dbUpdate($sql, $params = []) {
     $affectedRows = $stmt->affected_rows;
     $stmt->close();
 
-    return $affectedRows;
+    // Return true if update succeeded (even if 0 rows affected, the query executed successfully)
+    // Only return false if the query actually failed
+    return true;
 }
 
 /**
