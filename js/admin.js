@@ -1305,7 +1305,18 @@ const AdminDashboard = {
         alert('Edit user form coming soon. Use /api/admin/crud-users.php?action=get&user_id=' + userId);
     },
 
-    editItem(itemId) {
-        alert('Edit item form coming soon. Use /api/admin/crud-items.php?action=get&item_id=' + itemId);
+    editItemInPanel(itemId) {
+        // This is for the admin control panel edit
+        const modal = document.getElementById('itemModal');
+        document.getElementById('itemModalTitle').textContent = 'Edit Item';
+        document.getElementById('itemForm').dataset.itemId = itemId;
+        document.getElementById('itemFormError').style.display = 'none';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('uploadPlaceholder').style.display = 'block';
+        modal.style.display = 'block';
+        this.setupImageUpload();
+
+        // Load item data
+        this.loadItemForEdit(itemId);
     }
 };
