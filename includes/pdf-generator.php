@@ -4,6 +4,8 @@
 // Professional $100M+ Marketing Firm Quality
 // ============================================================
 
+require_once __DIR__ . '/qr-code-generator.php';
+
 class ItemPDFGenerator {
     private $item;
     private $shortUrl;
@@ -32,7 +34,7 @@ class ItemPDFGenerator {
         $increment = '$' . number_format((float)($item['min_increment'] ?? 50), 0);
         $timeRemaining = $this->getTimeRemaining();
         $url = htmlspecialchars($this->shortUrl);
-        $qrUrl = urlencode($this->shortUrl);
+        $qrUrl = QRCodeGenerator::getQRUrl($this->shortUrl);
 
         return <<<HTML
 <!DOCTYPE html>
@@ -351,7 +353,7 @@ class ItemPDFGenerator {
 
             <div class="right-column">
                 <div class="qr-section">
-                    <img src="https://chart.googleapis.com/chart?chs=200x200&chld=L|0&cht=qr&chl={$qrUrl}" alt="Bid QR Code" class="qr-image" onerror="this.style.display='none'">
+                    <img src="{$qrUrl}" alt="Bid QR Code" class="qr-image" onerror="this.style.display='none'">
                     <div class="qr-label">SCAN TO BID</div>
                 </div>
 
