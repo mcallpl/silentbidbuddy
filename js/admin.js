@@ -94,21 +94,14 @@ const AdminDashboard = {
     },
 
     getAdminTokenFromCookie() {
-        // Extract token from admin_session_token cookie
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'admin_session_token') {
-                this.adminToken = decodeURIComponent(value);
-                return;
-            }
-        }
+        // Session cookie is sent automatically by browser, no need to extract it
+        // The API checks for admin_session_token cookie directly
     },
 
     getAuthHeaders() {
         return {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (this.adminToken || '')
+            'Content-Type': 'application/json'
+            // Session cookie sent automatically by browser, no Authorization header needed
         };
     },
 
