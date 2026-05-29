@@ -140,26 +140,30 @@ function dbUpdate($sql, $params = []) {
     $stmt = $conn->prepare($sql);
 
     if (!$stmt) {
-        error_log("Update preparation failed: " . $conn->error . " SQL: " . $sql);
+        error_log("❌ [DB UPDATE] Preparation failed: " . $conn->error . " SQL: " . $sql);
         return false;
     }
 
     if (!empty($params)) {
         $types = buildTypeString($params);
-        $stmt->bind_param($types, ...$params);
+        if (!$stmt->bind_param($types, ...$params)) {
+            error_log("❌ [DB UPDATE] Bind failed: " . $stmt->error . " Types: " . $types . " SQL: " . $sql);
+            $stmt->close();
+            return false;
+        }
     }
 
     if (!$stmt->execute()) {
-        error_log("Update execution failed: " . $stmt->error . " SQL: " . $sql);
+        error_log("❌ [DB UPDATE] Execution failed: " . $stmt->error . " SQL: " . $sql);
         $stmt->close();
         return false;
     }
 
     $affectedRows = $stmt->affected_rows;
+    error_log("✓ [DB UPDATE] Success - Affected rows: " . $affectedRows . " SQL: " . $sql);
     $stmt->close();
 
-    // Return true if update succeeded (even if 0 rows affected, the query executed successfully)
-    // Only return false if the query actually failed
+    // Return true on successful execution (statement executed without error)
     return true;
 }
 
