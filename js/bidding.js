@@ -96,28 +96,33 @@ SBB.Bidding = {
     },
 
     startFeedRefresh() {
+        // CRITICAL: Refresh every 2 seconds to ensure real-time bid sync
+        // Must NOT be longer - users need to see other bids immediately
         this.feedInterval = setInterval(() => {
             this.loadBidFeed();
-        }, 3000);
+        }, 2000);
     },
 
     async loadBidFeed() {
         try {
-            const response = await SBB.API.get(
-                '/api/bidding/get-live-feed.php?id=' + this.itemId + '&limit=20'
-            );
+            const url = '/api/bidding/get-live-feed.php?id=' + this.itemId + '&limit=20&t=' + Date.now();
+            const response = await SBB.API.get(url);
 
-            console.log('Bid feed response:', response);
+            // CRITICAL: Log all responses for debugging sync issues
+            console.log('[BID SYNC] Feed loaded at', new Date().toLocaleTimeString(), '- Bids:', response?.bids?.length || 0);
 
             if (response && response.status === 'ok' && Array.isArray(response.bids)) {
                 this.renderBidFeed(response.bids);
             } else {
-                console.warn('Invalid bid feed response:', response);
-                this.renderBidFeed([]);
+                console.warn('[BID SYNC] Invalid response:', response);
+                // Don't clear the feed on error - keep showing last known bids
+                if (!response || !response.bids) {
+                    console.error('[BID SYNC] API returned empty or invalid bids');
+                }
             }
         } catch (err) {
-            console.error('Error loading bid feed:', err);
-            this.renderBidFeed([]);
+            console.error('[BID SYNC] Network error loading bids:', err);
+            // Don't clear the feed on error
         }
     },
 
@@ -199,16 +204,19 @@ SBB.Bidding = {
             });
 
             if (response.status === 'success') {
+                console.log('[BID SYNC] ✓ Bid placed successfully:', response);
+
                 // Update UI
                 this.updateItemDisplay(response);
                 this.closeBidModal();
 
-                // Refresh feed immediately
-                this.loadBidFeed();
+                // Refresh feed IMMEDIATELY - don't wait for next interval
+                await this.loadBidFeed();
 
                 // Show success message
-                this.showSuccessNotification('Your bid was placed successfully!');
+                this.showSuccessNotification('Your bid was placed successfully! Refreshing live bids...');
             } else {
+                console.error('[BID SYNC] ❌ Bid placement failed:', response);
                 this.showErrorNotification(response.message || 'Bid failed');
             }
         } catch (err) {

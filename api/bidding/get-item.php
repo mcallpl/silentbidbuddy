@@ -12,6 +12,11 @@ require_once __DIR__ . '/../../includes/bidding.php';
 
 header('Content-Type: application/json');
 
+// CRITICAL: Prevent all caching - bids must sync in real-time
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 // Only allow GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
