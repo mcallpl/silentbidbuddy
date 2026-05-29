@@ -29,7 +29,7 @@ $total = dbCount('items');
 
 // Get items for current page
 $items = dbGetAll(
-    "SELECT id, item_number, title, current_high_bid, is_closed,
+    "SELECT id, item_number, title, image_url, current_high_bid, is_closed,
             auction_end_time, (SELECT COUNT(*) FROM bids WHERE bids.item_id = items.id) as bid_count
      FROM items
      ORDER BY item_number ASC
