@@ -51,6 +51,7 @@ if (!defined('ANTI_SNIPING_MINUTES')) define('ANTI_SNIPING_MINUTES', 2);
 // ============================================================
 // ADMIN CONFIGURATION
 // ============================================================
+if (!defined('ADMIN_SESSION_COOKIE_NAME')) define('ADMIN_SESSION_COOKIE_NAME', 'admin_session_token');
 if (!defined('ADMIN_TOKEN')) {
     define('ADMIN_TOKEN', $vault_admin_token ?? '');
     if (empty(ADMIN_TOKEN)) {

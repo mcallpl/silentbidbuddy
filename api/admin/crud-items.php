@@ -13,9 +13,12 @@ header('Content-Type: application/json');
 
 // Check if admin is logged in
 if (!isAdminLoggedIn()) {
+    error_log('[ADMIN CRUD] ❌ Admin not logged in - Auth check failed');
     http_response_code(401);
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Admin session required.']));
 }
+
+error_log('[ADMIN CRUD] ✓ Admin authenticated - Proceeding with action: ' . ($action ?? 'none'));
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
@@ -150,10 +153,17 @@ function handleUpdateItem() {
     }
 
     $params[] = $item_id;
-    $success = dbUpdate(
-        "UPDATE items SET " . implode(', ', $updates) . " WHERE id = ?",
-        $params
-    );
+
+    $sql = "UPDATE items SET " . implode(', ', $updates) . " WHERE id = ?";
+    error_log('[ADMIN CRUD] Updating item ' . $item_id . ' with fields: ' . implode(', ', $updates));
+
+    $success = dbUpdate($sql, $params);
+
+    if (!$success) {
+        error_log('[ADMIN CRUD] ❌ Update failed for item ' . $item_id . ' - SQL: ' . $sql);
+    } else {
+        error_log('[ADMIN CRUD] ✓ Update successful for item ' . $item_id);
+    }
 
     echo json_encode([
         'status' => $success ? 'ok' : 'error',
