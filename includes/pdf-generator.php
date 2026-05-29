@@ -34,8 +34,10 @@ class ItemPDFGenerator {
         $increment = '$' . number_format((float)($item['min_increment'] ?? 50), 0);
         $timeRemaining = $this->getTimeRemaining();
 
-        // Use item number (consistent across environments) if no short URL provided
-        $bidUrl = $this->shortUrl ?? (APP_DOMAIN . '/item.php?id=' . (int)$item['item_number']);
+        // CRITICAL: Always use production domain for QR codes (users access via phone)
+        // Never use localhost - it won't work when scanned by phones
+        $productionDomain = 'https://silentbidbuddy.peoplestar.com';
+        $bidUrl = $this->shortUrl ?? ($productionDomain . '/item.php?id=' . (int)$item['item_number']);
         $url = htmlspecialchars($bidUrl);
         $qrUrl = QRCodeGenerator::getQRUrl($bidUrl);
 
