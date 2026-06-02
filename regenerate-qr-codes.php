@@ -12,8 +12,9 @@ require_once __DIR__ . '/includes/rebrandly-utils.php';
 // Override APP_DOMAIN for CLI execution
 // When running via CLI, detect domain from environment or use production
 if (php_sapi_name() === 'cli') {
-    // Check if we're on production server
-    if (file_exists('/var/www/html/silentbidbuddy/config.php')) {
+    // Check if we're on production server (parent directory suggests production path)
+    $script_dir = dirname(__FILE__);
+    if (strpos($script_dir, '/var/www') !== false) {
         // We're on production server
         if (!defined('APP_DOMAIN_OVERRIDE')) define('APP_DOMAIN_OVERRIDE', 'https://silentbidbuddy.peoplestar.com');
     }

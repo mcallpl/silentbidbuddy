@@ -9,6 +9,22 @@ window.SBB = window.SBB || {};
 // API Communication
 // ============================================================
 SBB.API = {
+    getSessionToken() {
+        // Try localStorage first (from login flow)
+        let token = localStorage.getItem('session_token');
+        if (token) return token;
+
+        // Try cookie as fallback (persistent session)
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'session_token') {
+                return decodeURIComponent(value);
+            }
+        }
+        return null;
+    },
+
     async post(endpoint, data = {}) {
         const options = {
             method: 'POST',
@@ -19,7 +35,7 @@ SBB.API = {
         };
 
         // Include session token if available
-        const token = localStorage.getItem('session_token');
+        const token = this.getSessionToken();
         if (token) {
             options.headers['Authorization'] = 'Bearer ' + token;
         }
@@ -37,7 +53,7 @@ SBB.API = {
         };
 
         // Include session token if available
-        const token = localStorage.getItem('session_token');
+        const token = this.getSessionToken();
         if (token) {
             options.headers['Authorization'] = 'Bearer ' + token;
         }
