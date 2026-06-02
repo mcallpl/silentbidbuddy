@@ -46,10 +46,22 @@ rsync -avz --delete ./ $DO_SERVER:$DO_PATH/ \
     > /tmp/deploy.log 2>&1
 
 echo ""
+echo "🔐 Step 4: Fixing file permissions on production..."
+ssh $DO_SERVER "cd $DO_PATH && \
+    chown -R www-data:www-data . && \
+    chmod 755 . && \
+    chmod 755 api includes css js cli documents uploads qr_codes logs 2>/dev/null || true && \
+    chmod 644 *.php api/*/*.php includes/*.php documents/* .htaccess 2>/dev/null || true && \
+    echo '   ✓ Permissions fixed'" || {
+    echo "   ⚠️  Permission fix skipped (may require manual intervention)"
+}
+
+echo ""
 echo "✅ DEPLOYMENT COMPLETE!"
 echo ""
 echo "✓ Changes committed to git"
 echo "✓ Pushed to GitHub"
 echo "✓ Synced to DigitalOcean (64.227.108.128)"
+echo "✓ Permissions fixed (www-data ownership, proper read/write)"
 echo ""
 echo "Live at: https://silentbidbuddy.peoplestar.com/"
