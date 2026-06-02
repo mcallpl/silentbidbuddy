@@ -55,16 +55,7 @@ $page_title = 'All Items - ' . APP_NAME;
                             <!-- Item Image -->
                             <div class="item-card-image">
                                 <?php if ($item['image_url']): ?>
-                                    <?php
-                                        $imageUrl = $item['image_url'];
-                                        // Fix image URLs that are missing the  prefix
-                                        if (strpos($imageUrl, '') === false && strpos($imageUrl, 'data:') !== 0 && strpos($imageUrl, 'http') !== 0) {
-                                            if (strpos($imageUrl, '/') === 0) {
-                                                $imageUrl = '/silentbidbuddy' . $imageUrl;
-                                            }
-                                        }
-                                    ?>
-                                    <img src="<?php echo htmlspecialchars($imageUrl); ?>"
+                                    <img src="<?php echo htmlspecialchars($item['image_url']); ?>"
                                          alt="<?php echo htmlspecialchars($item['title']); ?>"
                                     />
                                 <?php else: ?>
