@@ -89,9 +89,19 @@ if (!defined('COOKIE_DOMAIN')) {
         $host = $_SERVER['HTTP_HOST'];
         // Remove port if present
         $host = preg_replace('/:.*$/', '', $host);
-        // For real domains (not localhost/IP), prepend dot for subdomain cookies
+        // For real domains (not localhost/IP), extract parent domain
         if ($host !== 'localhost' && $host !== '127.0.0.1' && !filter_var($host, FILTER_VALIDATE_IP)) {
-            $cookie_domain = '.' . $host;
+            // Count dots - if more than 1, this is a subdomain, extract parent domain
+            $dot_count = substr_count($host, '.');
+            if ($dot_count > 1) {
+                // Extract parent domain (remove first subdomain)
+                $parts = explode('.', $host);
+                array_shift($parts);
+                $cookie_domain = '.' . implode('.', $parts);
+            } else {
+                // Single domain with one dot (e.g., example.com)
+                $cookie_domain = '.' . $host;
+            }
         }
     }
     define('COOKIE_DOMAIN', $cookie_domain);
