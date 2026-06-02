@@ -29,8 +29,8 @@ $page_title = 'All Items - ' . APP_NAME;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="/silentbidbuddy/css/main.css">
-    <link rel="stylesheet" href="/silentbidbuddy/css/mobile.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="items-list-page">
     <header class="app-header">
@@ -57,8 +57,8 @@ $page_title = 'All Items - ' . APP_NAME;
                                 <?php if ($item['image_url']): ?>
                                     <?php
                                         $imageUrl = $item['image_url'];
-                                        // Fix image URLs that are missing the /silentbidbuddy/ prefix
-                                        if (strpos($imageUrl, '/silentbidbuddy/') === false && strpos($imageUrl, 'data:') !== 0 && strpos($imageUrl, 'http') !== 0) {
+                                        // Fix image URLs that are missing the  prefix
+                                        if (strpos($imageUrl, '') === false && strpos($imageUrl, 'data:') !== 0 && strpos($imageUrl, 'http') !== 0) {
                                             if (strpos($imageUrl, '/') === 0) {
                                                 $imageUrl = '/silentbidbuddy' . $imageUrl;
                                             }
@@ -119,7 +119,7 @@ $page_title = 'All Items - ' . APP_NAME;
                                 </div>
 
                                 <!-- Action Button -->
-                                <a href="/silentbidbuddy/item.php?id=<?php echo (int)$item['item_number']; ?>"
+                                <a href="item.php?id=<?php echo (int)$item['item_number']; ?>"
                                    class="btn btn-primary btn-full-width">
                                     View & Bid
                                 </a>
@@ -132,10 +132,10 @@ $page_title = 'All Items - ' . APP_NAME;
 
         <!-- Navigation -->
         <section class="navigation-section">
-            <a href="/silentbidbuddy/index.php" class="btn btn-secondary">← Back</a>
+            <a href="index.php" class="btn btn-secondary">← Back</a>
         </section>
     </div>
 
-    <script src="/silentbidbuddy/js/app.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
