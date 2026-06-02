@@ -11,7 +11,7 @@ require_once __DIR__ . '/includes/db-helpers.php';
 // Require authentication
 $user = getCurrentUser();
 if (!$user) {
-    header("Location: index.php');
+    header('Location: index.php');
     exit;
 }
 

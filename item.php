@@ -16,7 +16,7 @@ require_once __DIR__ . '/includes/db-helpers.php';
 // Get item ID from URL
 $item_num = $_GET['id'] ?? 0;
 if (!$item_num) {
-    header("Location: items.php');
+    header('Location: items.php');
     exit;
 }
 
