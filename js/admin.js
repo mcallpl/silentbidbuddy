@@ -1078,7 +1078,7 @@ const AdminDashboard = {
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 9000);
     },
 
     formatCurrency(amount) {

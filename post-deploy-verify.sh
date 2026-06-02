@@ -75,12 +75,12 @@ echo ""
 
 # TEST 5: PHP Syntax on Production
 echo "🔍 TEST 5: PHP Syntax on Production"
-SYNTAX_CHECK=$(ssh $DO_SERVER "cd $DO_PATH && php -l index.php 2>&1 | grep -i 'syntax errors'" | wc -l)
+SYNTAX_CHECK=$(ssh $DO_SERVER "cd $DO_PATH && php -l index.php 2>&1 | grep -i 'parse error'" | wc -l)
 if [ "$SYNTAX_CHECK" -eq 0 ]; then
     echo -e "${GREEN}✓ Production PHP files have valid syntax${NC}"
 else
     echo -e "${RED}✗ Syntax errors on production${NC}"
-    ssh $DO_SERVER "cd $DO_PATH && php -l *.php api/*/*.php includes/*.php 2>&1 | grep -i error"
+    ssh $DO_SERVER "cd $DO_PATH && php -l *.php api/*/*.php includes/*.php 2>&1 | grep -i 'parse error'"
     FAILED=1
 fi
 echo ""
