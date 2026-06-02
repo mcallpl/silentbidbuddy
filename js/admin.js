@@ -6,7 +6,7 @@
 const AdminDashboard = {
     config: {
         metricsRefreshRate: 2000, // 2 seconds
-        apiBaseUrl: '/silentbidbuddy/api/admin'
+        apiBaseUrl: '/api/admin'
     },
 
     state: {
@@ -1021,7 +1021,7 @@ const AdminDashboard = {
             window.location.reload();
         } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = '/silentbidbuddy/admin.php';
+            window.location.href = 'admin.php';
         }
     },
 

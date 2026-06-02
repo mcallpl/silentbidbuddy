@@ -16,7 +16,7 @@ require_once __DIR__ . '/includes/db-helpers.php';
 // Get item ID from URL
 $item_num = $_GET['id'] ?? 0;
 if (!$item_num) {
-    header('Location: /silentbidbuddy/items.php');
+    header("Location: items.php');
     exit;
 }
 
@@ -61,8 +61,8 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="/silentbidbuddy/css/main.css">
-    <link rel="stylesheet" href="/silentbidbuddy/css/mobile.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="item-page">
     <header class="app-header">
@@ -77,12 +77,6 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
             <?php if ($item['image_url']): ?>
                 <?php
                     $imageUrl = $item['image_url'];
-                    // Fix image URLs that are missing the /silentbidbuddy/ prefix
-                    if (strpos($imageUrl, '/silentbidbuddy/') === false && strpos($imageUrl, 'data:') !== 0 && strpos($imageUrl, 'http') !== 0) {
-                        if (strpos($imageUrl, '/') === 0) {
-                            $imageUrl = '/silentbidbuddy' . $imageUrl;
-                        }
-                    }
                 ?>
                 <img src="<?php echo htmlspecialchars($imageUrl); ?>"
                      alt="<?php echo htmlspecialchars($item['title']); ?>"
@@ -147,7 +141,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
             <section class="bidding-section">
                 <?php if (!$is_authenticated): ?>
                     <p class="auth-prompt">
-                        <a href="/silentbidbuddy/index.php" class="btn btn-primary btn-large">Sign In to Bid</a>
+                        <a href="index.php" class="btn btn-primary btn-large">Sign In to Bid</a>
                     </p>
                 <?php else: ?>
                     <!-- Quick Bid Button -->
@@ -179,7 +173,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
                 <div class="auction-closed-message">
                     <p>⏱️ This auction is closed.</p>
                     <?php if ($is_user_winning): ?>
-                        <p>You won! <a href="/silentbidbuddy/checkout.php?item_id=<?php echo $item['id']; ?>" class="btn btn-primary">Complete Payment</a></p>
+                        <p>You won! <a href="checkout.php?item_id=<?php echo $item['id']; ?>" class="btn btn-primary">Complete Payment</a></p>
                     <?php endif; ?>
                 </div>
             </section>
@@ -195,7 +189,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
 
         <!-- Navigation -->
         <section class="navigation-section">
-            <a href="/silentbidbuddy/items.php" class="btn btn-secondary">View All Items</a>
+            <a href="items.php" class="btn btn-secondary">View All Items</a>
         </section>
     </div>
 
@@ -211,7 +205,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
         </div>
     </div>
 
-    <script src="/silentbidbuddy/js/app.js"></script>
+    <script src="js/app.js"></script>
     <script>
         // Pass data to JavaScript
         window.SBB = window.SBB || {};
@@ -235,7 +229,7 @@ $is_auction_open = !$item['is_closed'] && $time_remaining > 0;
             }
         }
     </script>
-    <script src="/silentbidbuddy/js/bidding.js"></script>
+    <script src="js/bidding.js"></script>
     <script>
         // CRITICAL: Initialize the bidding system when page loads
         if (window.SBB && window.SBB.Bidding) {

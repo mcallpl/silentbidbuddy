@@ -11,7 +11,7 @@ require_once __DIR__ . '/includes/db-helpers.php';
 // Require authentication
 $user = getCurrentUser();
 if (!$user) {
-    header('Location: /silentbidbuddy/index.php');
+    header("Location: index.php');
     exit;
 }
 
@@ -40,8 +40,8 @@ $page_title = 'Checkout - ' . APP_NAME;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="/silentbidbuddy/css/main.css">
-    <link rel="stylesheet" href="/silentbidbuddy/css/mobile.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body class="checkout-page">
@@ -75,17 +75,17 @@ $page_title = 'Checkout - ' . APP_NAME;
             <div id="checkoutError" class="error-message" style="display: none;"></div>
 
             <p class="return-link">
-                <a href="/silentbidbuddy/item.php?id=<?php echo $item['id']; ?>">Back to Item</a>
+                <a href="item.php?id=<?php echo $item['id']; ?>">Back to Item</a>
             </p>
         </section>
     </div>
 
-    <script src="/silentbidbuddy/js/app.js"></script>
+    <script src="js/app.js"></script>
     <script>
         window.SBB = window.SBB || {};
         window.SBB.itemId = <?php echo (int)$item['id']; ?>;
         window.SBB.sessionToken = localStorage.getItem('session_token');
         window.SBB.amount = <?php echo (float)$item['current_high_bid']; ?>;
     </script>
-    <script src="/silentbidbuddy/js/stripe-checkout.js"></script>
+    <script src="js/stripe-checkout.js"></script>
 </body>

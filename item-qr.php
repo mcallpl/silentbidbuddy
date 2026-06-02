@@ -18,12 +18,12 @@ if (!$item_id) {
 if (isAuthenticated()) {
     // User is logged in - redirect to item page
     $item_url = 'item.php?id=' . $item_id;
-    header("Location: /silentbidbuddy/" . $item_url);
+    header("Location: " . $item_url);
     exit;
 } else {
     // User not logged in - redirect to registration with return URL
     $return_url = urlencode('item.php?id=' . $item_id);
     $register_url = 'index.php?return=' . $return_url;
-    header("Location: /silentbidbuddy/" . $register_url);
+    header("Location: " . $register_url);
     exit;
 }

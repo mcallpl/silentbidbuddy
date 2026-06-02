@@ -33,8 +33,8 @@ $page_title = 'Payment Successful - ' . APP_NAME;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="/silentbidbuddy/css/main.css">
-    <link rel="stylesheet" href="/silentbidbuddy/css/mobile.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="success-page">
     <header class="app-header">
@@ -67,7 +67,7 @@ $page_title = 'Payment Successful - ' . APP_NAME;
             </div>
 
             <div class="action-buttons">
-                <a href="/silentbidbuddy/index.php" class="btn btn-primary btn-large">Back to Auction</a>
+                <a href="index.php" class="btn btn-primary btn-large">Back to Auction</a>
                 <a href="#" class="btn btn-secondary">Download Receipt</a>
             </div>
         </section>

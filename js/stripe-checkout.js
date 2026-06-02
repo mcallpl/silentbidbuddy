@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         try {
             // Create checkout session
-            const sessionResponse = await SBB.API.post('/silentbidbuddy/api/checkout/create-session.php', {
+            const sessionResponse = await SBB.API.post('/api/checkout/create-session.php', {
                 item_id: window.SBB.itemId
             });
 

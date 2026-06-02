@@ -105,7 +105,7 @@ SBB.Bidding = {
 
     async loadBidFeed() {
         try {
-            const url = '/silentbidbuddy/api/bidding/get-live-feed.php?id=' + this.itemId + '&limit=20&t=' + Date.now();
+            const url = '/api/bidding/get-live-feed.php?id=' + this.itemId + '&limit=20&t=' + Date.now();
             const response = await SBB.API.get(url);
 
             // CRITICAL: Log all responses for debugging sync issues
@@ -204,7 +204,7 @@ SBB.Bidding = {
         });
 
         try {
-            const response = await SBB.API.post('/silentbidbuddy/api/bidding/place-bid.php', {
+            const response = await SBB.API.post('/api/bidding/place-bid.php', {
                 item_id: this.itemId,
                 bid_amount: this.pendingBid.amount,
                 max_bid_amount: this.pendingBid.maxBid

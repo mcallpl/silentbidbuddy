@@ -16,8 +16,8 @@ $page_title = APP_NAME . ' — Admin Dashboard';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="/silentbidbuddy/css/main.css">
-    <link rel="stylesheet" href="/silentbidbuddy/css/admin.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-page">
     <!-- Login Screen (shown if not logged in) -->
@@ -411,7 +411,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
     <!-- Toast Notifications -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <script src="/silentbidbuddy/js/admin.js"></script>
+    <script src="js/admin.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             AdminDashboard.init(<?php echo json_encode($is_logged_in); ?>);

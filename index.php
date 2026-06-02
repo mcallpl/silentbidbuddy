@@ -12,7 +12,7 @@ require_once __DIR__ . '/includes/auth.php';
 // This is stored in the 'session_token' cookie and validated on every page load
 if (isAuthenticated()) {
     // User has valid session - redirect to items page (all available items)
-    header('Location: /silentbidbuddy/items.php');
+    header('Location: items.php');
     exit;
 }
 
@@ -24,8 +24,8 @@ $page_title = APP_NAME . ' - Bid Now';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="/silentbidbuddy/css/main.css">
-    <link rel="stylesheet" href="/silentbidbuddy/css/mobile.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="auth-page">
     <div class="container">
@@ -111,7 +111,7 @@ $page_title = APP_NAME . ' - Bid Now';
         </div>
     </div>
 
-    <script src="/silentbidbuddy/js/app.js"></script>
+    <script src="js/app.js"></script>
     <script>
         // Initialize auth flow
         document.addEventListener('DOMContentLoaded', function() {

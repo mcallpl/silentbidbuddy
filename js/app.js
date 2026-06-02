@@ -114,7 +114,7 @@ SBB.Auth = {
         sendCodeBtn.querySelector('.btn-spinner').style.display = 'inline';
 
         try {
-            const response = await SBB.API.post('/silentbidbuddy/api/auth/send-code.php', { phone });
+            const response = await SBB.API.post('/api/auth/send-code.php', { phone });
 
             if (response.status === 'ok') {
                 this.currentPhone = phone;
@@ -154,7 +154,7 @@ SBB.Auth = {
         verifyCodeBtn.querySelector('.btn-spinner').style.display = 'inline';
 
         try {
-            const response = await SBB.API.post('/silentbidbuddy/api/auth/verify-code.php', {
+            const response = await SBB.API.post('/api/auth/verify-code.php', {
                 phone: this.currentPhone,
                 full_name: this.currentName,
                 code: code
@@ -176,7 +176,7 @@ SBB.Auth = {
                     if (returnUrl) {
                         window.location.href = decodeURIComponent(returnUrl);
                     } else {
-                        window.location.href = '/silentbidbuddy/item.php?id=1';
+                        window.location.href = 'item.php?id=1';
                     }
                 }, 2000);
             } else {
@@ -230,7 +230,7 @@ SBB.Session = {
     logout() {
         localStorage.removeItem('session_token');
         localStorage.removeItem('user_id');
-        window.location.href = '/silentbidbuddy/index.php';
+        window.location.href = 'index.php';
     }
 };
 
