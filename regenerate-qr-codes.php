@@ -9,10 +9,23 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/rebrandly-utils.php';
 
+// Override APP_DOMAIN for CLI execution
+// When running via CLI, detect domain from environment or use production
+if (php_sapi_name() === 'cli') {
+    // Check if we're on production server
+    if (file_exists('/var/www/html/silentbidbuddy/config.php')) {
+        // We're on production server
+        if (!defined('APP_DOMAIN_OVERRIDE')) define('APP_DOMAIN_OVERRIDE', 'https://silentbidbuddy.peoplestar.com');
+    }
+}
+
 echo "================================\n";
 echo "REGENERATING QR CODES\n";
 echo "================================\n";
 echo "\n";
+
+// Use override domain if set, otherwise use APP_DOMAIN
+$domain = defined('APP_DOMAIN_OVERRIDE') ? APP_DOMAIN_OVERRIDE : APP_DOMAIN;
 
 // Get all items
 $items = dbGetAll(
@@ -25,7 +38,7 @@ if (empty($items)) {
 }
 
 echo "Found " . count($items) . " items\n";
-echo "Current APP_DOMAIN: " . APP_DOMAIN . "\n";
+echo "Using domain: " . $domain . "\n";
 echo "\n";
 
 $updated = 0;
@@ -40,7 +53,7 @@ foreach ($items as $item) {
 
     try {
         // Generate new QR code URL with correct domain
-        $qr_target_url = APP_DOMAIN . '/item-qr.php?id=' . $item_id;
+        $qr_target_url = $domain . '/item-qr.php?id=' . $item_id;
 
         // Create short URL
         $short_url = RebrandlyUtils::createShortUrl($qr_target_url, 'Item ' . $item_number . ': ' . $title);
@@ -79,7 +92,7 @@ echo "\n";
 
 if ($failed === 0) {
     echo "✅ All QR codes regenerated with correct production URL!\n";
-    echo "QR codes now point to: " . APP_DOMAIN . "\n";
+    echo "QR codes now point to: " . $domain . "\n";
 } else {
     echo "⚠️  Some QR codes failed. Check Rebrandly API key.\n";
 }
