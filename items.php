@@ -110,7 +110,7 @@ $page_title = 'All Items - ' . APP_NAME;
                                 </div>
 
                                 <!-- Action Button -->
-                                <a href="item.php?id=<?php echo (int)$item['item_number']; ?>"
+                                <a href="item.php?id=<?php echo (int)$item['id']; ?>"
                                    class="btn btn-primary btn-full-width">
                                     View & Bid
                                 </a>

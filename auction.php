@@ -112,8 +112,8 @@ class AuctionCLI {
                 ['Title', $title],
                 ['Starting Bid', '$' . number_format($starting_bid, 2)],
                 ['Duration', sprintf('%dh %dm %ds', $hours, $minutes, $seconds)],
-                ['Web URL', APP_DOMAIN . '/item.php?id=' . $next_item_number],
-                ['QR Code URL', APP_DOMAIN . '/item.php?id=' . $next_item_number]
+                ['Web URL', APP_DOMAIN . '/item.php?id=' . $item_id],
+                ['QR Code URL', APP_DOMAIN . '/item.php?id=' . $item_id]
             ]);
         } else {
             echo "\n✗ Error creating item.\n";
@@ -144,7 +144,7 @@ class AuctionCLI {
         $generated = 0;
         $failed = 0;
         foreach ($items as $item) {
-            $url = APP_DOMAIN . '/item.php?id=' . $item['item_number'];
+            $url = APP_DOMAIN . '/item.php?id=' . $item['id'];
             $filename = sprintf(
                 '%s/item_%03d_%s.png',
                 QR_CODES_DIR,
