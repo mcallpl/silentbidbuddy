@@ -784,6 +784,59 @@ const AdminDashboard = {
         document.getElementById('logoutBtn').addEventListener('click', () => {
             this.logout();
         });
+
+        // Close auctions button
+        document.getElementById('closeAuctionsBtn')?.addEventListener('click', () => {
+            this.closeExpiredAuctions();
+        });
+    },
+
+    async closeExpiredAuctions() {
+        const btn = document.getElementById('closeAuctionsBtn');
+        const btnText = btn.querySelector('.btn-text');
+        const btnSpinner = btn.querySelector('.btn-spinner');
+        const resultDiv = document.getElementById('closeAuctionsResult');
+
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/api/admin/close-auctions.php', {
+                method: 'POST',
+                headers: this.getAuthHeaders()
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'ok') {
+                resultDiv.textContent = '✅ ' + data.message;
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#dcfce7';
+                resultDiv.style.color = '#2d5016';
+
+                // Reload bidders/users section to show updated stats
+                setTimeout(() => {
+                    this.loadUsers(1);
+                    this.loadItems(1);
+                    this.startMetricsPolling();
+                }, 1000);
+            } else {
+                resultDiv.textContent = '❌ Error: ' + data.message;
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#fee2e2';
+                resultDiv.style.color = '#7c2d12';
+            }
+        } catch (err) {
+            resultDiv.textContent = '❌ Network error: ' + err.message;
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#fee2e2';
+            resultDiv.style.color = '#7c2d12';
+        } finally {
+            btnText.style.display = 'inline';
+            btnSpinner.style.display = 'none';
+            btn.disabled = false;
+        }
     },
 
     validatePDFRequirements() {

@@ -133,6 +133,17 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <div id="recentActivityContainer" class="data-table">
                     <p class="loading">Loading activity...</p>
                 </div>
+
+                <!-- Auction Management -->
+                <div style="margin-top: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #2563eb;">
+                    <h3>Auction Management</h3>
+                    <p style="color: #666; margin: 0.5rem 0 1rem 0;">Close expired auctions and sync bidder statistics</p>
+                    <button id="closeAuctionsBtn" class="btn btn-primary" style="background-color: #10b981;">
+                        <span class="btn-text">🏁 Close Expired Auctions</span>
+                        <span class="btn-spinner" style="display: none;">Closing...</span>
+                    </button>
+                    <div id="closeAuctionsResult" style="margin-top: 1rem; padding: 1rem; display: none; border-radius: 4px; color: #2d5016; background: #dcfce7;"></div>
+                </div>
             </section>
 
             <!-- Items Section -->
