@@ -327,12 +327,8 @@ SBB.Bidding = {
     }
 };
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.SBB.isAuctionOpen) {
-        SBB.Bidding.init();
-    }
-});
+// NOTE: init() is called from inline script in item.php after bidding.js loads
+// Do NOT initialize here to avoid duplicate event listeners
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
