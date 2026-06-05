@@ -488,10 +488,18 @@ const AdminDashboard = {
                 form.querySelector('[name="duration_seconds"]').value = seconds;
             }
 
-            // Display winner name if exists
+            // Display winner name - handle both open and closed items
             const winnerField = form.querySelector('[name="winner_name"]');
             if (winnerField) {
-                winnerField.value = item.winner_name || '(No winner yet)';
+                if (item.is_closed === 0) {
+                    winnerField.value = '(Auction still active)';
+                } else if (item.current_high_bid > 0 && item.winner_name) {
+                    winnerField.value = item.winner_name;
+                } else if (item.current_high_bid === 0) {
+                    winnerField.value = '(No bids received)';
+                } else {
+                    winnerField.value = '(No winner)';
+                }
             }
 
             // Show image if exists
