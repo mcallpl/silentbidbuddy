@@ -187,11 +187,11 @@ const AdminDashboard = {
                             <tr>
                                 <td>#${bid.id}</td>
                                 <td>
-                                    <strong>${this.escape(bid.item_title)}</strong>
+                                    <strong>${this.escapeHtml(bid.item_title)}</strong>
                                     <br><small style="color: #999;">#${bid.item_number}</small>
                                 </td>
                                 <td>
-                                    <strong>${this.escape(bid.full_name)}</strong>
+                                    <strong>${this.escapeHtml(bid.full_name)}</strong>
                                     <br><small style="color: #999;">${bid.phone_display}</small>
                                 </td>
                                 <td style="text-align: right; font-weight: bold;">$${bid.bid_amount.toFixed(2)}</td>
