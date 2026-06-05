@@ -148,9 +148,10 @@ function getLiveMetrics() {
          WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)"
     );
 
+    // Total raised from CLOSED items only
     $total_raised = dbGetValue(
         "SELECT SUM(current_high_bid) FROM items
-         WHERE current_high_bid > 0"
+         WHERE is_closed = 1 AND current_high_bid > 0"
     );
 
     $recent_bids = dbGetAll(
@@ -163,12 +164,12 @@ function getLiveMetrics() {
          LIMIT 10"
     );
 
+    // High traffic items - show all items ranked by bid count
     $high_traffic_items = dbGetAll(
-        "SELECT i.id, i.title, i.image_url, COUNT(b.id) as bid_count, i.current_high_bid
+        "SELECT i.id, i.title, i.image_url, COUNT(b.id) as bid_count, i.current_high_bid, i.is_closed
          FROM items i
          LEFT JOIN bids b ON b.item_id = i.id
-         WHERE i.is_closed = 0
-         GROUP BY i.id
+         GROUP BY i.id, i.title, i.image_url, i.current_high_bid, i.is_closed
          ORDER BY bid_count DESC
          LIMIT 5"
     );
@@ -192,7 +193,8 @@ function getAuctionSummary() {
     $closed_items = dbGetValue("SELECT COUNT(*) FROM items WHERE is_closed = 1");
     $total_bidders = dbGetValue("SELECT COUNT(DISTINCT user_id) FROM bids");
     $total_bids = dbGetValue("SELECT COUNT(*) FROM bids");
-    $total_raised = dbGetValue("SELECT SUM(current_high_bid) FROM items WHERE current_high_bid > 0");
+    // Total raised from CLOSED items only
+    $total_raised = dbGetValue("SELECT SUM(current_high_bid) FROM items WHERE is_closed = 1 AND current_high_bid > 0");
     $pending_payments = dbGetValue("SELECT COUNT(*) FROM transactions WHERE status = 'pending'");
     $completed_payments = dbGetValue("SELECT SUM(amount) FROM transactions WHERE status = 'paid'");
 

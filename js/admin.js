@@ -145,10 +145,77 @@ const AdminDashboard = {
     async loadBids(page = 1) {
         const container = document.getElementById('bidsContainer');
         try {
-            // Placeholder for bids loading
-            container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Bids list coming soon</p>';
+            container.innerHTML = '<p class="loading">Loading bids...</p>';
+
+            const response = await fetch(this.config.apiBaseUrl + '/get-bids.php?page=' + page + '&limit=50', {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load bids');
+            }
+
+            const data = await response.json();
+
+            if (data.status !== 'ok' || !Array.isArray(data.bids)) {
+                throw new Error('Invalid bids response');
+            }
+
+            const bids = data.bids;
+
+            if (bids.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No bids yet</p>';
+                return;
+            }
+
+            // Build bids table
+            const html = `
+                <table class="data-table-inner">
+                    <thead>
+                        <tr>
+                            <th>Bid ID</th>
+                            <th>Item</th>
+                            <th>Bidder</th>
+                            <th>Bid Amount</th>
+                            <th>Current High</th>
+                            <th>Status</th>
+                            <th>Date/Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bids.map(bid => `
+                            <tr>
+                                <td>#${bid.id}</td>
+                                <td>
+                                    <strong>${this.escape(bid.item_title)}</strong>
+                                    <br><small style="color: #999;">#${bid.item_number}</small>
+                                </td>
+                                <td>
+                                    <strong>${this.escape(bid.full_name)}</strong>
+                                    <br><small style="color: #999;">${bid.phone_display}</small>
+                                </td>
+                                <td style="text-align: right; font-weight: bold;">$${bid.bid_amount.toFixed(2)}</td>
+                                <td style="text-align: right;">$${bid.current_high_bid.toFixed(2)}</td>
+                                <td>
+                                    <span class="badge ${bid.is_closed ? 'badge-closed' : 'badge-open'}">
+                                        ${bid.is_closed ? 'Closed' : 'Open'}
+                                    </span>
+                                </td>
+                                <td style="font-size: 0.9rem; color: #666;">${new Date(bid.created_at).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+
+            // Render pagination
+            this.renderPagination('bidsPagination', data.pagination, page, () => this.loadBids);
+
         } catch (error) {
             container.innerHTML = `<p class="error">Error loading bids: ${error.message}</p>`;
+            console.error('Error loading bids:', error);
         }
     },
 

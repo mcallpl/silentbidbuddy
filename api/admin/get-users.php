@@ -47,13 +47,12 @@ if (!empty($search)) {
 }
 
 // Get users with aggregated data
+// First get base user data with bid counts
 $query = "SELECT
             u.id,
             u.full_name,
             CONCAT(SUBSTR(u.phone_number, 1, 6), '...', SUBSTR(u.phone_number, -4)) as phone_display,
             COUNT(DISTINCT b.id) as bid_count,
-            SUM(CASE WHEN b.item_id IN (SELECT id FROM items WHERE is_closed = 1 AND current_high_bidder_id = u.id) THEN 1 ELSE 0 END) as items_won,
-            SUM(CASE WHEN b.item_id IN (SELECT id FROM items WHERE is_closed = 1 AND current_high_bidder_id = u.id) THEN (SELECT current_high_bid FROM items WHERE id = b.item_id) ELSE 0 END) as total_spent,
             MAX(b.created_at) as last_bid_at
          FROM users u
          LEFT JOIN bids b ON u.id = b.user_id
@@ -67,11 +66,20 @@ $params[] = $offset;
 
 $users = dbGetAll($query, $params);
 
-// Format response
+// For each user, get items won and total spent
 foreach ($users as &$user) {
+    $user_wins = dbGetRow(
+        "SELECT
+            COUNT(DISTINCT i.id) as items_won,
+            SUM(i.current_high_bid) as total_spent
+         FROM items i
+         WHERE i.is_closed = 1 AND i.current_high_bidder_id = ?",
+        [(int)$user['id']]
+    );
+
+    $user['items_won'] = (int)($user_wins['items_won'] ?? 0);
+    $user['total_spent'] = (float)($user_wins['total_spent'] ?? 0);
     $user['bid_count'] = (int)($user['bid_count'] ?? 0);
-    $user['items_won'] = (int)($user['items_won'] ?? 0);
-    $user['total_spent'] = (float)($user['total_spent'] ?? 0);
 }
 
 http_response_code(200);
