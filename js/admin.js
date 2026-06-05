@@ -145,9 +145,23 @@ const AdminDashboard = {
     async loadBids(page = 1) {
         const container = document.getElementById('bidsContainer');
         try {
+            // Get filter and sort state from UI or use defaults
+            const filterType = document.getElementById('bidsFilterDropdown')?.value || 'all';
+            const itemFilter = document.getElementById('bidsItemFilter')?.dataset.itemId || 0;
+            const sortBy = document.getElementById('bidsSortBy')?.dataset.sortBy || 'b.created_at';
+            const sortOrder = document.getElementById('bidsSortBy')?.dataset.sortOrder || 'DESC';
+
             container.innerHTML = '<p class="loading">Loading bids...</p>';
 
-            const response = await fetch(this.config.apiBaseUrl + '/get-bids.php?page=' + page + '&limit=50', {
+            let url = this.config.apiBaseUrl + '/get-bids.php?page=' + page + '&limit=50';
+            url += '&filter=' + encodeURIComponent(filterType);
+            url += '&sort_by=' + encodeURIComponent(sortBy);
+            url += '&sort_order=' + encodeURIComponent(sortOrder);
+            if (itemFilter > 0) {
+                url += '&item_id=' + itemFilter;
+            }
+
+            const response = await fetch(url, {
                 headers: this.getAuthHeaders()
             });
 
@@ -163,31 +177,65 @@ const AdminDashboard = {
 
             const bids = data.bids;
 
+            // Build filter controls HTML
+            let filterHtml = `
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+                    <select id="bidsFilterDropdown" class="form-input" style="width: auto;">
+                        <option value="all" ${filterType === 'all' ? 'selected' : ''}>All Bids</option>
+                        <option value="active" ${filterType === 'active' ? 'selected' : ''}>Active Bids</option>
+                        <option value="winning" ${filterType === 'winning' ? 'selected' : ''}>Winning Bids</option>
+                    </select>
+            `;
+
+            if (itemFilter > 0) {
+                filterHtml += `
+                    <div style="padding: 0.5rem 1rem; background: #e8f4f8; border-radius: 4px; font-size: 0.9rem;">
+                        <strong>Filtered to item:</strong> ${this.escapeHtml(bids[0]?.item_title || 'Unknown')}
+                        <button id="clearItemFilter" style="margin-left: 1rem; padding: 0.25rem 0.75rem; background: #667eea; color: white; border: none; border-radius: 3px; cursor: pointer;">Show All Items</button>
+                    </div>
+                `;
+            }
+
+            filterHtml += `</div>`;
+
             if (bids.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No bids yet</p>';
+                container.innerHTML = filterHtml + '<p style="color: #999; text-align: center; padding: 2rem;">No bids match the current filters</p>';
+                this.setupBidsFilters(data);
                 return;
             }
 
-            // Build bids table
-            const html = `
-                <table class="data-table-inner">
+            // Build bids table with sortable headers
+            const sortToggle = (column) => {
+                const newOrder = (sortBy === column && sortOrder === 'DESC') ? 'ASC' : 'DESC';
+                return `data-sort-by="${column}" data-sort-order="${newOrder}" style="cursor: pointer; user-select: none;"`;
+            };
+
+            const getSortIndicator = (column) => {
+                if (sortBy !== column) return '';
+                return sortOrder === 'ASC' ? ' ↑' : ' ↓';
+            };
+
+            let html = filterHtml + `
+                <table class="data-table-inner" style="width: 100%;">
                     <thead>
                         <tr>
-                            <th>Bid ID</th>
-                            <th>Item</th>
-                            <th>Bidder</th>
-                            <th>Bid Amount</th>
-                            <th>Current High</th>
+                            <th ${sortToggle('b.id')}>Bid ID${getSortIndicator('b.id')}</th>
+                            <th ${sortToggle('i.title')}>Item${getSortIndicator('i.title')}</th>
+                            <th ${sortToggle('u.full_name')}>Bidder${getSortIndicator('u.full_name')}</th>
+                            <th ${sortToggle('b.bid_amount')}>Bid Amount${getSortIndicator('b.bid_amount')}</th>
+                            <th ${sortToggle('i.current_high_bid')}>Current High${getSortIndicator('i.current_high_bid')}</th>
                             <th>Status</th>
-                            <th>Date/Time</th>
+                            <th ${sortToggle('b.created_at')}>Date/Time${getSortIndicator('b.created_at')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${bids.map(bid => `
-                            <tr>
+                            <tr style="${bid.is_winning_bid ? 'background-color: #fffacd; border-left: 4px solid #ffd700;' : ''}">
                                 <td>#${bid.id}</td>
                                 <td>
-                                    <strong>${this.escapeHtml(bid.item_title)}</strong>
+                                    <strong style="cursor: pointer; color: #667eea;" class="filter-by-item" data-item-id="${bid.item_id}">
+                                        ${this.escapeHtml(bid.item_title)}
+                                    </strong>
                                     <br><small style="color: #999;">#${bid.item_number}</small>
                                 </td>
                                 <td>
@@ -200,6 +248,7 @@ const AdminDashboard = {
                                     <span class="badge ${bid.is_closed ? 'badge-closed' : 'badge-open'}">
                                         ${bid.is_closed ? 'Closed' : 'Open'}
                                     </span>
+                                    ${bid.is_winning_bid ? '<span class="badge" style="background-color: #ffd700; color: #333; margin-left: 0.5rem;">✓ Winning</span>' : ''}
                                 </td>
                                 <td style="font-size: 0.9rem; color: #666;">${new Date(bid.created_at).toLocaleString()}</td>
                             </tr>
@@ -210,13 +259,67 @@ const AdminDashboard = {
 
             container.innerHTML = html;
 
-            // Render pagination
-            this.renderPagination('bidsPagination', data.pagination, page, () => this.loadBids);
+            // Setup event listeners
+            this.setupBidsFilters(data);
 
         } catch (error) {
             container.innerHTML = `<p class="error">Error loading bids: ${error.message}</p>`;
             console.error('Error loading bids:', error);
         }
+    },
+
+    setupBidsFilters(data) {
+        // Filter dropdown change
+        const filterDropdown = document.getElementById('bidsFilterDropdown');
+        if (filterDropdown) {
+            filterDropdown.addEventListener('change', () => this.loadBids(1));
+        }
+
+        // Clear item filter
+        const clearBtn = document.getElementById('clearItemFilter');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                const filterDiv = document.getElementById('bidsItemFilter');
+                if (filterDiv) filterDiv.dataset.itemId = 0;
+                this.loadBids(1);
+            });
+        }
+
+        // Clickable item names to filter
+        document.querySelectorAll('.filter-by-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const itemId = e.target.dataset.itemId;
+                const filterDiv = document.getElementById('bidsContainer');
+                if (!filterDiv.querySelector('#bidsItemFilter')) {
+                    const div = document.createElement('div');
+                    div.id = 'bidsItemFilter';
+                    filterDiv.insertBefore(div, filterDiv.firstChild);
+                }
+                document.getElementById('bidsItemFilter').dataset.itemId = itemId;
+                this.loadBids(1);
+            });
+        });
+
+        // Sortable column headers
+        document.querySelectorAll('th[data-sort-by]').forEach(th => {
+            th.addEventListener('click', () => {
+                const sortBy = th.dataset.sortBy;
+                const sortOrder = th.dataset.sortOrder || 'DESC';
+                const sortDiv = document.getElementById('bidsSortBy');
+                if (!sortDiv) {
+                    const div = document.createElement('div');
+                    div.id = 'bidsSortBy';
+                    div.style.display = 'none';
+                    document.getElementById('bidsContainer').appendChild(div);
+                }
+                document.getElementById('bidsSortBy').dataset.sortBy = sortBy;
+                document.getElementById('bidsSortBy').dataset.sortOrder = sortOrder;
+                this.loadBids(1);
+            });
+        });
+
+        // Pagination
+        this.renderPagination('bidsPagination', data.pagination, data.pagination.page, (p) => this.loadBids(p));
     },
 
     // ============================================================
