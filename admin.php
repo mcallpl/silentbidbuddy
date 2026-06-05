@@ -369,6 +369,11 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                         <input type="number" name="duration_seconds" class="form-input" min="0" max="59" value="0" style="width: 80px;" />
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Winner</label>
+                    <input type="text" name="winner_name" class="form-input" readonly style="background-color: #f5f5f5; cursor: not-allowed;" />
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Shows the name of the bidder who won the auction (if closed)</p>
+                </div>
                 <div id="itemFormError" class="error-message" style="display: none;"></div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save Item</button>

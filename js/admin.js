@@ -421,6 +421,12 @@ const AdminDashboard = {
                 form.querySelector('[name="duration_seconds"]').value = seconds;
             }
 
+            // Display winner name if exists
+            const winnerField = form.querySelector('[name="winner_name"]');
+            if (winnerField) {
+                winnerField.value = item.winner_name || '(No winner yet)';
+            }
+
             // Show image if exists
             if (item.image_url) {
                 document.getElementById('imageUrlInput').value = item.image_url;

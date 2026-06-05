@@ -78,7 +78,9 @@ function handleGetItem() {
     }
 
     $item = dbGetRow(
-        "SELECT * FROM items WHERE id = ?",
+        "SELECT i.*, u.full_name as winner_name FROM items i
+         LEFT JOIN users u ON i.current_high_bidder_id = u.id
+         WHERE i.id = ?",
         [$item_id]
     );
 
