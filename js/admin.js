@@ -670,13 +670,21 @@ const AdminDashboard = {
             console.log('[EDIT ITEM] ✓ Form populated successfully');
 
             // Display QR code if exists
-            if (item.qr_code_url) {
+            if (item.short_url) {
                 document.getElementById('itemQRDisplay').style.display = 'block';
-                document.getElementById('modalQRCode').src = item.qr_code_url;
-                if (item.short_url) {
-                    document.getElementById('modalQRLink').href = item.short_url;
-                    document.getElementById('modalQRLink').textContent = item.short_url;
-                }
+
+                // Generate QR code from short URL using reliable service
+                const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent('https://' + item.short_url);
+                const qrImage = document.getElementById('modalQRCode');
+                qrImage.src = qrUrl;
+                qrImage.onerror = () => {
+                    // Fallback to another service if primary fails
+                    qrImage.src = 'https://quickchart.io/qr?text=' + encodeURIComponent('https://' + item.short_url) + '&size=150';
+                };
+
+                document.getElementById('modalQRLink').href = 'https://' + item.short_url;
+                document.getElementById('modalQRLink').textContent = item.short_url;
+
                 // Generate document link
                 const docPath = 'documents/item-' + item.id + '.html';
                 document.getElementById('modalDocumentLink').href = docPath;
