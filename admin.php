@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/admin-auth.php';
+require_once __DIR__ . '/includes/page-meta.php';
 
 $is_logged_in = isAdminLoggedIn();
 $page_title = APP_NAME . ' — Admin Dashboard';
@@ -13,11 +14,11 @@ $page_title = APP_NAME . ' — Admin Dashboard';
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
+    <?php renderPageMeta([
+        'title' => $page_title,
+        'description' => 'Silent Bid Buddy administrator dashboard.',
+        'stylesheets' => ['css/main.css', 'css/admin.css']
+    ]); ?>
 </head>
 <body class="admin-page">
     <!-- Login Screen (shown if not logged in) -->

@@ -82,11 +82,10 @@ $page_title = $event_name . ' - ' . APP_NAME;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <?php renderPageMeta([
+        'title' => $page_title,
+        'description' => 'Browse auction items, place secure bids, and support a meaningful fundraising event with Silent Bid Buddy.'
+    ]); ?>
 </head>
 <body class="items-list-page">
     <?php renderPublicHeader(['user' => $user]); ?>

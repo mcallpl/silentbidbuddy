@@ -84,6 +84,7 @@ if (!defined('APP_DOMAIN')) {
     }
 }
 if (!defined('APP_NAME')) define('APP_NAME', 'Silent Bid Buddy');
+if (!defined('PUBLIC_SITE_URL')) define('PUBLIC_SITE_URL', getenv('PUBLIC_SITE_URL') ?: 'https://silentbidbuddy.com');
 
 // ============================================================
 // COOKIE CONFIGURATION (for session persistence)
@@ -170,4 +171,3 @@ session_set_cookie_params([
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-

@@ -197,11 +197,10 @@ $page_title = 'My Bids - ' . APP_NAME;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <?php renderPageMeta([
+        'title' => $page_title,
+        'description' => 'Track your Silent Bid Buddy bids, watched items, winning status, and checkout steps.'
+    ]); ?>
 </head>
 <body class="items-list-page my-bids-page">
     <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>

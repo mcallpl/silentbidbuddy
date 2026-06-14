@@ -75,11 +75,11 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <?php renderPageMeta([
+        'title' => htmlspecialchars_decode($page_title),
+        'description' => 'Bid on ' . $item['title'] . ' and support this fundraising auction through Silent Bid Buddy.',
+        'type' => 'product'
+    ]); ?>
 </head>
 <body class="item-page">
     <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>

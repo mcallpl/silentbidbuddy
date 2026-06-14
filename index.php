@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/page-meta.php';
 
 // PERSISTENT SESSION: Users should NOT need to re-verify every visit
 // Session persists for 30 days via HTTP-only secure cookie
@@ -21,11 +22,10 @@ $page_title = APP_NAME . ' - Bid Now';
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title); ?></title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <?php renderPageMeta([
+        'title' => $page_title,
+        'description' => 'Sign in to Silent Bid Buddy and start bidding in a polished, secure nonprofit auction experience.'
+    ]); ?>
 </head>
 <body class="auth-page">
     <div class="container">

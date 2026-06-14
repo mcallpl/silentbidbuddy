@@ -41,11 +41,10 @@ $page_title = 'Payment Successful - ' . APP_NAME;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <?php renderPageMeta([
+        'title' => $page_title,
+        'description' => 'Thank you for supporting this fundraising auction through Silent Bid Buddy.'
+    ]); ?>
 </head>
 <body class="success-page">
     <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>

@@ -1,0 +1,23 @@
+{
+  "name": "Silent Bid Buddy",
+  "short_name": "Bid Buddy",
+  "description": "A polished silent auction experience for generous bidders, trusted nonprofits, and joyful fundraising events.",
+  "start_url": "/items.php",
+  "display": "standalone",
+  "background_color": "#fffdf8",
+  "theme_color": "#172235",
+  "icons": [
+    {
+      "src": "images/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

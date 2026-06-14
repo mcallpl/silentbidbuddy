@@ -4,6 +4,8 @@
 // Shared bidder-facing header and menu.
 // ============================================================
 
+require_once __DIR__ . '/page-meta.php';
+
 function renderPublicHeader($options = []) {
     $title = $options['title'] ?? APP_NAME;
     $back_href = $options['back_href'] ?? null;
@@ -72,11 +74,10 @@ function renderPublicMessagePage($options = []) {
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title><?php echo htmlspecialchars($title . ' - ' . APP_NAME); ?></title>
-        <link rel="stylesheet" href="css/main.css">
-        <link rel="stylesheet" href="css/mobile.css">
+        <?php renderPageMeta([
+            'title' => $title . ' - ' . APP_NAME,
+            'description' => $message
+        ]); ?>
     </head>
     <body class="items-list-page message-page">
         <?php renderPublicHeader(['user' => $user]); ?>
