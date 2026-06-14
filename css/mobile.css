@@ -63,6 +63,10 @@
         font-size: var(--font-size-base);
     }
 
+    .how-steps {
+        grid-template-columns: 1fr;
+    }
+
     .item-image {
         max-height: 250px;
         object-fit: cover;

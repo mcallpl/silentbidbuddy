@@ -7,6 +7,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
+require_once __DIR__ . '/includes/public-nav.php';
 
 // Require authentication
 $user = getCurrentUser();
@@ -45,9 +46,7 @@ $page_title = 'Checkout - ' . APP_NAME;
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body class="checkout-page">
-    <header class="app-header">
-        <h1><?php echo APP_NAME; ?> — Payment</h1>
-    </header>
+    <?php renderPublicHeader(['title' => APP_NAME . ' - Payment', 'back_href' => 'item.php?id=' . (int)$item['id'], 'back_label' => '← Item', 'user' => $user]); ?>
 
     <div class="container checkout-container">
         <section class="checkout-summary">

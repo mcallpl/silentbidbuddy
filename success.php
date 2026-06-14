@@ -7,6 +7,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
+require_once __DIR__ . '/includes/public-nav.php';
 
 // Get session ID from query param
 $session_id = $_GET['session_id'] ?? '';
@@ -26,6 +27,7 @@ if (!$transaction) {
 }
 
 $page_title = 'Payment Successful - ' . APP_NAME;
+$user = getCurrentUser();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,9 +39,7 @@ $page_title = 'Payment Successful - ' . APP_NAME;
     <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="success-page">
-    <header class="app-header">
-        <h1><?php echo APP_NAME; ?></h1>
-    </header>
+    <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>
 
     <div class="container success-container">
         <section class="success-message">
@@ -67,8 +67,8 @@ $page_title = 'Payment Successful - ' . APP_NAME;
             </div>
 
             <div class="action-buttons">
-                <a href="index.php" class="btn btn-primary btn-large">Back to Auction</a>
-                <a href="#" class="btn btn-secondary">Download Receipt</a>
+                <a href="items.php" class="btn btn-primary btn-large">Back to Auction</a>
+                <a href="my-bids.php" class="btn btn-secondary">View My Bids</a>
             </div>
         </section>
     </div>

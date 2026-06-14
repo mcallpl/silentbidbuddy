@@ -764,7 +764,7 @@ const AdminDashboard = {
             return;
         }
 
-        let html = '<table class="admin-table"><thead><tr><th>Item</th><th>Winner</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="admin-table"><thead><tr><th>Item</th><th>Winner</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>';
 
         transactions.forEach(t => {
             const statusBadge = `<span class="badge badge-${t.status === 'paid' ? 'success' : t.status === 'pending' ? 'warning' : 'danger'}">${t.status}</span>`;
@@ -776,9 +776,6 @@ const AdminDashboard = {
                 <td>$${this.formatCurrency(t.amount)}</td>
                 <td>${statusBadge}</td>
                 <td>${date}</td>
-                <td>
-                    <button class="btn btn-small btn-secondary" onclick="AdminDashboard.showToast('Resend SMS not yet implemented', 'info')">Resend SMS</button>
-                </td>
             </tr>`;
         });
 
@@ -1543,16 +1540,8 @@ const AdminDashboard = {
         });
 
         // Create buttons
-        const createAdminBtn = document.getElementById('createAdminBtn');
-        const createUserBtn = document.getElementById('createUserBtn');
         const createItemManageBtn = document.getElementById('createItemManageBtn');
 
-        if (createAdminBtn) {
-            createAdminBtn.addEventListener('click', () => this.showCreateAdminForm());
-        }
-        if (createUserBtn) {
-            createUserBtn.addEventListener('click', () => this.showCreateUserForm());
-        }
         if (createItemManageBtn) {
             createItemManageBtn.addEventListener('click', () => this.showCreateItemForm());
         }
@@ -1593,7 +1582,6 @@ const AdminDashboard = {
                         <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Role</th>
                         <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Status</th>
                         <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Last Login</th>
-                        <th style="text-align: center; padding: 1rem; font-weight: 600; color: #333;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>`;
@@ -1617,7 +1605,6 @@ const AdminDashboard = {
                 html += `<td style="padding: 1rem; text-align: center;">${role}</td>`;
                 html += `<td style="padding: 1rem; text-align: center;">${status}</td>`;
                 html += `<td style="padding: 1rem; text-align: center; font-size: 0.9rem;">${lastLogin}</td>`;
-                html += `<td style="padding: 1rem; text-align: center;"><button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="AdminDashboard.editAdmin(${admin.id})">Edit</button></td>`;
                 html += `</tr>`;
             });
 
@@ -1672,7 +1659,7 @@ const AdminDashboard = {
                 html += `<td style="padding: 1rem; font-family: monospace; font-size: 0.9rem;">${this.escapeHtml(user.phone_number)}</td>`;
                 html += `<td style="padding: 1rem; font-size: 0.85rem; color: #666;">${this.escapeHtml(user.stripe_customer_id || '-')}</td>`;
                 html += `<td style="padding: 1rem; font-size: 0.9rem;">${joined}</td>`;
-                html += `<td style="padding: 1rem; text-align: center;"><button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="AdminDashboard.editUser(${user.id})">Edit</button></td>`;
+                html += `<td style="padding: 1rem; text-align: center;"><button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="AdminDashboard.viewUserDetails(${user.id})">View</button></td>`;
                 html += `</tr>`;
             });
 
@@ -1757,24 +1744,20 @@ const AdminDashboard = {
         }
     },
 
-    showCreateAdminForm() {
-        alert('Admin creation form coming soon. Use /api/admin/crud-admins.php?action=create');
-    },
-
-    showCreateUserForm() {
-        alert('User creation form coming soon. Use /api/admin/crud-users.php?action=create');
-    },
-
     showCreateItemForm() {
-        alert('Item creation form coming soon. Use existing item creation modal');
-    },
-
-    editAdmin(adminId) {
-        alert('Edit admin form coming soon. Use /api/admin/crud-admins.php?action=get&admin_id=' + adminId);
+        document.getElementById('itemModalTitle').textContent = 'Create New Item';
+        document.getElementById('itemForm').reset();
+        document.getElementById('itemForm').dataset.itemId = '';
+        document.getElementById('itemFormError').style.display = 'none';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('uploadPlaceholder').style.display = 'block';
+        document.getElementById('createPDFBtn').style.display = 'none';
+        document.getElementById('itemModal').style.display = 'block';
+        this.setupImageUpload();
     },
 
     editUser(userId) {
-        alert('Edit user form coming soon. Use /api/admin/crud-users.php?action=get&user_id=' + userId);
+        this.viewUserDetails(userId);
     },
 
     editItemInPanel(itemId) {

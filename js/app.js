@@ -260,7 +260,80 @@ SBB.Session = {
     logout() {
         localStorage.removeItem('session_token');
         localStorage.removeItem('user_id');
+        localStorage.removeItem('user_name');
+        localStorage.removeItem('user_email');
         window.location.href = 'index.php';
+    }
+};
+
+// ============================================================
+// Public UI
+// ============================================================
+SBB.UI = {
+    init() {
+        this.setupPublicMenu();
+    },
+
+    setupPublicMenu() {
+        const toggle = document.querySelector('.js-public-menu-toggle');
+        const menu = document.getElementById('publicMenu');
+        const overlay = document.getElementById('publicMenuOverlay');
+        const close = document.querySelector('.js-public-menu-close');
+        const logout = document.querySelector('.js-public-logout');
+
+        if (!toggle || !menu || !overlay) return;
+
+        const openMenu = () => {
+            menu.hidden = false;
+            overlay.hidden = false;
+            document.body.classList.add('public-menu-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            close?.focus();
+        };
+
+        const closeMenu = () => {
+            menu.hidden = true;
+            overlay.hidden = true;
+            document.body.classList.remove('public-menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+
+        toggle.addEventListener('click', openMenu);
+        close?.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !menu.hidden) closeMenu();
+        });
+
+        logout?.addEventListener('click', async () => {
+            logout.disabled = true;
+            try {
+                await SBB.API.post('/api/auth/logout.php');
+            } catch (err) {
+                // Local cleanup still signs the user out if the network call fails.
+            } finally {
+                SBB.Session.logout();
+            }
+        });
+    },
+
+    showNotice(message, type = 'info') {
+        let notice = document.getElementById('sbbNotice');
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.id = 'sbbNotice';
+            notice.className = 'sbb-notice';
+            notice.setAttribute('role', 'status');
+            document.body.appendChild(notice);
+        }
+
+        notice.textContent = message;
+        notice.className = `sbb-notice ${type === 'error' ? 'is-error' : 'is-info'} is-visible`;
+
+        window.clearTimeout(notice.dismissTimer);
+        notice.dismissTimer = window.setTimeout(() => {
+            notice.classList.remove('is-visible');
+        }, 3500);
     }
 };
 
@@ -284,6 +357,12 @@ SBB.Utils = {
         return div.innerHTML;
     }
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.SBB && window.SBB.UI) {
+        window.SBB.UI.init();
+    }
+});
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {

@@ -9,6 +9,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/events.php';
 require_once __DIR__ . '/includes/favorites.php';
+require_once __DIR__ . '/includes/public-nav.php';
 
 // Check authentication
 $user = getCurrentUser();
@@ -87,10 +88,7 @@ $page_title = $event_name . ' - ' . APP_NAME;
     <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="items-list-page">
-    <header class="app-header">
-        <h1><?php echo APP_NAME; ?></h1>
-        <button class="btn-menu">≡</button>
-    </header>
+    <?php renderPublicHeader(['user' => $user]); ?>
 
     <div class="container items-container">
         <!-- Event Header -->
@@ -256,6 +254,24 @@ $page_title = $event_name . ' - ' . APP_NAME;
         <section class="navigation-section">
             <a href="index.php" class="btn btn-secondary">← Back</a>
         </section>
+
+        <section id="how-bidding-works" class="how-bidding-works" aria-labelledby="howBiddingWorksTitle">
+            <h2 id="howBiddingWorksTitle">How Bidding Works</h2>
+            <div class="how-steps">
+                <div>
+                    <strong>1</strong>
+                    <span>Sign in once with your phone number.</span>
+                </div>
+                <div>
+                    <strong>2</strong>
+                    <span>Bid the next amount or enter the maximum you are willing to pay.</span>
+                </div>
+                <div>
+                    <strong>3</strong>
+                    <span>Watch your items from My Bids and pay if you win.</span>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="js/app.js"></script>
@@ -278,10 +294,10 @@ $page_title = $event_name . ' - ' . APP_NAME;
                         button.setAttribute('aria-pressed', response.is_favorited ? 'true' : 'false');
                         button.textContent = response.is_favorited ? 'Watching' : 'Watch';
                     } else {
-                        alert(response.message || 'Could not update watchlist');
+                        SBB.UI.showNotice(response.message || 'Could not update watchlist', 'error');
                     }
                 } catch (err) {
-                    alert('Network error. Please try again.');
+                    SBB.UI.showNotice('Network error. Please try again.', 'error');
                 } finally {
                     button.disabled = false;
                 }

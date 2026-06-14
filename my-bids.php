@@ -9,6 +9,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/events.php';
 require_once __DIR__ . '/includes/favorites.php';
+require_once __DIR__ . '/includes/public-nav.php';
 
 $user = getCurrentUser();
 if (!$user) {
@@ -203,11 +204,7 @@ $page_title = 'My Bids - ' . APP_NAME;
     <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="items-list-page my-bids-page">
-    <header class="app-header">
-        <a class="btn-back" href="items.php">← Items</a>
-        <h1><?php echo APP_NAME; ?></h1>
-        <button class="btn-menu">≡</button>
-    </header>
+    <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>
 
     <main class="container my-bids-container">
         <section class="event-hero">
@@ -275,5 +272,6 @@ $page_title = 'My Bids - ' . APP_NAME;
             </section>
         <?php endif; ?>
     </main>
+    <script src="js/app.js"></script>
 </body>
 </html>

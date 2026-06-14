@@ -236,14 +236,12 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                     <button class="admin-control-tab active" data-target="adminAccountsTab">Admin Accounts</button>
                     <button class="admin-control-tab" data-target="usersManageTab">User Management</button>
                     <button class="admin-control-tab" data-target="itemsManageTab">Item Management</button>
-                    <button class="admin-control-tab" data-target="transactionsManageTab">Transactions</button>
                 </div>
 
                 <!-- Admin Accounts Tab -->
                 <div id="adminAccountsTab" class="admin-control-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h3>Admin Accounts</h3>
-                        <button id="createAdminBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create Admin</button>
                     </div>
                     <div id="adminsContainer" class="data-table">
                         <p class="loading">Loading admin accounts...</p>
@@ -254,7 +252,6 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <div id="usersManageTab" class="admin-control-content" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h3>User Management</h3>
-                        <button id="createUserBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create User</button>
                     </div>
                     <div id="usersManageContainer" class="data-table">
                         <p class="loading">Loading users...</p>
@@ -274,17 +271,6 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                     <div id="itemsManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
                 </div>
 
-                <!-- Transactions Tab -->
-                <div id="transactionsManageTab" class="admin-control-content" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>Transaction Management</h3>
-                        <button id="editTransactionBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">⚙️ Edit Transactions</button>
-                    </div>
-                    <div id="transactionsManageContainer" class="data-table">
-                        <p class="loading">Loading transactions...</p>
-                    </div>
-                    <div id="transactionsManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
-                </div>
             </section>
         </main>
     </div>

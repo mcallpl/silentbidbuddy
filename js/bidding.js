@@ -171,12 +171,12 @@ SBB.Bidding = {
             : null;
 
         if (!customAmount || customAmount <= 0) {
-            alert('Please enter a valid bid amount');
+            SBB.UI.showNotice('Please enter a valid bid amount', 'error');
             return;
         }
 
         if (maxAmount && maxAmount < customAmount) {
-            alert('Max bid must be greater than or equal to your bid amount');
+            SBB.UI.showNotice('Max bid must be greater than or equal to your bid amount', 'error');
             return;
         }
 
@@ -309,9 +309,8 @@ SBB.Bidding = {
     },
 
     showNotification(message, type = 'info') {
-        // Simple notification (could be enhanced with a toast library)
         console.log('[' + type.toUpperCase() + ']', message);
-        alert(message); // Basic implementation
+        SBB.UI.showNotice(message, type === 'success' ? 'info' : type);
     },
 
     destroy() {

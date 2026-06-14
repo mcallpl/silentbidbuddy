@@ -13,6 +13,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/favorites.php';
+require_once __DIR__ . '/includes/public-nav.php';
 
 // Get item ID from URL
 $item_num = $_GET['id'] ?? 0;
@@ -68,11 +69,7 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
     <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="item-page">
-    <header class="app-header">
-        <button class="btn-back" onclick="history.back()">← Back</button>
-        <h1><?php echo APP_NAME; ?></h1>
-        <button class="btn-menu">≡</button>
-    </header>
+    <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>
 
     <div class="container item-container">
         <!-- Hero Image Section -->
@@ -267,10 +264,10 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
                         button.setAttribute('aria-pressed', response.is_favorited ? 'true' : 'false');
                         button.textContent = response.is_favorited ? 'Watching' : 'Watch';
                     } else {
-                        alert(response.message || 'Could not update watchlist');
+                        SBB.UI.showNotice(response.message || 'Could not update watchlist', 'error');
                     }
                 } catch (err) {
-                    alert('Network error. Please try again.');
+                    SBB.UI.showNotice('Network error. Please try again.', 'error');
                 } finally {
                     button.disabled = false;
                 }
