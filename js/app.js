@@ -262,7 +262,7 @@ SBB.Session = {
         localStorage.removeItem('user_id');
         localStorage.removeItem('user_name');
         localStorage.removeItem('user_email');
-        window.location.href = 'index.php';
+        window.location.href = 'bid.php';
     }
 };
 

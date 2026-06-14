@@ -748,3 +748,151 @@
 .remove-image-btn:hover {
     background: #ff5252;
 }
+
+/* ============================================================
+   BRAND FINISH — Admin Console
+   ============================================================ */
+
+.admin-page {
+    background:
+        linear-gradient(180deg, rgba(255, 250, 240, 0.95), rgba(244, 247, 242, 1));
+    color: #172235;
+    font-family: "Avenir Next", "Trebuchet MS", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.login-container {
+    background:
+        linear-gradient(90deg, rgba(9, 17, 33, 0.82), rgba(9, 17, 33, 0.36)),
+        url("../images/brand/silent-bid-buddy-social-1200x630.png") center / cover no-repeat;
+}
+
+.login-box,
+.metric-card,
+.status-card,
+.data-table,
+.admin-table,
+.form-section,
+.modal-content {
+    background: rgba(255, 253, 248, 0.96);
+    border: 1px solid rgba(23, 34, 53, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 16px 34px rgba(23, 34, 53, 0.1);
+}
+
+.login-box {
+    border-top: 4px solid #d99a2b;
+}
+
+.login-box h1,
+.dashboard-title,
+.admin-section h2,
+.admin-section h3 {
+    color: #172235;
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: 0;
+}
+
+.login-box .subtitle,
+.metric-label,
+.status-label,
+.admin-table td,
+.empty-state,
+.loading {
+    color: rgba(23, 34, 53, 0.66);
+}
+
+.dashboard-container {
+    background: transparent;
+}
+
+.admin-header,
+.admin-nav {
+    background: rgba(255, 253, 248, 0.92);
+    border-color: rgba(23, 34, 53, 0.1);
+    box-shadow: 0 12px 30px rgba(23, 34, 53, 0.06);
+    backdrop-filter: blur(18px);
+}
+
+.nav-tab {
+    color: rgba(23, 34, 53, 0.66);
+    font-weight: 800;
+}
+
+.nav-tab:hover {
+    color: #172235;
+    background: #fff4d8;
+}
+
+.nav-tab.active {
+    color: #28785f;
+    border-bottom-color: #d99a2b;
+}
+
+.metric-card {
+    border-left-color: #d99a2b;
+}
+
+.metric-value,
+.status-value {
+    color: #315fcb;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.admin-table thead {
+    background: #fff4d8;
+    border-bottom-color: rgba(217, 154, 43, 0.35);
+}
+
+.admin-table th {
+    color: #172235;
+}
+
+.admin-table tbody tr:hover {
+    background: #f4f7f2;
+}
+
+.form-input,
+.form-select,
+.form-textarea,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    background: #fffaf0;
+    border-color: rgba(23, 34, 53, 0.16);
+    color: #172235;
+    border-radius: 8px;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #d99a2b;
+    box-shadow: 0 0 0 4px rgba(217, 154, 43, 0.16);
+    outline: none;
+}
+
+.image-upload-zone {
+    background: #fffaf0;
+    border-color: rgba(217, 154, 43, 0.42);
+}
+
+.image-upload-zone:hover,
+.image-upload-zone.drag-over {
+    background: #fff4d8;
+    border-color: #d99a2b;
+}
+
+.upload-btn {
+    color: #315fcb;
+    font-weight: 800;
+}
+
+.upload-btn:hover {
+    color: #28785f;
+}

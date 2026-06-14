@@ -1,133 +1,133 @@
 <?php
 // ============================================================
-// SILENT BID BUDDY — Authentication Splash
-// Landing page with phone entry and verification flow
+// SILENT BID BUDDY — Public Landing Page
+// Professional front door for bidders, nonprofits, and admins.
 // ============================================================
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/page-meta.php';
 
-// PERSISTENT SESSION: Users should NOT need to re-verify every visit
-// Session persists for 30 days via HTTP-only secure cookie
-// This is stored in the 'session_token' cookie and validated on every page load
-if (isAuthenticated()) {
-    // User has valid session - redirect to items page (all available items)
-    header('Location: items.php');
-    exit;
-}
-
-$page_title = APP_NAME . ' - Bid Now';
+$page_title = APP_NAME . ' - Silent Auctions Made Warm, Simple, and Professional';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php renderPageMeta([
         'title' => $page_title,
-        'description' => 'Sign in to Silent Bid Buddy and start bidding in a polished, secure nonprofit auction experience.'
+        'description' => 'Silent Bid Buddy helps nonprofits run polished silent auctions with beautiful item pages, secure bidding, bidder reminders, admin tools, and donor-friendly checkout.'
     ]); ?>
 </head>
-<body class="auth-page">
-    <div class="container">
-        <div class="auth-splash">
-            <!-- Logo/Header -->
-            <div class="splash-header">
-                <h1><?php echo htmlspecialchars(APP_NAME); ?></h1>
-                <p class="subtitle">Silent Auction Platform</p>
-            </div>
+<body class="landing-page">
+    <header class="landing-nav" aria-label="Silent Bid Buddy navigation">
+        <a class="landing-brand" href="index.php" aria-label="Silent Bid Buddy home">
+            <img src="images/brand/favicon.svg" alt="" />
+            <span>Silent Bid Buddy</span>
+        </a>
+        <nav class="landing-nav-links" aria-label="Primary links">
+            <a href="#experience">Experience</a>
+            <a href="#tools">Admin Tools</a>
+            <a href="items.php">Open Auction</a>
+            <a class="nav-admin-link" href="admin.php">Admin</a>
+        </nav>
+    </header>
 
-            <!-- Phone Entry Form -->
-            <div class="auth-form" id="phoneForm">
-                <h2>Sign Up to Bid</h2>
-                <p class="form-description">Enter your info and we'll send a verification code.</p>
-
-                <div class="form-group">
-                    <label for="nameInput" class="form-label">Your Name <span class="required">*</span></label>
-                    <input
-                        type="text"
-                        id="nameInput"
-                        class="form-input"
-                        placeholder="Your Name"
-                        autocomplete="name"
-                        required
-                    />
+    <main>
+        <section class="landing-hero" aria-labelledby="landingHeroTitle">
+            <div class="landing-hero-bg" aria-hidden="true"></div>
+            <div class="landing-hero-content">
+                <p class="landing-kicker">Nonprofit silent auctions, handled beautifully</p>
+                <h1 id="landingHeroTitle">
+                    <span>Bid with</span>
+                    <span>confidence.</span>
+                    <span>Give with</span>
+                    <span>heart.</span>
+                </h1>
+                <p class="landing-hero-copy">
+                    Silent Bid Buddy gives your auction a polished digital home, helps bidders feel informed,
+                    and gives administrators the practical tools they need to run the room with calm.
+                </p>
+                <div class="landing-actions" aria-label="Primary actions">
+                    <a class="landing-btn landing-btn-primary" href="items.php">Open Auction App</a>
+                    <a class="landing-btn landing-btn-secondary" href="bid.php">Bidder Sign In</a>
+                    <a class="landing-btn landing-btn-quiet" href="admin.php">Admin Console</a>
                 </div>
-
-                <div class="form-group">
-                    <label for="phoneInput" class="form-label">Phone Number <span class="required">*</span></label>
-                    <input
-                        type="tel"
-                        id="phoneInput"
-                        class="form-input"
-                        placeholder="(555) 123-4567"
-                        autocomplete="tel"
-                        inputmode="tel"
-                        required
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label for="emailInput" class="form-label">Email <span class="optional">(optional)</span></label>
-                    <input
-                        type="email"
-                        id="emailInput"
-                        class="form-input"
-                        placeholder="you@example.org"
-                        autocomplete="email"
-                    />
-                    <p class="form-hint">Used for receipts and auction updates.</p>
-                </div>
-
-                <button id="sendCodeBtn" class="btn btn-primary btn-large">
-                    <span class="btn-text">Send Verification Code</span>
-                    <span class="btn-spinner" style="display: none;">Sending...</span>
-                </button>
-
-                <div id="phoneError" class="error-message" style="display: none;"></div>
             </div>
-
-            <!-- Code Verification Form (Hidden initially) -->
-            <div class="auth-form" id="codeForm" style="display: none;">
-                <h2>Enter Your Code</h2>
-                <p class="form-description">Check your SMS for the 6-digit code.</p>
-
-                <div class="form-group">
-                    <input
-                        type="text"
-                        id="codeInput"
-                        class="form-input code-input"
-                        placeholder="000000"
-                        inputmode="numeric"
-                        maxlength="6"
-                        autocomplete="one-time-code"
-                    />
+            <div class="landing-hero-proof" aria-label="Platform highlights">
+                <div>
+                    <strong>Live bidding</strong>
+                    <span>Clear current bids, opening bids, and bidder status.</span>
                 </div>
-
-                <button id="verifyCodeBtn" class="btn btn-primary btn-large">
-                    <span class="btn-text">Verify & Continue</span>
-                    <span class="btn-spinner" style="display: none;">Verifying...</span>
-                </button>
-
-                <button id="backBtn" class="btn btn-secondary">
-                    Back to Phone Entry
-                </button>
-
-                <div id="codeError" class="error-message" style="display: none;"></div>
+                <div>
+                    <strong>Beautiful items</strong>
+                    <span>Rich descriptions, generated artwork, and share-ready presentation.</span>
+                </div>
+                <div>
+                    <strong>Admin control</strong>
+                    <span>Manage items, users, close times, payments, and auction flow.</span>
+                </div>
             </div>
+        </section>
 
-            <!-- Success Message (Hidden initially) -->
-            <div class="auth-form success-message" id="successMessage" style="display: none;">
-                <h2>🎉 Welcome!</h2>
-                <p>Redirecting you to the auction...</p>
+        <section id="experience" class="landing-band landing-intro" aria-labelledby="experienceTitle">
+            <div class="landing-section-heading">
+                <p class="landing-kicker">Designed for the whole room</p>
+                <h2 id="experienceTitle">A calmer bidder experience and a sharper event presence.</h2>
             </div>
-        </div>
-    </div>
+            <div class="landing-feature-grid">
+                <article class="landing-feature">
+                    <span class="feature-number">01</span>
+                    <h3>Guests know what to do next.</h3>
+                    <p>Friendly phone verification, simple item browsing, clear bid states, watchlists, and checkout paths keep the evening moving.</p>
+                </article>
+                <article class="landing-feature">
+                    <span class="feature-number">02</span>
+                    <h3>Items look worth bidding on.</h3>
+                    <p>Descriptions can be improved for donor appeal, and item artwork can be created from the story behind each donation.</p>
+                </article>
+                <article class="landing-feature">
+                    <span class="feature-number">03</span>
+                    <h3>The auction feels trustworthy.</h3>
+                    <p>Bidder status, closing times, receipts, payments, and item details are presented with the polish people expect from a serious platform.</p>
+                </article>
+            </div>
+        </section>
 
-    <script src="js/app.js"></script>
-    <script>
-        // Initialize auth flow
-        document.addEventListener('DOMContentLoaded', function() {
-            SBB.Auth.init();
-        });
-    </script>
+        <section id="tools" class="landing-band landing-admin-panel" aria-labelledby="adminTitle">
+            <div class="admin-copy">
+                <p class="landing-kicker">For administrators</p>
+                <h2 id="adminTitle">Run the auction from one purposeful console.</h2>
+                <p>
+                    Build item listings, improve descriptions, manage bidders, review bids, create documents,
+                    monitor payments, and close items without making the team work from scattered spreadsheets.
+                </p>
+                <div class="admin-link-row">
+                    <a class="landing-btn landing-btn-primary" href="admin.php">Open Admin Console</a>
+                    <a class="landing-text-link" href="items.php">Preview bidder app</a>
+                </div>
+            </div>
+            <div class="admin-metrics" aria-label="Administrative capabilities">
+                <div><strong>Items</strong><span>Descriptions, imagery, values, and close times</span></div>
+                <div><strong>Bidders</strong><span>Phone verification, emails, watchlists, and activity</span></div>
+                <div><strong>Payments</strong><span>Winning bids, checkout, receipts, and status</span></div>
+                <div><strong>Materials</strong><span>Share links, item pages, QR codes, and PDFs</span></div>
+            </div>
+        </section>
+
+        <section class="landing-band landing-cta" aria-labelledby="landingCtaTitle">
+            <p class="landing-kicker">Ready when the doors open</p>
+            <h2 id="landingCtaTitle">Give your bidders a professional first impression.</h2>
+            <p>Start in the auction app, sign in as a bidder, or step into the admin console.</p>
+            <div class="landing-actions">
+                <a class="landing-btn landing-btn-primary" href="items.php">Open Auction App</a>
+                <a class="landing-btn landing-btn-secondary" href="bid.php">Bidder Sign In</a>
+                <a class="landing-btn landing-btn-quiet" href="admin.php">Admin Console</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="landing-footer">
+        <span><?php echo htmlspecialchars(APP_NAME); ?></span>
+        <span>Secure bidding for generous events.</span>
+    </footer>
 </body>
+</html>

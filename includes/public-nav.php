@@ -48,7 +48,7 @@ function renderPublicHeader($options = []) {
         <?php if ($is_authenticated): ?>
             <a class="<?php echo $current === 'my-bids.php' ? 'active' : ''; ?>" href="my-bids.php">My Bids & Watching</a>
         <?php else: ?>
-            <a href="index.php?return=<?php echo urlencode('items.php'); ?>">Sign In to Bid</a>
+            <a href="bid.php?return=<?php echo urlencode('items.php'); ?>">Sign In to Bid</a>
         <?php endif; ?>
         <a href="items.php#how-bidding-works">How Bidding Works</a>
 

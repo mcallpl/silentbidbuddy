@@ -102,7 +102,7 @@ $page_title = $event_name . ' - ' . APP_NAME;
                 <?php if ($is_authenticated): ?>
                     <a href="my-bids.php" class="btn btn-secondary">My Bids</a>
                 <?php else: ?>
-                    <a href="index.php?return=<?php echo urlencode('items.php'); ?>" class="btn btn-primary">Sign In to Bid</a>
+                    <a href="bid.php?return=<?php echo urlencode('items.php'); ?>" class="btn btn-primary">Sign In to Bid</a>
                 <?php endif; ?>
             </div>
         </section>
@@ -237,7 +237,7 @@ $page_title = $event_name . ' - ' . APP_NAME;
                                         </button>
                                     <?php elseif (!$is_authenticated): ?>
                                         <a
-                                            href="index.php?return=<?php echo urlencode('items.php'); ?>"
+                                            href="bid.php?return=<?php echo urlencode('items.php'); ?>"
                                             class="btn btn-secondary btn-watch"
                                         >
                                             Watch
@@ -253,7 +253,7 @@ $page_title = $event_name . ' - ' . APP_NAME;
 
         <!-- Navigation -->
         <section class="navigation-section">
-            <a href="index.php" class="btn btn-secondary">← Back</a>
+            <a href="index.php" class="btn btn-secondary">Home</a>
         </section>
 
         <section id="how-bidding-works" class="how-bidding-works" aria-labelledby="howBiddingWorksTitle">

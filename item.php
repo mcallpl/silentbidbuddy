@@ -169,7 +169,7 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
             <section class="bidding-section">
                 <?php if (!$is_authenticated): ?>
                     <p class="auth-prompt">
-                        <a href="index.php" class="btn btn-primary btn-large">Sign In to Bid</a>
+                        <a href="bid.php?return=<?php echo urlencode('item.php?id=' . (int)$item['item_number']); ?>" class="btn btn-primary btn-large">Sign In to Bid</a>
                     </p>
                 <?php else: ?>
                     <!-- Quick Bid Button -->

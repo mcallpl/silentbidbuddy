@@ -4,20 +4,26 @@
    ============================================================ */
 
 :root {
-    --color-primary: #2563eb;
-    --color-primary-dark: #1e40af;
-    --color-primary-light: #3b82f6;
-    --color-accent: #f59e0b;
-    --color-success: #10b981;
+    --color-primary: #315fcb;
+    --color-primary-dark: #172235;
+    --color-primary-light: #4d7be0;
+    --color-accent: #d99a2b;
+    --color-success: #28785f;
     --color-error: #ef4444;
-    --color-warning: #f59e0b;
-    --color-dark: #1f2937;
-    --color-medium: #6b7280;
-    --color-light: #f3f4f6;
-    --color-white: #ffffff;
-    --color-border: #e5e7eb;
+    --color-warning: #d99a2b;
+    --color-dark: #172235;
+    --color-medium: #667085;
+    --color-light: #f4f7f2;
+    --color-white: #fffdf8;
+    --color-border: #e5ddcf;
+    --color-cream: #fffaf0;
+    --color-ivory: #fffdf8;
+    --color-navy: #172235;
+    --color-gold: #d99a2b;
+    --color-green: #28785f;
 
-    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    --font-family: "Avenir Next", "Trebuchet MS", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-display: Georgia, "Times New Roman", serif;
     --font-size-base: 16px;
     --font-size-sm: 14px;
     --font-size-xs: 12px;
@@ -34,12 +40,12 @@
 
     --radius-sm: 4px;
     --radius-md: 8px;
-    --radius-lg: 12px;
+    --radius-lg: 8px;
     --radius-full: 9999px;
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 8px 20px rgba(23, 34, 53, 0.06);
+    --shadow-md: 0 16px 34px rgba(23, 34, 53, 0.1);
+    --shadow-lg: 0 28px 70px rgba(23, 34, 53, 0.14);
 
     --transition: all 0.3s ease;
 }
@@ -61,6 +67,419 @@ body {
     line-height: 1.6;
     color: var(--color-dark);
     background-color: var(--color-white);
+}
+
+/* ============================================================
+   PUBLIC LANDING PAGE
+   ============================================================ */
+
+.landing-page {
+    --landing-ink: #111a2b;
+    --landing-navy: #172235;
+    --landing-blue: #315fcb;
+    --landing-gold: #d99a2b;
+    --landing-green: #28785f;
+    --landing-cream: #fffaf0;
+    --landing-mist: #f4f7f2;
+    --landing-line: rgba(23, 34, 53, 0.14);
+    background: #fffdf8;
+    color: var(--landing-ink);
+    font-family: "Avenir Next", "Trebuchet MS", var(--font-family);
+    overflow-x: hidden;
+}
+
+.landing-page h1,
+.landing-page h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: 0;
+}
+
+.landing-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem clamp(1rem, 4vw, 3.5rem);
+    background: rgba(255, 253, 248, 0.86);
+    border-bottom: 1px solid rgba(23, 34, 53, 0.08);
+    backdrop-filter: blur(18px);
+}
+
+.landing-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--landing-navy);
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.landing-brand img {
+    width: 38px;
+    height: 38px;
+}
+
+.landing-nav-links {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.8rem, 2vw, 1.4rem);
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.landing-nav-links a {
+    color: rgba(17, 26, 43, 0.78);
+    text-decoration: none;
+}
+
+.landing-nav-links a:hover {
+    color: var(--landing-blue);
+}
+
+.landing-nav-links .nav-admin-link {
+    color: var(--landing-navy);
+    border: 1px solid rgba(23, 34, 53, 0.18);
+    border-radius: var(--radius-full);
+    padding: 0.48rem 0.8rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.landing-hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    isolation: isolate;
+    padding: clamp(7rem, 11vw, 9rem) clamp(1.25rem, 5vw, 5rem) clamp(2rem, 5vw, 4rem);
+    color: #fff;
+}
+
+.landing-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+        linear-gradient(90deg, rgba(8, 16, 31, 0.9) 0%, rgba(8, 16, 31, 0.7) 42%, rgba(8, 16, 31, 0.1) 78%),
+        linear-gradient(180deg, rgba(8, 16, 31, 0.12) 0%, rgba(8, 16, 31, 0.78) 100%),
+        url("../images/items/generated/napa-vineyard-weekend.png") center / cover no-repeat;
+}
+
+.landing-hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 18vh;
+    background: linear-gradient(180deg, rgba(255, 253, 248, 0) 0%, #fffdf8 94%);
+    z-index: -1;
+}
+
+.landing-hero-content {
+    width: min(760px, 100%);
+    min-width: 0;
+    padding-bottom: clamp(4rem, 12vw, 8rem);
+}
+
+.landing-kicker {
+    margin-bottom: 0.85rem;
+    color: var(--landing-gold);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.landing-hero h1 {
+    max-width: 720px;
+    color: #fff;
+    font-size: clamp(3.35rem, 9vw, 7.8rem);
+    text-wrap: balance;
+    text-shadow: 0 22px 58px rgba(0, 0, 0, 0.34);
+}
+
+.landing-hero h1 span {
+    display: block;
+}
+
+.landing-hero-copy {
+    max-width: 650px;
+    margin-top: 1.25rem;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: clamp(1rem, 2.2vw, 1.28rem);
+    line-height: 1.65;
+}
+
+.landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.65rem;
+}
+
+.landing-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border-radius: var(--radius-full);
+    padding: 0.82rem 1.18rem;
+    font-weight: 900;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.landing-btn:hover {
+    transform: translateY(-2px);
+}
+
+.landing-btn-primary {
+    background: var(--landing-blue);
+    color: #fff;
+    box-shadow: 0 18px 38px rgba(49, 95, 203, 0.28);
+}
+
+.landing-btn-primary:hover {
+    background: #244fb2;
+}
+
+.landing-btn-secondary {
+    background: #fff;
+    color: var(--landing-navy);
+}
+
+.landing-btn-quiet {
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.46);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.landing-cta .landing-btn-quiet,
+.landing-admin-panel .landing-btn-quiet {
+    color: var(--landing-navy);
+    border-color: rgba(23, 34, 53, 0.18);
+    background: #fff;
+}
+
+.landing-hero-proof {
+    position: absolute;
+    left: clamp(1.25rem, 5vw, 5rem);
+    right: clamp(1.25rem, 5vw, 5rem);
+    bottom: 1.2rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(18px);
+}
+
+.landing-hero-proof div {
+    padding: 1.05rem;
+    background: rgba(7, 14, 27, 0.34);
+}
+
+.landing-hero-proof strong,
+.landing-hero-proof span {
+    display: block;
+}
+
+.landing-hero-proof strong {
+    color: #fff;
+    font-size: 0.98rem;
+}
+
+.landing-hero-proof span {
+    margin-top: 0.24rem;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 0.86rem;
+    line-height: 1.4;
+}
+
+.landing-band {
+    padding: clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 5rem);
+}
+
+.landing-section-heading {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.32fr) minmax(0, 0.68fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+    max-width: 1180px;
+    margin: 0 auto 2rem;
+}
+
+.landing-section-heading h2,
+.landing-admin-panel h2,
+.landing-cta h2 {
+    color: var(--landing-navy);
+    font-size: clamp(2.3rem, 5vw, 4.8rem);
+    text-wrap: balance;
+}
+
+.landing-feature-grid {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--landing-line);
+}
+
+.landing-feature {
+    padding: 2rem clamp(1rem, 2vw, 1.5rem);
+    border-right: 1px solid var(--landing-line);
+}
+
+.landing-feature:last-child {
+    border-right: 0;
+}
+
+.feature-number {
+    display: inline-block;
+    margin-bottom: 1.2rem;
+    color: var(--landing-green);
+    font-weight: 900;
+}
+
+.landing-feature h3 {
+    color: var(--landing-navy);
+    font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+    line-height: 1.12;
+    margin-bottom: 0.85rem;
+}
+
+.landing-feature p,
+.landing-admin-panel p,
+.landing-cta p {
+    color: rgba(17, 26, 43, 0.72);
+    line-height: 1.72;
+}
+
+.landing-admin-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 0.65fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: center;
+    background: var(--landing-mist);
+}
+
+.admin-copy {
+    max-width: 720px;
+}
+
+.admin-copy p:not(.landing-kicker) {
+    margin-top: 1.1rem;
+    font-size: 1.04rem;
+}
+
+.admin-link-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.6rem;
+}
+
+.landing-text-link {
+    color: var(--landing-green);
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.landing-text-link:hover {
+    color: var(--landing-blue);
+}
+
+.admin-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid rgba(23, 34, 53, 0.14);
+    border-radius: var(--radius-md);
+    background: rgba(23, 34, 53, 0.14);
+    box-shadow: 0 24px 60px rgba(23, 34, 53, 0.08);
+}
+
+.admin-metrics div {
+    min-height: 150px;
+    padding: 1.25rem;
+    background: #fffdf8;
+}
+
+.admin-metrics strong,
+.admin-metrics span {
+    display: block;
+}
+
+.admin-metrics strong {
+    color: var(--landing-navy);
+    font-size: 1.35rem;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.admin-metrics span {
+    margin-top: 0.5rem;
+    color: rgba(17, 26, 43, 0.66);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.landing-cta {
+    text-align: center;
+    background:
+        linear-gradient(180deg, rgba(255, 253, 248, 0.92), rgba(255, 250, 240, 0.98)),
+        url("../images/brand/silent-bid-buddy-social-1200x630.png") center / cover no-repeat;
+}
+
+.landing-cta h2,
+.landing-cta p {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.landing-cta p {
+    margin-top: 1rem;
+}
+
+.landing-cta .landing-actions {
+    justify-content: center;
+}
+
+.landing-cta .landing-btn-quiet {
+    color: var(--landing-navy);
+}
+
+.landing-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.3rem clamp(1.25rem, 5vw, 5rem);
+    border-top: 1px solid var(--landing-line);
+    color: rgba(17, 26, 43, 0.62);
+    font-weight: 700;
+}
+
+@keyframes landingRise {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ============================================================
@@ -1587,4 +2006,273 @@ body.public-menu-open {
     25%, 75% {
         opacity: 0.8;
     }
+}
+
+/* ============================================================
+   BRAND FINISH — Gala / Donor Trust Visual System
+   ============================================================ */
+
+body:not(.landing-page) {
+    background:
+        linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(244, 247, 242, 0.98)),
+        radial-gradient(circle at 12% 0%, rgba(217, 154, 43, 0.12), transparent 30%);
+    color: var(--color-navy);
+}
+
+.app-header {
+    background: rgba(23, 34, 53, 0.96);
+    border-bottom: 1px solid rgba(217, 154, 43, 0.28);
+    box-shadow: 0 14px 34px rgba(23, 34, 53, 0.18);
+    backdrop-filter: blur(18px);
+}
+
+.app-header h1,
+.splash-header h1,
+.item-title,
+.event-hero h2,
+.public-message-card h1,
+.success-message h1,
+.checkout-summary h2,
+.checkout-form h3,
+.bid-history h2,
+.items-section h2,
+.my-bid-title {
+    font-family: var(--font-display);
+    letter-spacing: 0;
+}
+
+.app-header h1 {
+    font-size: 1.15rem;
+}
+
+.btn,
+.category-chip,
+.public-menu a,
+.public-menu-action {
+    border-radius: var(--radius-full);
+    font-weight: 850;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #315fcb, #244fb2);
+    box-shadow: 0 14px 30px rgba(49, 95, 203, 0.22);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #244fb2, #172235);
+}
+
+.btn-secondary {
+    background: #fffdf8;
+    border-color: rgba(23, 34, 53, 0.16);
+    color: var(--color-navy);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #fff5df;
+    border-color: rgba(217, 154, 43, 0.5);
+}
+
+.auth-page {
+    background:
+        linear-gradient(90deg, rgba(9, 17, 33, 0.82), rgba(9, 17, 33, 0.38)),
+        url("../images/brand/silent-bid-buddy-social-1200x630.png") center / cover no-repeat;
+}
+
+.auth-splash,
+.public-message-card,
+.item-info,
+.bid-block,
+.countdown-section,
+.bidding-section,
+.bid-history,
+.event-hero,
+.browse-controls,
+.item-card,
+.how-bidding-works,
+.checkout-summary,
+.checkout-form,
+.success-message,
+.my-bid-card,
+.bid-summary-card {
+    background: rgba(255, 253, 248, 0.94);
+    border: 1px solid rgba(23, 34, 53, 0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.auth-splash {
+    border-top: 4px solid var(--color-gold);
+    max-width: 430px;
+}
+
+.splash-header h1 {
+    color: var(--color-navy);
+    font-size: 2.2rem;
+}
+
+.splash-header .subtitle,
+.form-description,
+.item-description,
+.event-close,
+.item-card-description,
+.next-minimum-bid,
+.fair-market-value,
+.my-bid-stats,
+.public-message-card p {
+    color: rgba(23, 34, 53, 0.66);
+}
+
+.form-input {
+    background: #fffaf0;
+    border-color: rgba(23, 34, 53, 0.16);
+    color: var(--color-navy);
+}
+
+.form-input:focus {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 4px rgba(217, 154, 43, 0.16);
+}
+
+.event-hero {
+    overflow: hidden;
+    position: relative;
+    background:
+        linear-gradient(90deg, rgba(23, 34, 53, 0.92), rgba(23, 34, 53, 0.64)),
+        url("../images/brand/silent-bid-buddy-social-1200x630.png") center / cover no-repeat;
+    color: #fff;
+}
+
+.event-hero .event-org,
+.event-hero .event-close {
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.event-hero h2 {
+    color: #fff;
+}
+
+.browse-controls {
+    padding: var(--spacing-lg);
+}
+
+.category-chip {
+    border: 1px solid rgba(23, 34, 53, 0.12);
+    background: #fffdf8;
+    color: rgba(23, 34, 53, 0.72);
+}
+
+.category-chip.active,
+.category-chip:hover {
+    background: #e8f4ee;
+    border-color: rgba(40, 120, 95, 0.35);
+    color: var(--color-green);
+}
+
+.item-card {
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.item-card-image {
+    background: #e9e1d4;
+}
+
+.item-card-title,
+.item-title,
+.my-bid-title,
+.items-section h2,
+.bid-history h2 {
+    color: var(--color-navy);
+}
+
+.lot-pill,
+.item-card-category {
+    background: #fff4d8;
+    color: #8a5b00;
+}
+
+.bid-block.highlight {
+    border: 2px solid rgba(217, 154, 43, 0.76);
+    background:
+        linear-gradient(135deg, rgba(217, 154, 43, 0.12), rgba(255, 253, 248, 0.96));
+}
+
+.bid-header,
+.countdown-label {
+    color: rgba(23, 34, 53, 0.62);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+}
+
+.current-bid-amount,
+.countdown-timer {
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    letter-spacing: 0;
+}
+
+.btn-quick-bid {
+    background: linear-gradient(135deg, var(--color-green), #1d5c49);
+    box-shadow: 0 18px 34px rgba(40, 120, 95, 0.24);
+}
+
+.btn-quick-bid:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d5c49, var(--color-navy));
+}
+
+.bidding-section {
+    border-top: 3px solid rgba(49, 95, 203, 0.24);
+}
+
+.custom-bid-link {
+    color: var(--color-primary);
+}
+
+.bid-history-item,
+.recent-bid,
+.my-bid-card {
+    border-color: rgba(23, 34, 53, 0.1);
+}
+
+.public-menu {
+    background: #fffdf8;
+    border-left: 1px solid rgba(217, 154, 43, 0.28);
+}
+
+.public-menu-header strong,
+.public-menu a:hover,
+.public-menu a.active {
+    color: var(--color-green);
+}
+
+.public-menu a:hover,
+.public-menu a.active {
+    background: #e8f4ee;
+}
+
+.status-winning,
+.status-paid,
+.badge-winning,
+.badge-success {
+    background: #e8f4ee;
+    color: var(--color-green);
+}
+
+.status-outbid,
+.status-due {
+    background: #fff4d8;
+    color: #8a5b00;
+}
+
+.modal-content {
+    background: #fffdf8;
+    border: 1px solid rgba(23, 34, 53, 0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
 }

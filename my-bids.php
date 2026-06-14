@@ -13,7 +13,7 @@ require_once __DIR__ . '/includes/public-nav.php';
 
 $user = getCurrentUser();
 if (!$user) {
-    header('Location: index.php?return=' . urlencode('my-bids.php'));
+    header('Location: bid.php?return=' . urlencode('my-bids.php'));
     exit;
 }
 

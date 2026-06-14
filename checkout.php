@@ -12,7 +12,7 @@ require_once __DIR__ . '/includes/public-nav.php';
 // Require authentication
 $user = getCurrentUser();
 if (!$user) {
-    header('Location: index.php?return=' . urlencode($_SERVER['REQUEST_URI'] ?? 'checkout.php'));
+    header('Location: bid.php?return=' . urlencode($_SERVER['REQUEST_URI'] ?? 'checkout.php'));
     exit;
 }
 
