@@ -15,7 +15,7 @@ NC='\033[0m'
 FAILED=0
 DO_SERVER="root@64.227.108.128"
 DO_PATH="/var/www/html/silentbidbuddy"
-APP_URL="https://silentbidbuddy.peoplestar.com"
+APP_URL="https://silentbidbuddy.com"
 
 echo "=================================="
 echo "POST-DEPLOYMENT VERIFICATION"

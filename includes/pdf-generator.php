@@ -49,7 +49,7 @@ class ItemPDFGenerator {
 
         // CRITICAL: Always use production domain for QR codes (users access via phone)
         // Never use localhost - it won't work when scanned by phones
-        $productionDomain = 'https://silentbidbuddy.peoplestar.com';
+        $productionDomain = 'https://silentbidbuddy.com';
         $bidUrl = $this->shortUrl ?? ($productionDomain . '/item.php?id=' . (int)$item['id']);
         $url = htmlspecialchars($bidUrl);
         $qrUrl = QRCodeGenerator::getQRUrl($bidUrl);
