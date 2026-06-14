@@ -115,11 +115,11 @@ else
     FAILED=1
 fi
 
-JS_PATH=$(curl -s "$APP_URL" | grep 'src="js' | head -1)
+JS_PATH=$(curl -s "$APP_URL/bid.php" | grep 'src="js' | head -1)
 if echo "$JS_PATH" | grep -q 'src="js/'; then
-    echo -e "${GREEN}✓ JavaScript uses relative paths${NC}"
+    echo -e "${GREEN}✓ JavaScript uses relative paths on bidder sign-in${NC}"
 else
-    echo -e "${RED}✗ JavaScript paths are not relative:${NC}"
+    echo -e "${RED}✗ JavaScript paths are not relative on bidder sign-in:${NC}"
     echo "$JS_PATH"
     FAILED=1
 fi
