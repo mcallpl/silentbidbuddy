@@ -56,4 +56,50 @@ function renderPublicHeader($options = []) {
     </nav>
     <?php
 }
+
+function renderPublicMessagePage($options = []) {
+    $status = (int)($options['status'] ?? 200);
+    $title = $options['title'] ?? APP_NAME;
+    $heading = $options['heading'] ?? 'Something needs attention';
+    $message = $options['message'] ?? 'Please return to the auction and try again.';
+    $actions = $options['actions'] ?? [
+        ['href' => 'items.php', 'label' => 'Browse Items', 'class' => 'btn-primary']
+    ];
+    $user = $options['user'] ?? getCurrentUser();
+
+    http_response_code($status);
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?php echo htmlspecialchars($title . ' - ' . APP_NAME); ?></title>
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/mobile.css">
+    </head>
+    <body class="items-list-page message-page">
+        <?php renderPublicHeader(['user' => $user]); ?>
+        <main class="container">
+            <section class="public-message-card">
+                <h1><?php echo htmlspecialchars($heading); ?></h1>
+                <p><?php echo htmlspecialchars($message); ?></p>
+                <div class="public-message-actions">
+                    <?php foreach ($actions as $action): ?>
+                        <a
+                            href="<?php echo htmlspecialchars($action['href']); ?>"
+                            class="btn <?php echo htmlspecialchars($action['class'] ?? 'btn-secondary'); ?>"
+                        >
+                            <?php echo htmlspecialchars($action['label']); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        </main>
+        <script src="js/app.js"></script>
+    </body>
+    </html>
+    <?php
+    exit;
+}
 ?>

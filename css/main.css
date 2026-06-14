@@ -261,6 +261,41 @@ body.public-menu-open {
     background: #245c4f;
 }
 
+.message-page .container {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.public-message-card {
+    width: min(620px, 100%);
+    background: #ffffff;
+    border: 1px solid #e7efe9;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.public-message-card h1 {
+    color: #1f2a24;
+    margin-bottom: var(--spacing-sm);
+}
+
+.public-message-card p {
+    color: var(--color-medium);
+    line-height: 1.55;
+    margin-bottom: var(--spacing-lg);
+}
+
+.public-message-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
 /* ============================================================
    AUTHENTICATION SPLASH
    ============================================================ */

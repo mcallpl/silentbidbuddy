@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (!sessionResponse.session_id) {
-                throw new Error(sessionResponse.error || 'Failed to create checkout session');
+                throw new Error(sessionResponse.message || sessionResponse.error || 'Failed to create checkout session');
             }
 
             // Initialize Stripe

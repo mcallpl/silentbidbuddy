@@ -12,14 +12,24 @@ require_once __DIR__ . '/includes/public-nav.php';
 // Require authentication
 $user = getCurrentUser();
 if (!$user) {
-    header('Location: index.php');
+    header('Location: index.php?return=' . urlencode($_SERVER['REQUEST_URI'] ?? 'checkout.php'));
     exit;
 }
 
 // Get item ID
 $item_id = $_GET['item_id'] ?? 0;
 if (!$item_id) {
-    die('Item not found');
+    renderPublicMessagePage([
+        'status' => 404,
+        'title' => 'Checkout',
+        'heading' => 'Checkout link needs an item',
+        'message' => 'Choose a won item from My Bids to continue payment.',
+        'actions' => [
+            ['href' => 'my-bids.php', 'label' => 'View My Bids', 'class' => 'btn-primary'],
+            ['href' => 'items.php', 'label' => 'Browse Items', 'class' => 'btn-secondary']
+        ],
+        'user' => $user
+    ]);
 }
 
 // Fetch item
@@ -29,8 +39,17 @@ $item = dbGetRow(
 );
 
 if (!$item || $item['current_high_bidder_id'] != $user['id']) {
-    http_response_code(403);
-    die('You are not the winner of this item');
+    renderPublicMessagePage([
+        'status' => 403,
+        'title' => 'Checkout',
+        'heading' => 'This checkout is not available',
+        'message' => 'Only the winning bidder can pay for this item. Check My Bids for items ready for payment.',
+        'actions' => [
+            ['href' => 'my-bids.php', 'label' => 'View My Bids', 'class' => 'btn-primary'],
+            ['href' => 'items.php', 'label' => 'Browse Items', 'class' => 'btn-secondary']
+        ],
+        'user' => $user
+    ]);
 }
 
 $page_title = 'Checkout - ' . APP_NAME;

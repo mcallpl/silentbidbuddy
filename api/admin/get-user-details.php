@@ -25,8 +25,9 @@ if (!$user_id) {
 }
 
 // Get user info
+$email_select = dbColumnExists('users', 'email') ? ', email' : ", '' AS email";
 $user = dbGetRow(
-    "SELECT id, full_name, phone_number, stripe_customer_id, created_at FROM users WHERE id = ?",
+    "SELECT id, full_name, phone_number, stripe_customer_id, created_at {$email_select} FROM users WHERE id = ?",
     [$user_id]
 );
 
@@ -99,6 +100,7 @@ echo json_encode([
     'user' => [
         'id' => (int)$user['id'],
         'full_name' => $user['full_name'],
+        'email' => $user['email'] ?? '',
         'phone_display' => substr($user['phone_number'], 0, 6) . '...' . substr($user['phone_number'], -4),
         'stripe_customer_id' => $user['stripe_customer_id'],
         'created_at' => $user['created_at']

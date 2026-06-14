@@ -11,6 +11,7 @@ require_once __DIR__ . '/includes/public-nav.php';
 
 // Get session ID from query param
 $session_id = $_GET['session_id'] ?? '';
+$user = getCurrentUser();
 
 // Fetch transaction by session ID
 $transaction = dbGetRow(
@@ -22,12 +23,20 @@ $transaction = dbGetRow(
 );
 
 if (!$transaction) {
-    http_response_code(404);
-    die('Transaction not found');
+    renderPublicMessagePage([
+        'status' => 404,
+        'title' => 'Payment',
+        'heading' => 'We could not find that payment record',
+        'message' => 'If you just completed checkout, your payment may still be processing. You can return to My Bids to check your item status.',
+        'actions' => [
+            ['href' => 'my-bids.php', 'label' => 'View My Bids', 'class' => 'btn-primary'],
+            ['href' => 'items.php', 'label' => 'Browse Items', 'class' => 'btn-secondary']
+        ],
+        'user' => $user
+    ]);
 }
 
 $page_title = 'Payment Successful - ' . APP_NAME;
-$user = getCurrentUser();
 ?>
 <!DOCTYPE html>
 <html lang="en">

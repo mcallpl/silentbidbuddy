@@ -24,6 +24,8 @@ $page = max(1, $page);
 $limit = min($limit, 100);
 
 $offset = ($page - 1) * $limit;
+$has_email_column = dbColumnExists('users', 'email');
+$email_select = $has_email_column ? 'u.email' : "'' AS email";
 
 // Build query
 $where = "1=1";
@@ -51,13 +53,14 @@ if (!empty($search)) {
 $query = "SELECT
             u.id,
             u.full_name,
+            {$email_select},
             CONCAT(SUBSTR(u.phone_number, 1, 6), '...', SUBSTR(u.phone_number, -4)) as phone_display,
             COUNT(DISTINCT b.id) as bid_count,
             MAX(b.created_at) as last_bid_at
          FROM users u
          LEFT JOIN bids b ON u.id = b.user_id
          WHERE " . $where . "
-         GROUP BY u.id, u.full_name, u.phone_number
+         GROUP BY u.id, u.full_name, u.phone_number" . ($has_email_column ? ', u.email' : '') . "
          ORDER BY MAX(b.created_at) DESC
          LIMIT ? OFFSET ?";
 

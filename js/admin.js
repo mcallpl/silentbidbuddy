@@ -817,7 +817,7 @@ const AdminDashboard = {
             return;
         }
 
-        let html = '<table class="admin-table"><thead><tr><th>Name</th><th>Phone</th><th>Bids</th><th>Won</th><th>Total Spent</th><th>Last Bid</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="admin-table"><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Bids</th><th>Won</th><th>Total Spent</th><th>Last Bid</th><th>Actions</th></tr></thead><tbody>';
 
         users.forEach(user => {
             const lastBid = user.last_bid_at ? new Date(user.last_bid_at).toLocaleTimeString() : '-';
@@ -825,6 +825,7 @@ const AdminDashboard = {
             html += `<tr>
                 <td>${this.escapeHtml(user.full_name)}</td>
                 <td>${user.phone_display}</td>
+                <td>${this.escapeHtml(user.email || '-')}</td>
                 <td>${user.bid_count}</td>
                 <td>${user.items_won}</td>
                 <td>$${this.formatCurrency(user.total_spent)}</td>
@@ -865,6 +866,7 @@ const AdminDashboard = {
                 html += '<h3>User Information</h3>';
                 html += '<p><strong>Name:</strong> ' + this.escapeHtml(user.full_name) + '</p>';
                 html += '<p><strong>Phone:</strong> ' + user.phone_display + '</p>';
+                html += '<p><strong>Email:</strong> ' + this.escapeHtml(user.email || 'Not provided') + '</p>';
                 html += '<p><strong>Member Since:</strong> ' + new Date(user.created_at).toLocaleDateString() + '</p>';
 
                 if (data.wins.length > 0) {

@@ -163,7 +163,7 @@ $page_title = $event_name . ' - ' . APP_NAME;
                                     />
                                 <?php else: ?>
                                     <div class="image-placeholder-card">
-                                        <span>No Image</span>
+                                        <span>Image coming soon</span>
                                     </div>
                                 <?php endif; ?>
                             </div>

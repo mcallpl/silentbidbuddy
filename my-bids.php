@@ -162,7 +162,7 @@ function renderBidItemCard($item, $user_id, $kind = 'bid') {
             <?php if (!empty($item['image_url'])): ?>
                 <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" />
             <?php else: ?>
-                <span>No Image</span>
+                <span>Image coming soon</span>
             <?php endif; ?>
         </div>
         <div class="my-bid-content">

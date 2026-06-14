@@ -32,8 +32,15 @@ $item = dbGetRow(
 );
 
 if (!$item) {
-    http_response_code(404);
-    die("Item not found");
+    renderPublicMessagePage([
+        'status' => 404,
+        'title' => 'Item Not Found',
+        'heading' => 'We could not find that auction item',
+        'message' => 'The item may have been removed, closed, or the link may be incorrect.',
+        'actions' => [
+            ['href' => 'items.php', 'label' => 'Browse Items', 'class' => 'btn-primary']
+        ]
+    ]);
 }
 
 $page_title = htmlspecialchars($item['title']) . ' - ' . APP_NAME;
@@ -84,7 +91,7 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
                 />
             <?php else: ?>
                 <div class="image-placeholder">
-                    <span>No Image Available</span>
+                    <span>Image coming soon</span>
                 </div>
             <?php endif; ?>
         </div>
