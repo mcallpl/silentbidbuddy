@@ -1826,6 +1826,7 @@ const AdminDashboard = {
                         <td>${event.item_count || 0}</td>
                         <td>
                             <button class="btn btn-small" onclick="AdminDashboard.editEvent(${event.id})">Edit</button>
+                            <button class="btn btn-small btn-secondary" onclick="AdminDashboard.manageEventUsers(${event.id})">👥 Users</button>
                             <button class="btn btn-small btn-secondary" onclick="AdminDashboard.viewEventSettings(${event.id})">Settings</button>
                         </td>
                     </tr>
@@ -1846,6 +1847,172 @@ const AdminDashboard = {
 
     viewEventSettings(eventId) {
         alert('Event settings (SMS, branding, payment) coming soon. Event ID: ' + eventId);
+    },
+
+    async manageEventUsers(eventId) {
+        this.currentEventId = eventId;
+        this.showModal('manageUsersModal');
+        await this.loadEventUsers(eventId);
+        this.setupUserManagementListeners();
+    },
+
+    async loadEventUsers(eventId) {
+        try {
+            const response = await fetch(`/api/admin/get-event-users.php?event_id=${eventId}`, {
+                method: 'GET',
+                headers: this.getAuthHeaders(),
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+            const container = document.getElementById('usersContainer');
+
+            if (!response.ok || data.status !== 'ok') {
+                container.innerHTML = `<p class="error">Error: ${data.message || 'Failed to load users'}</p>`;
+                return;
+            }
+
+            const users = data.users || [];
+
+            if (users.length === 0) {
+                container.innerHTML = '<p style="color: #999; padding: 1rem;">No users created yet for this event</p>';
+                return;
+            }
+
+            // Build users table
+            let html = '<table class="admin-table" style="width: 100%;"><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Type</th><th>Actions</th></tr></thead><tbody>';
+
+            users.forEach(user => {
+                const typeColor = user.user_type === 'admin' ? 'green' : user.user_type === 'viewer' ? 'blue' : 'gray';
+                const typeLabel = user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1);
+
+                html += `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 0.75rem;">${user.full_name}</td>
+                        <td style="padding: 0.75rem;">${user.phone_number}</td>
+                        <td style="padding: 0.75rem;">${user.email || 'N/A'}</td>
+                        <td style="padding: 0.75rem;"><span style="color: ${typeColor};"><strong>${typeLabel}</strong></span></td>
+                        <td style="padding: 0.75rem;">
+                            <button class="btn btn-small btn-danger" onclick="AdminDashboard.deleteEventUser(${user.id}, ${eventId})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch (error) {
+            document.getElementById('usersContainer').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        }
+    },
+
+    setupUserManagementListeners() {
+        const createBtn = document.getElementById('createUserBtn');
+        const saveBtn = document.getElementById('saveUserBtn');
+        const cancelBtn = document.getElementById('cancelUserBtn');
+
+        if (createBtn) {
+            createBtn.onclick = () => {
+                document.getElementById('createUserForm').style.display = 'block';
+                document.getElementById('userFullName').focus();
+            };
+        }
+
+        if (saveBtn) {
+            saveBtn.onclick = () => this.saveNewEventUser();
+        }
+
+        if (cancelBtn) {
+            cancelBtn.onclick = () => {
+                document.getElementById('createUserForm').style.display = 'none';
+                document.getElementById('userFullName').value = '';
+                document.getElementById('userPhoneNumber').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('userType').value = '';
+                document.getElementById('createUserError').style.display = 'none';
+            };
+        }
+    },
+
+    async saveNewEventUser() {
+        const eventId = this.currentEventId;
+        const fullName = document.getElementById('userFullName').value.trim();
+        const phoneNumber = document.getElementById('userPhoneNumber').value.trim();
+        const email = document.getElementById('userEmail').value.trim();
+        const userType = document.getElementById('userType').value;
+        const errorContainer = document.getElementById('createUserError');
+
+        errorContainer.style.display = 'none';
+
+        if (!fullName || !phoneNumber || !userType) {
+            errorContainer.textContent = 'Full name, phone number, and user type are required';
+            errorContainer.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/create-event-user.php', {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                credentials: 'include',
+                body: JSON.stringify({
+                    event_id: eventId,
+                    full_name: fullName,
+                    phone_number: phoneNumber,
+                    email: email || null,
+                    user_type: userType
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'ok') {
+                alert('User created successfully!');
+                // Reset form
+                document.getElementById('userFullName').value = '';
+                document.getElementById('userPhoneNumber').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('userType').value = '';
+                document.getElementById('createUserForm').style.display = 'none';
+                // Reload users list
+                this.loadEventUsers(eventId);
+            } else {
+                errorContainer.textContent = data.message || 'Failed to create user';
+                errorContainer.style.display = 'block';
+            }
+        } catch (error) {
+            errorContainer.textContent = 'Error: ' + error.message;
+            errorContainer.style.display = 'block';
+        }
+    },
+
+    async deleteEventUser(userId, eventId) {
+        if (!confirm('Are you sure you want to delete this user?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/delete-event-user.php', {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                credentials: 'include',
+                body: JSON.stringify({
+                    user_id: userId,
+                    event_id: eventId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'ok') {
+                alert('User deleted successfully');
+                this.loadEventUsers(eventId);
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete user'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
     },
 
     async loadEventForEditing(eventId) {

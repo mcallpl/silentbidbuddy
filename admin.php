@@ -404,6 +404,67 @@ $page_title = APP_NAME . ' — Admin Dashboard';
         </div>
     </div>
 
+    <!-- Manage Event Users Modal -->
+    <div id="manageUsersModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Manage Event Users</h2>
+                <button class="modal-close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                    <button id="createUserBtn" class="btn btn-primary">+ Create New User</button>
+                </div>
+
+                <div id="usersContainer" style="background: #f9f9f9; border-radius: 4px; padding: 1rem;">
+                    <p class="loading">Loading users...</p>
+                </div>
+
+                <div id="createUserForm" style="display: none; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <h3>Create New User</h3>
+                    <div style="background: white; padding: 1.5rem; border-radius: 4px; margin-top: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" id="userFullName" class="form-input" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" id="userPhoneNumber" class="form-input" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="userEmail" class="form-input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">User Type *</label>
+                            <select id="userType" class="form-input" required>
+                                <option value="">-- Select User Type --</option>
+                                <option value="bidder">Bidder (can place bids)</option>
+                                <option value="viewer">Viewer (read-only access)</option>
+                                <option value="admin">Admin (can manage event)</option>
+                            </select>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                                <strong>Bidder:</strong> Can bid on items |
+                                <strong>Viewer:</strong> Can see items/bids, no editing |
+                                <strong>Admin:</strong> Full event management
+                            </p>
+                        </div>
+
+                        <div id="createUserError" class="error-message" style="display: none; margin-top: 1rem;"></div>
+
+                        <div class="form-actions" style="margin-top: 1.5rem;">
+                            <button type="button" id="saveUserBtn" class="btn btn-primary">Create User</button>
+                            <button type="button" id="cancelUserBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Assign Admins to Events Modal -->
     <div id="assignAdminsModal" class="modal" style="display: none;">
         <div class="modal-content modal-large">
