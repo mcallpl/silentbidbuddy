@@ -45,7 +45,8 @@ echo json_encode([
     'admin' => [
         'id' => $admin['id'],
         'username' => $admin['username'],
-        'full_name' => $admin['full_name']
+        'full_name' => $admin['full_name'],
+        'is_super_admin' => (bool)$admin['is_super_admin']
     ]
 ]);
 

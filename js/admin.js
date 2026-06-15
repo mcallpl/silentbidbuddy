@@ -59,6 +59,8 @@ const AdminDashboard = {
                 const data = await response.json();
 
                 if (response.ok && data.status === 'ok') {
+                    // Store admin role for later use
+                    localStorage.setItem('adminRole', data.admin.is_super_admin ? 'Super Admin' : 'Admin');
                     window.location.reload();
                 } else {
                     loginError.textContent = data.message || 'Invalid username or password';
@@ -79,6 +81,13 @@ const AdminDashboard = {
     setupDashboard() {
         // Get admin token from cookie
         this.getAdminTokenFromCookie();
+
+        // Update header title with admin role
+        const adminRole = localStorage.getItem('adminRole') || 'Admin';
+        const titleElement = document.querySelector('.dashboard-title');
+        if (titleElement) {
+            titleElement.textContent = titleElement.textContent.replace(' — Admin', ' — ' + adminRole);
+        }
 
         this.setupNav();
         this.setupModals();
