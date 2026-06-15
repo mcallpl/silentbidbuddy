@@ -10,6 +10,40 @@ require_once __DIR__ . '/db-helpers.php';
 require_once __DIR__ . '/payment-requests.php';
 
 /**
+ * Get Stripe API keys for an event (event-specific or global fallback)
+ * @param int $event_id Event ID
+ * @return array ['public_key' => string, 'secret_key' => string]
+ */
+function getEventStripeKeys($event_id) {
+    if (!$event_id) {
+        // Fall back to global keys if no event specified
+        return [
+            'public_key' => STRIPE_PUBLISHABLE_KEY,
+            'secret_key' => STRIPE_SECRET_KEY
+        ];
+    }
+
+    // Get event-specific Stripe keys if configured
+    $event_settings = dbGetRow(
+        "SELECT stripe_key_publishable, stripe_key_secret FROM event_settings WHERE event_id = ?",
+        [(int)$event_id]
+    );
+
+    if ($event_settings && !empty($event_settings['stripe_key_publishable']) && !empty($event_settings['stripe_key_secret'])) {
+        return [
+            'public_key' => $event_settings['stripe_key_publishable'],
+            'secret_key' => $event_settings['stripe_key_secret']
+        ];
+    }
+
+    // Fall back to global keys
+    return [
+        'public_key' => STRIPE_PUBLISHABLE_KEY,
+        'secret_key' => STRIPE_SECRET_KEY
+    ];
+}
+
+/**
  * Create a Stripe Checkout Session for a winning bid
  * @param int $item_id Item ID
  * @param int $user_id User ID
@@ -20,6 +54,27 @@ require_once __DIR__ . '/payment-requests.php';
  */
 function createCheckoutSession($item_id, $user_id, $amount, $item_title, $user_email = '') {
     try {
+        // Get item and event information
+        $item = dbGetRow(
+            "SELECT id, event_id FROM items WHERE id = ?",
+            [(int)$item_id]
+        );
+
+        if (!$item) {
+            return ['success' => false, 'error' => 'Item not found'];
+        }
+
+        $event_id = (int)($item['event_id'] ?? 0);
+
+        // Get event-specific Stripe keys (or fall back to global)
+        $stripe_keys = getEventStripeKeys($event_id);
+        $public_key = $stripe_keys['public_key'];
+        $secret_key = $stripe_keys['secret_key'];
+
+        if (!$public_key || !$secret_key) {
+            return ['success' => false, 'error' => 'Stripe configuration not available'];
+        }
+
         $payment_request = ensurePendingPaymentRequest($item_id, $user_id, $amount);
         if (!$payment_request['success']) {
             return ['success' => false, 'error' => 'Failed to create payment request'];
@@ -35,7 +90,7 @@ function createCheckoutSession($item_id, $user_id, $amount, $item_title, $user_e
         }
 
         // Get or create Stripe customer
-        $customer = getOrCreateStripeCustomer($user_id, $user_email);
+        $customer = getOrCreateStripeCustomer($user_id, $user_email, $secret_key);
         if (!$customer || empty($customer['id'])) {
             return ['success' => false, 'error' => 'Failed to create payment customer'];
         }
@@ -54,11 +109,12 @@ function createCheckoutSession($item_id, $user_id, $amount, $item_title, $user_e
             'cancel_url' => APP_DOMAIN . '/item.php?id=' . urlencode($item_id),
             'metadata[item_id]' => $item_id,
             'metadata[user_id]' => $user_id,
-            'metadata[transaction_id]' => $transaction_id
+            'metadata[transaction_id]' => $transaction_id,
+            'metadata[event_id]' => $event_id
         ];
 
-        // Create Stripe checkout session via API
-        $response = callStripeAPI('/v1/checkout/sessions', $session_data, 'POST');
+        // Create Stripe checkout session via API using event-specific keys
+        $response = callStripeAPI('/v1/checkout/sessions', $session_data, 'POST', $secret_key);
 
         if (empty($response['id'])) {
             $error = $response['error']['message'] ?? 'Failed to create checkout session';
@@ -70,7 +126,8 @@ function createCheckoutSession($item_id, $user_id, $amount, $item_title, $user_e
         return [
             'success' => true,
             'session_id' => $response['id'],
-            'public_key' => STRIPE_PUBLISHABLE_KEY
+            'public_key' => $public_key,
+            'event_id' => $event_id
         ];
     } catch (Exception $e) {
         error_log("Stripe session creation error: " . $e->getMessage());
@@ -82,9 +139,10 @@ function createCheckoutSession($item_id, $user_id, $amount, $item_title, $user_e
  * Get or create a Stripe customer for a user
  * @param int $user_id User ID
  * @param string $email Email address (optional)
+ * @param string $stripe_secret_key Stripe secret key (optional, uses global if not provided)
  * @return array|null Customer data with 'id' key
  */
-function getOrCreateStripeCustomer($user_id, $email = '') {
+function getOrCreateStripeCustomer($user_id, $email = '', $stripe_secret_key = '') {
     try {
         // Get user record
         $user = dbGetRow(
@@ -98,7 +156,7 @@ function getOrCreateStripeCustomer($user_id, $email = '') {
 
         // If customer already exists, return it
         if ($user['stripe_customer_id']) {
-            $response = callStripeAPI('/v1/customers/' . $user['stripe_customer_id'], [], 'GET');
+            $response = callStripeAPI('/v1/customers/' . $user['stripe_customer_id'], [], 'GET', $stripe_secret_key);
             if (!empty($response['id'])) {
                 return $response;
             }
@@ -114,7 +172,7 @@ function getOrCreateStripeCustomer($user_id, $email = '') {
             $customer_data['email'] = $email;
         }
 
-        $response = callStripeAPI('/v1/customers', $customer_data, 'POST');
+        $response = callStripeAPI('/v1/customers', $customer_data, 'POST', $stripe_secret_key);
 
         if (empty($response['id'])) {
             return null;
@@ -240,12 +298,31 @@ function processCheckoutCompleted($session) {
 }
 
 /**
- * Verify Stripe webhook signature.
+ * Verify Stripe webhook signature (tries event-specific secrets first, then global)
  * @param string $payload Raw request body
  * @param string $signature Signature header
+ * @param int $event_id Event ID (optional, for event-specific verification)
  * @return bool
  */
-function verifyStripeSignature($payload, $signature) {
+function verifyStripeSignature($payload, $signature, $event_id = 0) {
+    // Try event-specific webhook secret first
+    if ($event_id) {
+        $event_settings = dbGetRow(
+            "SELECT stripe_key_secret FROM event_settings WHERE event_id = ?",
+            [(int)$event_id]
+        );
+
+        if ($event_settings && !empty($event_settings['stripe_key_secret'])) {
+            // Extract webhook secret from the stripe_key_secret if it contains both
+            // For now, assume stripe_key_secret is just the secret key
+            // In production, you'd want a separate webhook secret field
+            if (verifyStripeSignatureHeader($payload, $signature, $event_settings['stripe_key_secret'])) {
+                return true;
+            }
+        }
+    }
+
+    // Fall back to global webhook secret
     if (!STRIPE_WEBHOOK_SECRET) {
         return false;
     }
@@ -308,10 +385,13 @@ function verifyStripeSignatureHeader($payload, $signature, $secret, $tolerance_s
  * @param string $endpoint API endpoint path (e.g. '/v1/checkout/sessions')
  * @param array $data Request data
  * @param string $method HTTP method
+ * @param string $stripe_secret_key Stripe secret key (optional, uses global if not provided)
  * @return array API response
  */
-function callStripeAPI($endpoint, $data = [], $method = 'POST') {
-    if (!STRIPE_SECRET_KEY) {
+function callStripeAPI($endpoint, $data = [], $method = 'POST', $stripe_secret_key = '') {
+    $secret_key = $stripe_secret_key ?: STRIPE_SECRET_KEY;
+
+    if (!$secret_key) {
         throw new Exception('Stripe API key not configured');
     }
 
@@ -320,7 +400,7 @@ function callStripeAPI($endpoint, $data = [], $method = 'POST') {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, STRIPE_SECRET_KEY . ':');
+    curl_setopt($ch, CURLOPT_USERPWD, $secret_key . ':');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);

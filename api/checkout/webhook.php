@@ -32,9 +32,16 @@ if (!$event) {
     die(json_encode(['status' => 'error', 'message' => 'Invalid JSON payload']));
 }
 
-// Verify webhook signature
-if ($signature && STRIPE_WEBHOOK_SECRET) {
-    if (!verifyStripeSignature($payload, $signature)) {
+// Get event_id from session metadata (for event-specific Stripe verification)
+$event_id = 0;
+if ($event['type'] === 'checkout.session.completed') {
+    $session = $event['data']['object'] ?? [];
+    $event_id = (int)($session['metadata']['event_id'] ?? 0);
+}
+
+// Verify webhook signature (tries event-specific, then global)
+if ($signature && (STRIPE_WEBHOOK_SECRET || $event_id)) {
+    if (!verifyStripeSignature($payload, $signature, $event_id)) {
         http_response_code(401);
         die(json_encode(['status' => 'error', 'message' => 'Invalid signature']));
     }
