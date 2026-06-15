@@ -74,6 +74,15 @@ $page_title = APP_NAME . ' — Admin Dashboard';
             </div>
         </header>
 
+        <!-- Event Selector Bar -->
+        <div id="eventSelectorBar" style="background: white; border-bottom: 1px solid #ddd; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem;">
+            <label for="eventSelector" style="font-weight: 600; color: #333; margin: 0;">Select Event:</label>
+            <select id="eventSelector" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; cursor: pointer; min-width: 300px;">
+                <option value="">-- Choose an event --</option>
+            </select>
+            <span id="eventInfo" style="color: #666; font-size: 0.9rem; margin-left: auto;"></span>
+        </div>
+
         <!-- Navigation Tabs -->
         <nav class="admin-nav">
             <button class="nav-tab active" data-section="dashboard">Dashboard</button>

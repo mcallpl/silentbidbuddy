@@ -13,7 +13,9 @@ const AdminDashboard = {
         isLoggedIn: false,
         currentSection: 'dashboard',
         currentPage: {},
-        metricsInterval: null
+        metricsInterval: null,
+        selectedEventId: null,
+        events: []
     },
 
     init(isLoggedIn) {
@@ -114,6 +116,7 @@ const AdminDashboard = {
         }
 
         this.setupNav();
+        this.setupEventSelector();
         this.setupModals();
         this.setupButtons();
         this.setupFilters();
@@ -168,6 +171,80 @@ const AdminDashboard = {
         });
     },
 
+    async setupEventSelector() {
+        // Load available events and populate dropdown
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/get-events.php');
+            const data = await response.json();
+
+            if (response.ok && data.status === 'ok' && data.events && data.events.length > 0) {
+                this.state.events = data.events;
+                this.populateEventSelector(data.events);
+
+                // Auto-select first event if available
+                if (data.events.length > 0) {
+                    const selector = document.getElementById('eventSelector');
+                    selector.value = data.events[0].id;
+                    this.selectEvent(data.events[0].id);
+                }
+            }
+        } catch (error) {
+            console.debug('Could not load events:', error.message);
+        }
+    },
+
+    populateEventSelector(events) {
+        const selector = document.getElementById('eventSelector');
+        selector.innerHTML = '<option value="">-- Choose an event --</option>';
+
+        events.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.id;
+            option.textContent = event.name;
+            selector.appendChild(option);
+        });
+
+        // Add change event listener
+        selector.addEventListener('change', (e) => {
+            if (e.target.value) {
+                this.selectEvent(parseInt(e.target.value));
+            } else {
+                this.selectedEventId = null;
+                this.reloadAllData();
+            }
+        });
+    },
+
+    selectEvent(eventId) {
+        this.state.selectedEventId = eventId;
+
+        // Update event info
+        const event = this.state.events.find(e => e.id === eventId);
+        const eventInfo = document.getElementById('eventInfo');
+        if (event && eventInfo) {
+            const dateStr = event.event_date ? new Date(event.event_date).toLocaleDateString() : 'No date';
+            eventInfo.textContent = `📅 ${dateStr} | Status: ${event.status}`;
+        }
+
+        // Reload all data for this event
+        this.reloadAllData();
+    },
+
+    reloadAllData() {
+        // Reload current section with selected event filter
+        if (this.state.currentSection === 'dashboard') {
+            this.loadMetrics();
+        } else if (this.state.currentSection === 'items') {
+            this.loadItems(1);
+        } else if (this.state.currentSection === 'transactions') {
+            this.loadTransactions(1);
+        } else if (this.state.currentSection === 'users') {
+            this.loadUsers(1);
+        } else if (this.state.currentSection === 'bids') {
+            this.loadBids(1);
+        }
+    },
+
     showSection(section) {
         // Update nav tabs
         document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -201,6 +278,13 @@ const AdminDashboard = {
 
     async loadBids(page = 1) {
         const container = document.getElementById('bidsContainer');
+
+        // If no event selected, show message
+        if (!this.state.selectedEventId) {
+            container.innerHTML = '<p class="empty-state">Please select an event first.</p>';
+            return;
+        }
+
         try {
             // Get filter and sort state from UI or use defaults
             const filterType = document.getElementById('bidsFilterDropdown')?.value || 'all';
@@ -211,6 +295,7 @@ const AdminDashboard = {
             container.innerHTML = '<p class="loading">Loading bids...</p>';
 
             let url = this.config.apiBaseUrl + '/get-bids.php?page=' + page + '&limit=50';
+            url += '&event_id=' + this.state.selectedEventId;
             url += '&filter=' + encodeURIComponent(filterType);
             url += '&sort_by=' + encodeURIComponent(sortBy);
             url += '&sort_order=' + encodeURIComponent(sortOrder);
@@ -447,8 +532,18 @@ const AdminDashboard = {
     },
 
     async loadMetrics() {
+        // If no event selected, skip metrics
+        if (!this.state.selectedEventId) {
+            return;
+        }
+
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/get-metrics.php', {
+            let url = this.config.apiBaseUrl + '/get-metrics.php';
+            if (this.state.selectedEventId) {
+                url += '?event_id=' + this.state.selectedEventId;
+            }
+
+            const response = await fetch(url, {
                 headers: this.getAuthHeaders()
             });
             const data = await response.json();
@@ -532,8 +627,20 @@ const AdminDashboard = {
     // ============================================================
 
     async loadItems(page = 1) {
+        // If no event selected, show message
+        if (!this.state.selectedEventId) {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '<p class="empty-state">Please select an event first.</p>';
+            return;
+        }
+
         try {
-            const response = await fetch(this.config.apiBaseUrl + '/get-items.php?page=' + page + '&limit=25', {
+            let url = this.config.apiBaseUrl + '/get-items.php?page=' + page + '&limit=25';
+            if (this.state.selectedEventId) {
+                url += '&event_id=' + this.state.selectedEventId;
+            }
+
+            const response = await fetch(url, {
                 headers: this.getAuthHeaders()
             });
             const data = await response.json();
@@ -792,8 +899,16 @@ const AdminDashboard = {
     // ============================================================
 
     async loadTransactions(page = 1, status = '') {
+        // If no event selected, show message
+        const container = document.getElementById('transactionsContainer');
+        if (!this.state.selectedEventId) {
+            container.innerHTML = '<p class="empty-state">Please select an event first.</p>';
+            return;
+        }
+
         try {
             let url = this.config.apiBaseUrl + '/get-transactions.php?page=' + page + '&limit=25';
+            url += '&event_id=' + this.state.selectedEventId;
             if (status) {
                 url += '&status=' + encodeURIComponent(status);
             }
@@ -845,8 +960,18 @@ const AdminDashboard = {
     // ============================================================
 
     async loadUsers(page = 1, search = '') {
+        // If no event selected, show message
+        if (!this.state.selectedEventId) {
+            const container = document.getElementById('usersContainer');
+            container.innerHTML = '<p class="empty-state">Please select an event first.</p>';
+            return;
+        }
+
         try {
             let url = this.config.apiBaseUrl + '/get-users.php?page=' + page + '&limit=25';
+            if (this.state.selectedEventId) {
+                url += '&event_id=' + this.state.selectedEventId;
+            }
             if (search) {
                 url += '&search=' + encodeURIComponent(search);
             }
