@@ -79,7 +79,7 @@ function authenticateAdmin($username, $password) {
 
     // Fetch admin account
     $admin = dbGetRow(
-        "SELECT id, username, password_hash, email, full_name, is_active FROM admin_accounts WHERE username = ?",
+        "SELECT id, username, password_hash, email, full_name, is_active, is_super_admin FROM admin_accounts WHERE username = ?",
         [$username]
     );
 
@@ -107,7 +107,8 @@ function authenticateAdmin($username, $password) {
         'id' => $admin['id'],
         'username' => $admin['username'],
         'email' => $admin['email'],
-        'full_name' => $admin['full_name']
+        'full_name' => $admin['full_name'],
+        'is_super_admin' => (bool)$admin['is_super_admin']
     ];
 }
 
