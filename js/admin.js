@@ -59,11 +59,9 @@ const AdminDashboard = {
                 const data = await response.json();
 
                 if (response.ok && data.status === 'ok') {
-                    // Store admin role and redirect with flag
-                    const adminRole = data.admin.is_super_admin ? 'Super Admin' : 'Admin';
-                    localStorage.setItem('adminRole', adminRole);
-                    // Also add to URL for extra reliability
-                    window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'role=' + encodeURIComponent(adminRole);
+                    // Login successful, redirect to dashboard
+                    // Role will be fetched from API by setupDashboard()
+                    window.location.href = window.location.href;
                 } else {
                     loginError.textContent = data.message || 'Invalid username or password';
                     loginError.style.display = 'block';
@@ -80,23 +78,24 @@ const AdminDashboard = {
         });
     },
 
-    setupDashboard() {
+    async setupDashboard() {
         // Get admin token from cookie
         this.getAdminTokenFromCookie();
 
-        // Check for admin role from URL parameter or localStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlRole = urlParams.get('role');
-        const storedRole = localStorage.getItem('adminRole');
-        const adminRole = urlRole || storedRole;
+        // Fetch actual admin info from API (server is the authority)
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/get-current-admin.php');
+            const data = await response.json();
 
-        if (adminRole === 'Super Admin') {
-            const title = document.querySelector('.dashboard-title');
-            if (title) {
-                title.textContent = title.textContent.replace(' — Admin', ' — Super Admin');
+            if (response.ok && data.status === 'ok' && data.admin.is_super_admin) {
+                const title = document.querySelector('.dashboard-title');
+                if (title) {
+                    title.textContent = title.textContent.replace(' — Admin', ' — Super Admin');
+                }
             }
-            // Clean up URL
-            if (urlRole) window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+            // Silently fail - display default "Admin", backend authorization is the real security
+            console.debug('Could not fetch admin info:', error.message);
         }
 
         this.setupNav();
