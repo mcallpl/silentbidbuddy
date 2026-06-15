@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step-by-Step Instructions - Silent Bid Buddy</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <style>
+        .help-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .instructions-section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .instructions-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .instruction-step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .instruction-step h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin: 0 0 10px 0;
+        }
+
+        .instruction-step p {
+            margin: 8px 0;
+            color: #555;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .button-label {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        .input-label {
+            display: inline-block;
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 13px;
+            border: 1px solid #667eea;
+        }
+
+        .instruction-note {
+            background: #f0f4ff;
+            border-left: 3px solid #667eea;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #444;
+        }
+
+        .instruction-note strong {
+            color: #667eea;
+        }
+
+        .sub-steps {
+            margin: 15px 0 0 20px;
+        }
+
+        .sub-steps li {
+            margin: 8px 0;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .modal-example {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        .modal-example h4 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 13px;
+        }
+
+        .field-example {
+            background: #f9f9f9;
+            padding: 8px 12px;
+            border-radius: 3px;
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .instructions-section {
+                padding: 20px;
+            }
+
+            .instruction-step {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body class="help-page">
+    <div class="help-container">
+        <a href="javascript:history.back()" class="back-link">← Back to Dashboard</a>
+
+        <h1 style="font-size: 28px; margin-bottom: 10px; color: #333;">Complete Step-by-Step Instructions</h1>
+        <p style="color: #666; margin-bottom: 40px; font-size: 16px;">Exact instructions for every task in Silent Bid Buddy</p>
+
+        <!-- CREATE EVENT -->
+        <div class="instructions-section">
+            <h2>📅 How to Create an Event</h2>
+
+            <div class="instruction-step">
+                <h3>1. Navigate to Events Tab</h3>
+                <p>Click the <span class="button-label">📅 Events</span> tab in the top navigation bar (appears for Super Admins or Admins with assigned events).</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Click Create New Event</h3>
+                <p>You'll see a <span class="button-label">Create New Event</span> button. Click it to open the event creation form.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Fill in Event Details</h3>
+                <p>A form appears with these required fields:</p>
+                <ul class="sub-steps">
+                    <li><span class="input-label">Event Name</span> - What you're calling your auction (e.g., "Spring Gala 2026")</li>
+                    <li><span class="input-label">Event Date</span> - When the auction is happening</li>
+                    <li><span class="input-label">Auction Start Time</span> - When bidding begins (e.g., 6:00 PM)</li>
+                    <li><span class="input-label">Auction End Time</span> - When bidding ends (e.g., 8:30 PM)</li>
+                    <li><span class="input-label">Timezone</span> - Your location's timezone (defaults to America/Los_Angeles)</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Save Event</h3>
+                <p>Click the <span class="button-label">Create Event</span> button at the bottom of the form. The event is now live and ready for items and bidders.</p>
+            </div>
+
+            <div class="instruction-note">
+                <strong>Pro Tip:</strong> Start your event with a 30-minute buffer before guests arrive. Gives you time to verify everything loads correctly.
+            </div>
+        </div>
+
+        <!-- CREATE ITEMS -->
+        <div class="instructions-section">
+            <h2>📦 How to Create Auction Items</h2>
+
+            <div class="instruction-step">
+                <h3>1. Go to Items Tab</h3>
+                <p>Click the <span class="button-label">Items</span> tab in the top navigation.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Click Create Item Button</h3>
+                <p>Click <span class="button-label">+ Create Item</span> button. A modal dialog opens.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Enter Item Title</h3>
+                <p>Fill in <span class="input-label">Item Title</span> field. Make it clear and specific:</p>
+                <div class="field-example">
+                    ❌ Bad: "Gift Certificate"<br>
+                    ✅ Good: "Restaurant Gift Card - $100 at Blue Hill"
+                </div>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Write Item Description</h3>
+                <p>In the <span class="input-label">Description</span> textarea, write 3-5 sentences including:</p>
+                <ul class="sub-steps">
+                    <li>What the item is and what's included</li>
+                    <li>When it can be used (dates, blackout dates)</li>
+                    <li>Restrictions or conditions</li>
+                    <li>Who provided/donated it</li>
+                    <li>Why it's valuable (estimated price, normal retail value)</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>💡 Tip:</strong> Click the <span class="button-label">Improve description</span> button to use AI to enhance your description automatically.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>5. Add Item Photo</h3>
+                <p>Click the upload area and select a high-quality photo of the item. Photos increase bids by 30-40%!</p>
+                <ul class="sub-steps">
+                    <li>Use clear, well-lit photos</li>
+                    <li>Show the actual item (not just a logo or generic image)</li>
+                    <li>Accepted formats: JPG, PNG, GIF</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>6. Set Starting Bid</h3>
+                <p>Enter the <span class="input-label">Starting Bid</span> amount. Typically 40-60% of fair market value.</p>
+                <div class="field-example">
+                    Item worth $100 → Start at $40-60<br>
+                    Item worth $500 → Start at $250-300
+                </div>
+            </div>
+
+            <div class="instruction-step">
+                <h3>7. Set Minimum Increment</h3>
+                <p>Enter <span class="input-label">Minimum Increment</span> - the smallest amount the next bid must increase by:</p>
+                <ul class="sub-steps">
+                    <li>Items $0-50: Use $2-5 increments</li>
+                    <li>Items $50-250: Use $5-10 increments</li>
+                    <li>Items $250+: Use $15-25 increments</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>8. Set Closing Time</h3>
+                <p>Choose when this specific item's bidding closes. You can use:</p>
+                <ul class="sub-steps">
+                    <li>The event's default closing time (all items close together)</li>
+                    <li>A custom time (stagger items to keep bidding active longer)</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>9. Optional: Set Fair Market Value</h3>
+                <p>Enter <span class="input-label">Fair Market Value</span> to show bidders the estimated value. This helps them know if they're getting a good deal.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>10. Optional: Set Buy Now Price</h3>
+                <p>Enter a <span class="input-label">Buy Now Price</span> if you want to allow bidders to skip the auction and purchase immediately at a set price.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>11. Save Item</h3>
+                <p>Click <span class="button-label">Create Item</span> button. Item is now live and visible to bidders.</p>
+            </div>
+
+            <div class="instruction-note">
+                <strong>💡 Pro Tip:</strong> Stagger item closing times by 15-30 minutes. Keeps momentum and prevents all items closing at once.
+            </div>
+
+            <div class="instruction-note">
+                <strong>PDF & QR Codes:</strong> After creating an item, you can download a professional PDF with QR code for printing and table placement.
+            </div>
+        </div>
+
+        <!-- ADD BIDDERS/USERS -->
+        <div class="instructions-section">
+            <h2>👥 How to Add Bidders & Create Users</h2>
+
+            <div class="instruction-step">
+                <h3>1. Go to Bidders & Users Tab</h3>
+                <p>Click the <span class="button-label">Bidders</span> tab in the top navigation.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Click Create Bidder</h3>
+                <p>Click the <span class="button-label">Create Bidder</span> button in the top right. A form appears.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Enter Bidder Information</h3>
+                <p>Fill in the following information:</p>
+                <ul class="sub-steps">
+                    <li><span class="input-label">Full Name</span> (required) - Person's full name</li>
+                    <li><span class="input-label">Phone Number</span> (required) - Their mobile number for SMS alerts</li>
+                    <li><span class="input-label">Email</span> (optional) - Their email address</li>
+                    <li><span class="input-label">User Type</span> - Choose one:
+                        <ul>
+                            <li><strong>Bidder:</strong> Can place bids and win items</li>
+                            <li><strong>Viewer:</strong> Can see items but cannot bid (good for monitoring)</li>
+                            <li><strong>Admin:</strong> Can manage the auction (event administrators)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Save User</h3>
+                <p>Click <span class="button-label">Create User</span>. The bidder is now added to your event.</p>
+            </div>
+
+            <div class="instruction-note">
+                <strong>Important:</strong> Each person can have different phone numbers in different events. The system allows the same phone number across multiple events.
+            </div>
+
+            <div class="instruction-step">
+                <h3>Manage Event Users (For Event Admins)</h3>
+                <p>If you're managing users for a specific event:</p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Go to <span class="button-label">📅 Events</span> tab</li>
+                    <li>Find your event in the list</li>
+                    <li>Click the <span class="button-label">👥 Users</span> button for that event</li>
+                    <li>A modal opens showing that event's users</li>
+                    <li>Click <span class="button-label">+ Create User</span> to add users specific to that event</li>
+                </ol>
+            </div>
+
+            <div class="instruction-note">
+                <strong>💡 Batch Upload:</strong> Need to add 50+ bidders? Use CSV batch import (ask your admin for the import template).
+            </div>
+        </div>
+
+        <!-- MANAGE PAYMENTS -->
+        <div class="instructions-section">
+            <h2>💳 How to Set Up Stripe Payments</h2>
+
+            <div class="instruction-step">
+                <h3>1. Sign Up for Stripe Account</h3>
+                <p>Go to <strong>stripe.com</strong> and click "Start now". Fill in your nonprofit information.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Get Your Stripe API Keys</h3>
+                <p>After creating your Stripe account:</p>
+                <ul class="sub-steps">
+                    <li>Log into Stripe dashboard</li>
+                    <li>Go to "Developers" → "API Keys"</li>
+                    <li>Copy your <strong>Publishable Key</strong> (starts with "pk_")</li>
+                    <li>Copy your <strong>Secret Key</strong> (starts with "sk_")</li>
+                    <li>Keep these keys safe! They're sensitive credentials.</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Configure Stripe Keys in Silent Bid Buddy</h3>
+                <p>Contact your Super Admin to enter the Stripe keys. This is a one-time setup.</p>
+                <div class="instruction-note">
+                    <strong>For Super Admins:</strong> Go to <span class="button-label">👤 Admin Control</span> tab → Event-specific Stripe configuration (if desired). Otherwise, global Stripe keys are used for all events.
+                </div>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Test in Sandbox Mode</h3>
+                <p>Before going live, test in Stripe's sandbox:</p>
+                <ul class="sub-steps">
+                    <li>In Stripe dashboard, toggle "Test mode" on</li>
+                    <li>Use test card: 4242 4242 4242 4242 (any future expiry, any CVC)</li>
+                    <li>Place a test bid and go through checkout</li>
+                    <li>Verify transaction appears in Stripe dashboard</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>5. Go Live</h3>
+                <p>When ready, toggle "Test mode" off in Stripe to start processing real payments.</p>
+            </div>
+
+            <div class="instruction-note">
+                <strong>Multiple Events?</strong> Each event can use different Stripe accounts (different nonprofits, different organizations). Configure per-event in Admin Control.
+            </div>
+        </div>
+
+        <!-- LAUNCH AUCTION -->
+        <div class="instructions-section">
+            <h2>🚀 How to Launch Your Auction</h2>
+
+            <div class="instruction-step">
+                <h3>1. Verify Everything is Ready</h3>
+                <p>Before launching, check:</p>
+                <ul class="sub-steps">
+                    <li>✓ Event is created with correct date/times</li>
+                    <li>✓ All items are added with photos and descriptions</li>
+                    <li>✓ All bidders are added</li>
+                    <li>✓ Stripe is configured and tested</li>
+                    <li>✓ Starting bids are reasonable (40-60% of FMV)</li>
+                    <li>✓ Item closing times are staggered (optional but recommended)</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Create PDF Catalog (Optional)</h3>
+                <p>Generate a professional PDF to send to bidders before the event:</p>
+                <ul class="sub-steps">
+                    <li>Go to <span class="button-label">Items</span> tab</li>
+                    <li>Find an item and click to edit it</li>
+                    <li>Click <span class="button-label">Create PDF Catalog</span> button</li>
+                    <li>A PDF downloads with all items, photos, and descriptions</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Share Bidding Link</h3>
+                <p>Send bidders the link to your auction (e.g., <strong>https://silentbidbuddy.com/items.php</strong>). They can browse items and place bids.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Monitor Dashboard</h3>
+                <p>During the auction, watch the <span class="button-label">Dashboard</span> for live metrics:</p>
+                <ul class="sub-steps">
+                    <li>Active items currently being bid on</li>
+                    <li>Active bidders in the last hour</li>
+                    <li>Total bids placed</li>
+                    <li>Estimated amount raised</li>
+                    <li>High-traffic items (most popular)</li>
+                    <li>Recent activity (bids, wins)</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>5. Close Expired Auctions</h3>
+                <p>When items' closing times arrive, they automatically close. But you can manually close items:</p>
+                <ul class="sub-steps">
+                    <li>Go to <span class="button-label">Dashboard</span> tab</li>
+                    <li>Click <span class="button-label">🏁 Close Expired Auctions</span> button</li>
+                    <li>System marks all expired items as closed</li>
+                    <li>Winners are determined</li>
+                </ul>
+            </div>
+
+            <div class="instruction-note">
+                <strong>💡 Pro Tip:</strong> Announce winning items in real-time during your event. Creates excitement and encourages additional bidding.
+            </div>
+        </div>
+
+        <!-- COLLECT PAYMENTS -->
+        <div class="instructions-section">
+            <h2>💰 How Payments Work (Automated)</h2>
+
+            <div class="instruction-step">
+                <h3>1. Winners Are Auto-Invoiced</h3>
+                <p>When an item closes, the highest bidder automatically receives an invoice/payment link via email (if email available).</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Bidder Checks Out</h3>
+                <p>Winner clicks the payment link and enters their payment details (credit/debit card via Stripe).</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Payment Processed</h3>
+                <p>Stripe processes the payment securely (2.9% + 30¢ per transaction).</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Monitor Payments</h3>
+                <p>Go to <span class="button-label">Transactions</span> tab to see payment status:</p>
+                <ul class="sub-steps">
+                    <li><strong>Pending:</strong> Waiting for payment</li>
+                    <li><strong>Paid:</strong> Payment successful</li>
+                    <li><strong>Failed:</strong> Payment declined</li>
+                </ul>
+                <p>You can filter by status to see which winners still need to pay.</p>
+            </div>
+
+            <div class="instruction-note">
+                <strong>Manual Follow-Up:</strong> If a winner doesn't pay within 48 hours, you can manually send them a reminder link from the Transactions tab.
+            </div>
+
+            <div class="instruction-step">
+                <h3>5. View Bids & Winners</h3>
+                <p>Go to <span class="button-label">Bids</span> tab to see all bids and winners. Filter by "Winning Bids" to see only the bids that won.</p>
+            </div>
+        </div>
+
+        <!-- MANAGE ADMINS -->
+        <div class="instructions-section">
+            <h2>👤 How to Assign Event Admins (Super Admin Only)</h2>
+
+            <div class="instruction-step">
+                <h3>1. Go to Events Tab</h3>
+                <p>Click <span class="button-label">📅 Events</span> in the navigation bar.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>2. Click Assign Admins Button</h3>
+                <p>Click <span class="button-label">👤 Assign Admins to Events</span> button. A modal opens.</p>
+            </div>
+
+            <div class="instruction-step">
+                <h3>3. Select Admin & Event</h3>
+                <p>Choose:</p>
+                <ul class="sub-steps">
+                    <li><span class="input-label">Admin Account</span> - Which admin to assign</li>
+                    <li><span class="input-label">Event</span> - Which event to assign them to</li>
+                    <li><span class="input-label">Role</span> - Either:
+                        <ul>
+                            <li><strong>Manager:</strong> Can create/edit/delete items and users for this event</li>
+                            <li><strong>Viewer:</strong> Can only view items and users (read-only)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <h3>4. Save Assignment</h3>
+                <p>Click <span class="button-label">Assign Admin</span>. Admin can now manage that event.</p>
+            </div>
+
+            <div class="instruction-note">
+                <strong>One Admin, Multiple Events:</strong> You can assign the same admin to multiple events. They'll see all their assigned events in their dashboard.
+            </div>
+        </div>
+
+        <!-- BEST PRACTICES SECTION -->
+        <div class="instructions-section" style="background: linear-gradient(135deg, #f0f4ff 0%, #f9f0ff 100%);">
+            <h2>✅ Launch Checklist</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div>
+                    <h3 style="color: #667eea; font-size: 14px; margin-bottom: 12px;">📋 Items Setup</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Created at least 5 items</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Each item has a photo</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Descriptions are detailed (3+ sentences)</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Starting bids are 40-60% of value</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Closing times are staggered</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: #667eea; font-size: 14px; margin-bottom: 12px;">👥 Bidders & Admins</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Added all bidders</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Phone numbers verified</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Event admins assigned</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Admin roles set correctly</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Test admin can log in</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: #667eea; font-size: 14px; margin-bottom: 12px;">💳 Payment Setup</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Stripe account created</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ API keys entered</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Tested with sandbox card</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Switched to live mode</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Banking info verified</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="color: #667eea; font-size: 14px; margin-bottom: 12px;">🚀 Event Launch</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Event date/times set</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Bidding link ready to share</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ PDF catalog generated</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Dashboard tested (shows live data)</li>
+                        <li style="padding: 6px 0; font-size: 13px;">☐ Event starts at scheduled time</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 40px 20px; color: #999; font-size: 13px; border-top: 1px solid #eee; margin-top: 50px;">
+            <p>Need additional help? Contact support@silentbidbuddy.com</p>
+            <p style="margin-top: 10px;">Last updated: June 2026 | Silent Bid Buddy v2.0</p>
+        </div>
+    </div>
+</body>
+</html>
