@@ -82,6 +82,15 @@ const AdminDashboard = {
         // Get admin token from cookie
         this.getAdminTokenFromCookie();
 
+        // Update title if admin role is stored in localStorage
+        const storedRole = localStorage.getItem('adminRole');
+        if (storedRole === 'Super Admin') {
+            const title = document.querySelector('.dashboard-title');
+            if (title) {
+                title.textContent = title.textContent.replace(' — Admin', ' — Super Admin');
+            }
+        }
+
         this.setupNav();
         this.setupModals();
         this.setupButtons();
@@ -93,23 +102,6 @@ const AdminDashboard = {
 
         // Start metrics polling
         this.startMetricsPolling();
-
-        // Fetch admin role asynchronously (non-blocking)
-        this.updateAdminRole();
-    },
-
-    updateAdminRole() {
-        fetch(this.config.apiBaseUrl + '/get-current-admin.php')
-            .then(r => r.json())
-            .then(data => {
-                if (data.admin && data.admin.is_super_admin) {
-                    const title = document.querySelector('.dashboard-title');
-                    if (title) {
-                        title.textContent = title.textContent.replace(' — Admin', ' — Super Admin');
-                    }
-                }
-            })
-            .catch(() => {}); // Silently fail if API unreachable
     },
 
     getAdminTokenFromCookie() {
