@@ -84,8 +84,10 @@ const AdminDashboard = {
 
         // Update header title with admin role
         const adminRole = localStorage.getItem('adminRole') || 'Admin';
+        console.log('Admin Role from localStorage:', adminRole);
         const titleElement = document.querySelector('.dashboard-title');
         if (titleElement) {
+            console.log('Updating title from:', titleElement.textContent, 'to include:', adminRole);
             titleElement.textContent = titleElement.textContent.replace(' — Admin', ' — ' + adminRole);
         }
 
