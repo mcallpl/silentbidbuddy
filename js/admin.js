@@ -78,17 +78,27 @@ const AdminDashboard = {
         });
     },
 
-    setupDashboard() {
+    async setupDashboard() {
         // Get admin token from cookie
         this.getAdminTokenFromCookie();
 
-        // Update header title with admin role
-        const adminRole = localStorage.getItem('adminRole') || 'Admin';
-        console.log('Admin Role from localStorage:', adminRole);
-        const titleElement = document.querySelector('.dashboard-title');
-        if (titleElement) {
-            console.log('Updating title from:', titleElement.textContent, 'to include:', adminRole);
-            titleElement.textContent = titleElement.textContent.replace(' — Admin', ' — ' + adminRole);
+        // Fetch and set current admin role
+        try {
+            const response = await fetch(this.config.apiBaseUrl + '/get-current-admin.php');
+            const data = await response.json();
+
+            if (data.status === 'ok' && data.admin) {
+                const adminRole = data.admin.is_super_admin ? 'Super Admin' : 'Admin';
+                localStorage.setItem('adminRole', adminRole);
+
+                // Update header title with admin role
+                const titleElement = document.querySelector('.dashboard-title');
+                if (titleElement) {
+                    titleElement.textContent = titleElement.textContent.replace(' — Admin', ' — ' + adminRole);
+                }
+            }
+        } catch (error) {
+            console.error('Could not fetch admin info:', error);
         }
 
         this.setupNav();
