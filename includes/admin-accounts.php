@@ -121,6 +121,12 @@ function loginAdmin($admin_id) {
     // Create session token
     $session_token = bin2hex(random_bytes(32));
 
+    // Store session token in database
+    dbUpdate(
+        "UPDATE admin_accounts SET admin_session_token = ? WHERE id = ?",
+        [$session_token, (int)$admin_id]
+    );
+
     // Set persistent session cookie
     setSessionCookie(ADMIN_SESSION_COOKIE_NAME, $session_token, SESSION_COOKIE_LIFETIME);
 
@@ -139,6 +145,17 @@ function loginAdmin($admin_id) {
  * @return bool
  */
 function logoutAdmin() {
+    // Clear session token from database
+    $cookie_name = defined('ADMIN_SESSION_COOKIE_NAME') ? ADMIN_SESSION_COOKIE_NAME : 'admin_session_token';
+    $token = $_COOKIE[$cookie_name] ?? null;
+
+    if ($token) {
+        dbUpdate(
+            "UPDATE admin_accounts SET admin_session_token = NULL WHERE admin_session_token = ?",
+            [$token]
+        );
+    }
+
     clearSessionCookie(ADMIN_SESSION_COOKIE_NAME);
 
     dbInsert(
