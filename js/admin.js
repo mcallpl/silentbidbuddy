@@ -93,6 +93,23 @@ const AdminDashboard = {
 
         // Start metrics polling
         this.startMetricsPolling();
+
+        // Fetch admin role asynchronously (non-blocking)
+        this.updateAdminRole();
+    },
+
+    updateAdminRole() {
+        fetch(this.config.apiBaseUrl + '/get-current-admin.php')
+            .then(r => r.json())
+            .then(data => {
+                if (data.admin && data.admin.is_super_admin) {
+                    const title = document.querySelector('.dashboard-title');
+                    if (title) {
+                        title.textContent = title.textContent.replace(' — Admin', ' — Super Admin');
+                    }
+                }
+            })
+            .catch(() => {}); // Silently fail if API unreachable
     },
 
     getAdminTokenFromCookie() {
