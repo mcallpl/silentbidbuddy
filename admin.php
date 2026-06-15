@@ -10,6 +10,17 @@ require_once __DIR__ . '/includes/page-meta.php';
 
 $is_logged_in = isAdminLoggedIn();
 $page_title = APP_NAME . ' — Admin Dashboard';
+$admin_role = 'Admin';
+
+// Try to get current admin role if logged in
+if ($is_logged_in) {
+    require_once __DIR__ . '/includes/admin-auth-middleware.php';
+    $current_admin = getCurrentAdmin();
+    if ($current_admin && isset($current_admin['is_super_admin']) && $current_admin['is_super_admin']) {
+        $admin_role = 'Super Admin';
+        $page_title = APP_NAME . ' — Super Admin Dashboard';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +78,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
         <!-- Header -->
         <header class="admin-header">
             <div class="header-left">
-                <h1 class="dashboard-title"><?php echo htmlspecialchars(APP_NAME); ?> — Admin</h1>
+                <h1 class="dashboard-title"><?php echo htmlspecialchars(APP_NAME); ?> — <?php echo $admin_role; ?></h1>
             </div>
             <div class="header-right">
                 <button id="logoutBtn" class="btn btn-secondary btn-small">Logout</button>
