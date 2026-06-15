@@ -59,9 +59,11 @@ const AdminDashboard = {
                 const data = await response.json();
 
                 if (response.ok && data.status === 'ok') {
-                    // Store admin role for later use
-                    localStorage.setItem('adminRole', data.admin.is_super_admin ? 'Super Admin' : 'Admin');
-                    window.location.reload();
+                    // Store admin role and redirect with flag
+                    const adminRole = data.admin.is_super_admin ? 'Super Admin' : 'Admin';
+                    localStorage.setItem('adminRole', adminRole);
+                    // Also add to URL for extra reliability
+                    window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'role=' + encodeURIComponent(adminRole);
                 } else {
                     loginError.textContent = data.message || 'Invalid username or password';
                     loginError.style.display = 'block';
@@ -82,13 +84,19 @@ const AdminDashboard = {
         // Get admin token from cookie
         this.getAdminTokenFromCookie();
 
-        // Update title if admin role is stored in localStorage
+        // Check for admin role from URL parameter or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRole = urlParams.get('role');
         const storedRole = localStorage.getItem('adminRole');
-        if (storedRole === 'Super Admin') {
+        const adminRole = urlRole || storedRole;
+
+        if (adminRole === 'Super Admin') {
             const title = document.querySelector('.dashboard-title');
             if (title) {
                 title.textContent = title.textContent.replace(' — Admin', ' — Super Admin');
             }
+            // Clean up URL
+            if (urlRole) window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         this.setupNav();
