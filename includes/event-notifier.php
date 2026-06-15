@@ -199,6 +199,70 @@ function base64UrlEncode($string) {
 }
 
 /**
+ * Get event ID from item ID
+ * @param int $item_id Item ID
+ * @return int|null Event ID or null if not found
+ */
+function getEventIdFromItem($item_id) {
+    $item = dbGetRow(
+        "SELECT event_id FROM items WHERE id = ?",
+        [(int)$item_id]
+    );
+    return $item ? $item['event_id'] : null;
+}
+
+/**
+ * Get event settings with defaults
+ * @param int $event_id Event ID
+ * @return array Settings with defaults
+ */
+function getEventSettings($event_id) {
+    $settings = dbGetRow(
+        "SELECT * FROM event_settings WHERE event_id = ?",
+        [(int)$event_id]
+    );
+
+    // Return with defaults if not found
+    return $settings ?: [
+        'sms_enabled' => 1,
+        'outbid_sms_template' => null,
+        'winner_sms_template' => null
+    ];
+}
+
+/**
+ * Check if SMS is enabled for an event
+ * @param int $event_id Event ID
+ * @return bool SMS enabled
+ */
+function shouldSendSMS($event_id) {
+    $settings = getEventSettings($event_id);
+    // Default to enabled if no settings yet
+    return (bool)($settings['sms_enabled'] ?? true);
+}
+
+/**
+ * Get SMS message using custom template or default
+ * @param string $template_text Custom template (may be null)
+ * @param string $default Default message
+ * @param array $variables Template variables {TITLE, AMOUNT, URL, etc}
+ * @return string Final message
+ */
+function formatSMSMessage($template_text, $default, $variables = []) {
+    if (empty($template_text)) {
+        return $default;
+    }
+
+    // Replace template variables
+    $message = $template_text;
+    foreach ($variables as $key => $value) {
+        $message = str_replace('{' . $key . '}', $value, $message);
+    }
+
+    return $message;
+}
+
+/**
  * Notify when bid is placed
  * @param int $item_id Item ID
  * @param int $new_bidder_id User ID of new bidder
@@ -207,6 +271,10 @@ function base64UrlEncode($string) {
  * @param float $new_bid_amount New bid amount
  */
 function notifyBidPlaced($item_id, $new_bidder_id, $previous_bidder_id, $item_title, $new_bid_amount) {
+    // Get event context
+    $event_id = getEventIdFromItem($item_id);
+    $should_send_sms = $event_id ? shouldSendSMS($event_id) : true;
+
     // Notify outbid user
     if ($previous_bidder_id) {
         $previous_bidder = dbGetRow(
@@ -224,8 +292,24 @@ function notifyBidPlaced($item_id, $new_bidder_id, $previous_bidder_id, $item_ti
                 'data' => ['item_id' => $item_id, 'action' => 'view_item']
             ]);
 
-            // Keep existing SMS alert
-            sendOutbidAlert($previous_bidder['phone_number'], $item_title, $item_id);
+            // Send SMS if enabled for this event
+            if ($should_send_sms) {
+                $settings = $event_id ? getEventSettings($event_id) : null;
+
+                $item_url = "https://" . ($_SERVER['HTTP_HOST'] ?? 'silentbidbuddy.com') . "/item.php?id={$item_id}";
+                $default_message = "You've been outbid on '{$item_title}'! Bid again: {$item_url}";
+
+                if ($settings && !empty($settings['outbid_sms_template'])) {
+                    $message = formatSMSMessage($settings['outbid_sms_template'], $default_message, [
+                        'TITLE' => $item_title,
+                        'AMOUNT' => formatCurrency($new_bid_amount),
+                        'URL' => $item_url
+                    ]);
+                    sendTwilioSMS($previous_bidder['phone_number'], $message);
+                } else {
+                    sendOutbidAlert($previous_bidder['phone_number'], $item_title, $item_id);
+                }
+            }
         }
     }
 
@@ -246,8 +330,9 @@ function notifyBidPlaced($item_id, $new_bidder_id, $previous_bidder_id, $item_ti
  * @param int $winner_id User ID of winner
  * @param string $item_title Item title
  * @param float $winning_amount Final winning bid
+ * @param string $checkout_url Optional checkout URL for SMS
  */
-function notifyWinner($item_id, $winner_id, $item_title, $winning_amount) {
+function notifyWinner($item_id, $winner_id, $item_title, $winning_amount, $checkout_url = '') {
     $winner = dbGetRow(
         "SELECT phone_number FROM users WHERE id = ?",
         [(int)$winner_id]
@@ -266,7 +351,28 @@ function notifyWinner($item_id, $winner_id, $item_title, $winning_amount) {
         'data' => ['item_id' => $item_id, 'action' => 'checkout']
     ]);
 
-    // Keep existing SMS (will be sent by auction-engine.php separately)
+    // Send SMS if enabled for this event
+    $event_id = getEventIdFromItem($item_id);
+    $should_send_sms = $event_id ? shouldSendSMS($event_id) : true;
+
+    if ($should_send_sms && $winner['phone_number']) {
+        $settings = $event_id ? getEventSettings($event_id) : null;
+
+        if (!$checkout_url) {
+            $checkout_url = "https://" . ($_SERVER['HTTP_HOST'] ?? 'silentbidbuddy.com') . "/checkout.php?item_id={$item_id}";
+        }
+
+        if ($settings && !empty($settings['winner_sms_template'])) {
+            $message = formatSMSMessage($settings['winner_sms_template'], '', [
+                'TITLE' => $item_title,
+                'AMOUNT' => formatCurrency($winning_amount),
+                'URL' => $checkout_url
+            ]);
+            sendTwilioSMS($winner['phone_number'], $message);
+        } else {
+            sendWinnerNotification($winner['phone_number'], $item_title, $winning_amount, $checkout_url);
+        }
+    }
 
     // Log to audit trail
     dbInsert(
