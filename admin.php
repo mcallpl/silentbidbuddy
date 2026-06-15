@@ -6,10 +6,13 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/admin-auth.php';
+require_once __DIR__ . '/includes/admin-auth-middleware.php';
 require_once __DIR__ . '/includes/page-meta.php';
 
 $is_logged_in = isAdminLoggedIn();
-$page_title = APP_NAME . ' — Admin Dashboard';
+$current_admin = $is_logged_in ? getCurrentAdmin() : null;
+$admin_title = ($current_admin && $current_admin['is_super_admin']) ? 'Super Admin' : 'Admin';
+$page_title = APP_NAME . ' — ' . $admin_title . ' Dashboard';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +70,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
         <!-- Header -->
         <header class="admin-header">
             <div class="header-left">
-                <h1 class="dashboard-title"><?php echo htmlspecialchars(APP_NAME); ?> — Admin</h1>
+                <h1 class="dashboard-title"><?php echo htmlspecialchars(APP_NAME); ?> — <?php echo $admin_title; ?></h1>
             </div>
             <div class="header-right">
                 <button id="logoutBtn" class="btn btn-secondary btn-small">Logout</button>
