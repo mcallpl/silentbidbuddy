@@ -64,3 +64,17 @@ CREATE TABLE IF NOT EXISTS event_settings (
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
     INDEX idx_event_id (event_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add multi-tenant columns to users table
+ALTER TABLE users ADD COLUMN IF NOT EXISTS event_id INT UNSIGNED DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_type ENUM('bidder', 'admin', 'viewer') DEFAULT 'bidder';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_by_admin_id INT UNSIGNED DEFAULT NULL;
+
+-- Add foreign key constraints (if they don't exist)
+ALTER TABLE users ADD FOREIGN KEY IF NOT EXISTS (event_id) REFERENCES events(id) ON DELETE SET NULL;
+ALTER TABLE users ADD FOREIGN KEY IF NOT EXISTS (created_by_admin_id) REFERENCES admin_accounts(id) ON DELETE SET NULL;
+
+-- Add indexes for new columns
+ALTER TABLE users ADD INDEX IF NOT EXISTS idx_event_id (event_id);
+ALTER TABLE users ADD INDEX IF NOT EXISTS idx_user_type (user_type);
+ALTER TABLE users ADD INDEX IF NOT EXISTS idx_created_by_admin (created_by_admin_id);

@@ -5,12 +5,14 @@
 --          Only enforce uniqueness within a single event
 -- ============================================================
 
--- Drop the global UNIQUE constraint on phone_number (if it exists)
+-- Drop the global UNIQUE constraint on phone_number
+-- (Only needed if not already using composite constraint)
 ALTER TABLE users DROP INDEX IF EXISTS phone_number;
 
 -- Create a composite UNIQUE constraint on (phone_number, event_id)
 -- This allows the same phone number in different events,
 -- but prevents duplicate phone numbers within the same event
+-- Note: event_id column must exist (added in migration 004)
 ALTER TABLE users ADD UNIQUE KEY IF NOT EXISTS uq_phone_event (phone_number, event_id);
 
 -- Ensure we have an index for phone number lookups
