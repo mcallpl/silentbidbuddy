@@ -75,12 +75,12 @@ $page_title = APP_NAME . ' — Admin Dashboard';
         </header>
 
         <!-- Event Selector Bar -->
-        <div id="eventSelectorBar" style="background: white; border-bottom: 1px solid #ddd; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem;">
-            <label for="eventSelector" style="font-weight: 600; color: #333; margin: 0;">Select Event:</label>
-            <select id="eventSelector" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; cursor: pointer; min-width: 300px;">
+        <div id="eventSelectorBar">
+            <label for="eventSelector">Select Event:</label>
+            <select id="eventSelector">
                 <option value="">-- Choose an event --</option>
             </select>
-            <span id="eventInfo" style="color: #666; font-size: 0.9rem; margin-left: auto;"></span>
+            <span id="eventInfo"></span>
         </div>
 
         <!-- Navigation Tabs -->
@@ -90,9 +90,9 @@ $page_title = APP_NAME . ' — Admin Dashboard';
             <button class="nav-tab" data-section="users">Bidders</button>
             <button class="nav-tab" data-section="bids">Bids</button>
             <button class="nav-tab" data-section="transactions">Transactions</button>
-            <button class="nav-tab" data-section="events" style="background-color: #f0e8f8; font-weight: bold; display: none;" id="eventsTab">📅 Events</button>
-            <button class="nav-tab" data-section="admins" style="background-color: #e8f4f8; font-weight: bold;">👤 Admin Control</button>
-            <a href="admin/help-instructions.html" class="nav-tab" style="text-decoration: none; background-color: #f8f0e8; font-weight: bold; display: flex; align-items: center;">ℹ️ Help & Instructions</a>
+            <button class="nav-tab" data-section="events" id="eventsTab" style="display: none;">📅 Events</button>
+            <button class="nav-tab" data-section="admins">👤 Admin Control</button>
+            <a href="admin/help-instructions.html" class="nav-tab">ℹ️ Help & Instructions</a>
         </nav>
 
         <!-- Main Content -->
@@ -135,26 +135,26 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 </div>
 
                 <!-- High Traffic Items -->
-                <h3 style="margin-top: 2rem;">High-Traffic Items</h3>
+                <h3>High-Traffic Items</h3>
                 <div id="highTrafficContainer" class="data-table">
                     <p class="loading">Loading items...</p>
                 </div>
 
                 <!-- Recent Activity -->
-                <h3 style="margin-top: 2rem;">Recent Activity</h3>
+                <h3>Recent Activity</h3>
                 <div id="recentActivityContainer" class="data-table">
                     <p class="loading">Loading activity...</p>
                 </div>
 
                 <!-- Auction Management -->
-                <div style="margin-top: 2rem; padding: 1.5rem; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #2563eb;">
+                <div class="action-box">
                     <h3>Auction Management</h3>
-                    <p style="color: #666; margin: 0.5rem 0 1rem 0;">Close expired auctions and sync bidder statistics</p>
-                    <button id="closeAuctionsBtn" class="btn btn-primary" style="background-color: #10b981;">
+                    <p>Close expired auctions and sync bidder statistics</p>
+                    <button id="closeAuctionsBtn" class="btn btn-primary">
                         <span class="btn-text">🏁 Close Expired Auctions</span>
                         <span class="btn-spinner" style="display: none;">Closing...</span>
                     </button>
-                    <div id="closeAuctionsResult" style="margin-top: 1rem; padding: 1rem; display: none; border-radius: 4px; color: #2d5016; background: #dcfce7;"></div>
+                    <div id="closeAuctionsResult" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; color: #2d5016; background: #dcfce7;"></div>
                 </div>
             </section>
 
@@ -171,7 +171,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 </div>
 
                 <!-- Pagination -->
-                <div id="itemsPagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                <div id="itemsPagination" class="pagination" style="display: none;"></div>
             </section>
 
             <!-- Transactions Section -->
@@ -181,7 +181,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <!-- Status Filter -->
                 <div class="filter-group">
                     <label for="transactionStatusFilter">Filter by Status:</label>
-                    <select id="transactionStatusFilter" class="form-input" style="width: auto;">
+                    <select id="transactionStatusFilter" class="form-input">
                         <option value="">All</option>
                         <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
@@ -195,7 +195,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 </div>
 
                 <!-- Pagination -->
-                <div id="transactionsPagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                <div id="transactionsPagination" class="pagination" style="display: none;"></div>
             </section>
 
             <!-- Users Section -->
@@ -222,14 +222,14 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 </div>
 
                 <!-- Pagination -->
-                <div id="usersPagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                <div id="usersPagination" class="pagination" style="display: none;"></div>
             </section>
 
             <!-- Bids Section -->
             <section id="bidsSection" class="admin-section">
                 <h2>All Bids</h2>
                 <div class="filter-group">
-                    <select id="bidStatusFilter" class="form-input" style="width: 200px;">
+                    <select id="bidStatusFilter" class="form-input">
                         <option value="">All Bids</option>
                         <option value="active">Active Bids</option>
                         <option value="winning">Winning Bids</option>
@@ -238,13 +238,13 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <div id="bidsContainer" class="data-table">
                     <p class="loading">Loading bids...</p>
                 </div>
-                <div id="bidsPagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                <div id="bidsPagination" class="pagination" style="display: none;"></div>
             </section>
 
             <!-- Events Section -->
             <section id="eventsSection" class="admin-section">
                 <h2>📅 Events Management</h2>
-                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                <div class="section-title-row" style="margin-bottom: 2rem;">
                     <button id="createEventBtn" class="btn btn-primary">Create New Event</button>
                     <button id="assignAdminsBtn" class="btn btn-secondary">👤 Assign Admins to Events</button>
                 </div>
@@ -256,46 +256,42 @@ $page_title = APP_NAME . ' — Admin Dashboard';
             <!-- Admin Control Section (Super Admin Only) -->
             <section id="adminsSection" class="admin-section">
                 <h2>👤 Admin Control Panel</h2>
-                <p style="color: #666; margin-bottom: 1.5rem;">Manage admin accounts, users, items, and all database records</p>
+                <p style="margin-bottom: 1.5rem;">Manage admin accounts, users, items, and all database records</p>
 
                 <!-- Tabs for different admin controls -->
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(23, 34, 53, 0.1); padding-bottom: 1rem;">
                     <button class="admin-control-tab active" data-target="adminAccountsTab">Admin Accounts</button>
                     <button class="admin-control-tab" data-target="usersManageTab">User Management</button>
                     <button class="admin-control-tab" data-target="itemsManageTab">Item Management</button>
                 </div>
 
                 <!-- Admin Accounts Tab -->
-                <div id="adminAccountsTab" class="admin-control-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>Admin Accounts</h3>
-                    </div>
+                <div id="adminAccountsTab" class="admin-control-content active">
+                    <div class="section-title-row" style="margin-bottom: 1.5rem;"><h3 style="margin: 0;">Admin Accounts</h3></div>
                     <div id="adminsContainer" class="data-table">
                         <p class="loading">Loading admin accounts...</p>
                     </div>
                 </div>
 
                 <!-- User Management Tab -->
-                <div id="usersManageTab" class="admin-control-content" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>User Management</h3>
-                    </div>
+                <div id="usersManageTab" class="admin-control-content">
+                    <div class="section-title-row" style="margin-bottom: 1.5rem;"><h3 style="margin: 0;">User Management</h3></div>
                     <div id="usersManageContainer" class="data-table">
                         <p class="loading">Loading users...</p>
                     </div>
-                    <div id="usersManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                    <div id="usersManagePagination" class="pagination" style="display: none;"></div>
                 </div>
 
                 <!-- Items Management Tab -->
-                <div id="itemsManageTab" class="admin-control-content" style="display: none;">
+                <div id="itemsManageTab" class="admin-control-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h3>Item Management</h3>
-                        <button id="createItemManageBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Create Item</button>
+                        <button id="createItemManageBtn" class="btn btn-primary btn-small">+ Create Item</button>
                     </div>
                     <div id="itemsManageContainer" class="data-table">
                         <p class="loading">Loading items...</p>
                     </div>
-                    <div id="itemsManagePagination" class="pagination" style="display: none; margin-top: 1rem;"></div>
+                    <div id="itemsManagePagination" class="pagination" style="display: none;"></div>
                 </div>
 
             </section>
@@ -336,19 +332,19 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                     <div id="descriptionImproveResult" class="description-improve-result" style="display: none;"></div>
                 </div>
                 <!-- QR Code Display (for existing items) -->
-                <div id="itemQRDisplay" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: #f0f4ff; border-radius: 8px; border-left: 3px solid #667eea;">
+                <div id="itemQRDisplay" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: rgba(217, 154, 43, 0.08); border-radius: 8px; border-left: 3px solid var(--admin-accent);">
                     <label class="form-label" style="margin-bottom: 1rem;">QR Code & Document</label>
-                    <div style="display: flex; gap: 2rem; align-items: center;">
-                        <div style="text-align: center;">
-                            <img id="modalQRCode" src="" alt="QR Code" style="max-width: 150px; border-radius: 6px; background: white; padding: 8px;" />
-                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
-                                <a id="modalQRLink" href="#" target="_blank" style="color: #667eea; text-decoration: none;">View QR URL</a>
+                    <div class="qr-display-wrapper">
+                        <div class="qr-image-container">
+                            <img id="modalQRCode" src="" alt="QR Code" />
+                            <p class="qr-image-label">
+                                <a id="modalQRLink" href="#" target="_blank" class="qr-image-link">View QR URL</a>
                             </p>
                         </div>
-                        <div style="flex: 1;">
-                            <p style="font-size: 0.95rem; color: #333; margin-bottom: 0.5rem;"><strong>Print-Ready Document</strong></p>
-                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">Download the professional PDF with QR code for printing and table placement.</p>
-                            <a id="modalDocumentLink" href="#" target="_blank" class="btn btn-primary" style="display: inline-block;">📄 Download Document</a>
+                        <div class="qr-info-wrapper">
+                            <p class="qr-info-title">Print-Ready Document</p>
+                            <p class="qr-info-description">Download the professional PDF with QR code for printing and table placement.</p>
+                            <a id="modalDocumentLink" href="#" target="_blank" class="btn btn-primary">📄 Download Document</a>
                         </div>
                     </div>
                 </div>
@@ -401,8 +397,8 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 </div>
                 <div class="form-group">
                     <label class="form-label">Winner</label>
-                    <input type="text" name="winner_name" class="form-input" readonly style="background-color: #f5f5f5; cursor: not-allowed;" />
-                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Shows the name of the bidder who won the auction (if closed)</p>
+                    <input type="text" name="winner_name" class="form-input" readonly />
+                    <p class="form-hint">Shows the name of the bidder who won the auction (if closed)</p>
                 </div>
                 <div id="itemFormError" class="error-message" style="display: none;"></div>
                 <div class="form-actions">
@@ -421,18 +417,16 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <h2>Manage Event Users</h2>
                 <button class="modal-close" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 1.5rem;">
-                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-                    <button id="createUserBtn" class="btn btn-primary">+ Create New User</button>
-                </div>
+            <div class="modal-body">
+                <button id="createUserBtn" class="btn btn-primary" style="margin-bottom: 2rem;">+ Create New User</button>
 
-                <div id="usersContainer" style="background: #f9f9f9; border-radius: 4px; padding: 1rem;">
+                <div id="usersContainer" class="manage-users-container">
                     <p class="loading">Loading users...</p>
                 </div>
 
-                <div id="createUserForm" style="display: none; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                <div id="createUserForm" class="manage-users-form">
                     <h3>Create New User</h3>
-                    <div style="background: white; padding: 1.5rem; border-radius: 4px; margin-top: 1rem;">
+                    <div class="manage-users-form-box">
                         <div class="form-group">
                             <label class="form-label">Full Name *</label>
                             <input type="text" id="userFullName" class="form-input" required />
@@ -456,7 +450,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                                 <option value="viewer">Viewer (read-only access)</option>
                                 <option value="admin">Admin (can manage event)</option>
                             </select>
-                            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                            <p class="user-type-helper">
                                 <strong>Bidder:</strong> Can bid on items |
                                 <strong>Viewer:</strong> Can see items/bids, no editing |
                                 <strong>Admin:</strong> Full event management
@@ -482,8 +476,8 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <h2>Assign Admins to Events</h2>
                 <button class="modal-close" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 1.5rem;">
-                <p style="color: #666; margin-bottom: 1.5rem;">Select an event and assign admins with specific roles. Assigned admins will see this event in their Events tab.</p>
+            <div class="modal-body">
+                <p style="margin-bottom: 1.5rem;">Select an event and assign admins with specific roles. Assigned admins will see this event in their Events tab.</p>
 
                 <div class="form-group">
                     <label class="form-label">Select Event *</label>
@@ -494,8 +488,8 @@ $page_title = APP_NAME . ' — Admin Dashboard';
 
                 <div class="form-group">
                     <label class="form-label">Select Admin(s) *</label>
-                    <div id="adminCheckboxes" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; border-radius: 4px;">
-                        <p style="color: #999;">Loading admins...</p>
+                    <div id="adminCheckboxes" class="admin-checkboxes-container">
+                        <p class="admin-checkboxes-loading">Loading admins...</p>
                     </div>
                 </div>
 
@@ -506,7 +500,7 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                         <option value="viewer">Viewer (read-only)</option>
                         <option value="manager">Manager (edit allowed)</option>
                     </select>
-                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                    <p class="user-type-helper">
                         <strong>Viewer:</strong> Can view event and items, but cannot edit  |
                         <strong>Manager:</strong> Can edit event details and items
                     </p>
@@ -519,10 +513,10 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
 
-                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
-                    <h3 style="margin-bottom: 1rem;">Current Assignments</h3>
-                    <div id="currentAssignments" style="background: #f9f9f9; padding: 1rem; border-radius: 4px; min-height: 100px;">
-                        <p style="color: #999;">Select an event to see current assignments</p>
+                <div class="current-assignments-container">
+                    <h3>Current Assignments</h3>
+                    <div id="currentAssignments" class="current-assignments-box">
+                        <p class="assignments-loading">Select an event to see current assignments</p>
                     </div>
                 </div>
             </div>
@@ -646,16 +640,16 @@ $page_title = APP_NAME . ' — Admin Dashboard';
                 <h2 id="qrItemTitle">Item QR Code</h2>
                 <button class="modal-close" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body" style="text-align: center; padding: 2rem;">
-                <p style="color: #666; margin-bottom: 1.5rem;">Your item has been created! Share the QR code and document with bidders.</p>
+            <div class="modal-body">
+                <p style="margin-bottom: 1.5rem;">Your item has been created! Share the QR code and document with bidders.</p>
 
-                <div style="background: #f9f9f9; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <div style="background: var(--admin-light); padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
                     <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 250px; height: auto; margin: 0 auto; display: block;" />
                 </div>
 
-                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">QR Code URL:</p>
-                <div style="background: #f0f4ff; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; word-break: break-all;">
-                    <a id="qrCodeURL" href="#" style="color: #667eea; text-decoration: none; font-weight: 500;" target="_blank">Copy URL</a>
+                <p style="margin-bottom: 1rem;">QR Code URL:</p>
+                <div style="background: rgba(217, 154, 43, 0.08); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; word-break: break-all;">
+                    <a id="qrCodeURL" href="#" style="color: var(--admin-primary-light); text-decoration: none; font-weight: 500;" target="_blank">Copy URL</a>
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: center;">
