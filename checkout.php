@@ -8,6 +8,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/public-nav.php';
+require_once __DIR__ . '/includes/branding-helper.php';
 
 // Require authentication
 $user = getCurrentUser();
@@ -53,6 +54,7 @@ if (!$item || $item['current_high_bidder_id'] != $user['id']) {
 }
 
 $page_title = 'Checkout - ' . APP_NAME;
+$branding = getBrandingData();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,6 +69,10 @@ $page_title = 'Checkout - ' . APP_NAME;
     <?php renderPublicHeader(['title' => APP_NAME . ' - Payment', 'back_href' => 'item.php?id=' . (int)$item['id'], 'back_label' => '← Item', 'user' => $user]); ?>
 
     <div class="container checkout-container">
+        <?php if ($branding): ?>
+            <?php renderEventBanner(['show_logo' => false, 'show_mission' => false]); ?>
+        <?php endif; ?>
+
         <section class="checkout-summary">
             <h2>Order Summary</h2>
             <div class="summary-item">

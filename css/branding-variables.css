@@ -1,0 +1,366 @@
+/* ============================================================
+   SILENT BID BUDDY — CSS Branding Variables System
+
+   This file defines CSS custom properties for event branding.
+   All colors can be dynamically set per event via PHP inline CSS.
+
+   Usage:
+   - Include in all pages via renderPageMeta() or direct <link>
+   - Override via inline <style> in <head> with event-specific colors
+   - All UI elements automatically use these variables
+   ============================================================ */
+
+:root {
+    /* ============================================================
+       PRIMARY BRANDING COLORS
+       Override these with event-specific colors
+       ============================================================ */
+
+    /* Main brand color — used for primary buttons, headers, links */
+    --branding-primary: #2E7D32;
+    --branding-primary-dark: #1b5e20;
+    --branding-primary-light: #66bb6a;
+
+    /* Secondary color — used for backgrounds, accents */
+    --branding-secondary: #1976D2;
+    --branding-secondary-dark: #1565c0;
+    --branding-secondary-light: #42a5f5;
+
+    /* Accent color — used for CTAs, highlights, emphasis */
+    --branding-accent: #F57C00;
+    --branding-accent-dark: #e65100;
+    --branding-accent-light: #ffb74d;
+
+    /* ============================================================
+       BACKGROUND & TEXT COLORS
+       ============================================================ */
+
+    /* Page background */
+    --branding-background: #FFFFFF;
+
+    /* Light background for sections, cards */
+    --branding-light-bg: #F5F5F5;
+
+    /* Primary text color */
+    --branding-text: #212121;
+
+    /* Secondary text color — used for descriptions, metadata */
+    --branding-text-secondary: #666666;
+
+    /* Muted text — used for disabled, hints */
+    --branding-text-muted: #999999;
+
+    /* Text on colored backgrounds */
+    --branding-text-on-primary: #FFFFFF;
+    --branding-text-on-accent: #FFFFFF;
+
+    /* ============================================================
+       BORDER & SEPARATOR COLORS
+       ============================================================ */
+
+    --branding-border: #DDDDDD;
+    --branding-border-light: #EEEEEE;
+    --branding-border-dark: #CCCCCC;
+
+    /* ============================================================
+       STATUS COLORS
+       ============================================================ */
+
+    --branding-success: #28785F;
+    --branding-success-light: #81c784;
+    --branding-success-dark: #1b5e20;
+
+    --branding-error: #EF4444;
+    --branding-error-light: #ef9a9a;
+    --branding-error-dark: #c62828;
+
+    --branding-warning: #F57C00;
+    --branding-warning-light: #ffb74d;
+    --branding-warning-dark: #e65100;
+
+    --branding-info: #1976D2;
+    --branding-info-light: #42a5f5;
+    --branding-info-dark: #1565c0;
+
+    /* ============================================================
+       OVERLAY & OPACITY COLORS
+       ============================================================ */
+
+    /* Overlay for modals, dropdowns */
+    --branding-overlay-bg: rgba(0, 0, 0, 0.5);
+    --branding-overlay-light: rgba(0, 0, 0, 0.1);
+
+    /* Shadow colors */
+    --branding-shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* ============================================================
+       HOVER & INTERACTION STATES
+       ============================================================ */
+
+    /* Hover overlay opacity for buttons and clickable elements */
+    --branding-hover-opacity: 0.85;
+
+    /* Active/pressed state overlay */
+    --branding-active-opacity: 0.75;
+
+    /* Disabled state opacity */
+    --branding-disabled-opacity: 0.5;
+
+    /* Focus outline color */
+    --branding-focus-color: var(--branding-primary);
+
+    /* ============================================================
+       TRANSITION & ANIMATION
+       ============================================================ */
+
+    --branding-transition: all 0.3s ease;
+    --branding-transition-fast: all 0.15s ease;
+    --branding-transition-slow: all 0.5s ease;
+
+    /* ============================================================
+       SPACING & SIZING
+       ============================================================ */
+
+    --branding-radius-sm: 4px;
+    --branding-radius-md: 8px;
+    --branding-radius-lg: 12px;
+    --branding-radius-full: 9999px;
+
+    /* Shadow elevations */
+    --branding-shadow-xs: 0 1px 2px var(--branding-shadow-color);
+    --branding-shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --branding-shadow-md: 0 8px 16px rgba(0, 0, 0, 0.12);
+    --branding-shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.16);
+    --branding-shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================
+   COLOR VARIABLE MAPPINGS
+   Map branding variables to semantic usage
+   ============================================================ */
+
+:root {
+    /* Buttons */
+    --button-primary-bg: var(--branding-primary);
+    --button-primary-bg-hover: var(--branding-primary-dark);
+    --button-primary-color: var(--branding-text-on-primary);
+
+    --button-secondary-bg: var(--branding-secondary);
+    --button-secondary-bg-hover: var(--branding-secondary-dark);
+    --button-secondary-color: var(--branding-text-on-primary);
+
+    --button-accent-bg: var(--branding-accent);
+    --button-accent-bg-hover: var(--branding-accent-dark);
+    --button-accent-color: var(--branding-text-on-accent);
+
+    --button-ghost-color: var(--branding-primary);
+    --button-ghost-border: var(--branding-primary);
+    --button-ghost-bg-hover: rgba(46, 125, 50, 0.08);
+
+    /* Cards & Containers */
+    --card-bg: var(--branding-background);
+    --card-border: var(--branding-border);
+    --card-shadow: var(--branding-shadow-md);
+
+    /* Input Fields */
+    --input-bg: var(--branding-background);
+    --input-border: var(--branding-border);
+    --input-border-focus: var(--branding-primary);
+    --input-text: var(--branding-text);
+    --input-placeholder: var(--branding-text-muted);
+
+    /* Headers & Titles */
+    --heading-color: var(--branding-text);
+    --heading-border-accent: var(--branding-primary);
+
+    /* Links */
+    --link-color: var(--branding-primary);
+    --link-color-hover: var(--branding-primary-dark);
+    --link-visited: var(--branding-primary-dark);
+
+    /* Status Indicators */
+    --status-success: var(--branding-success);
+    --status-error: var(--branding-error);
+    --status-warning: var(--branding-warning);
+    --status-info: var(--branding-info);
+
+    /* Badges */
+    --badge-bg: var(--branding-light-bg);
+    --badge-text: var(--branding-text);
+    --badge-primary-bg: var(--branding-primary);
+    --badge-primary-text: var(--branding-text-on-primary);
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS (mobile-first)
+   ============================================================ */
+
+/* Small screens (phones): 480px and below */
+@media (max-width: 480px) {
+    :root {
+        /* Slightly increase touch targets */
+        --button-min-height: 44px;
+        --button-min-width: 44px;
+    }
+}
+
+/* Medium screens (tablets): 481px to 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+    :root {
+        /* Tablets have more screen space */
+    }
+}
+
+/* Large screens (desktops): 769px and above */
+@media (min-width: 769px) {
+    :root {
+        /* Desktop optimizations */
+    }
+}
+
+/* ============================================================
+   DARK MODE SUPPORT (optional)
+   Uncomment and customize if implementing dark mode
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Dark mode color overrides can be added here */
+        /* For now, light mode is the standard */
+    }
+}
+
+/* ============================================================
+   HIGH CONTRAST MODE SUPPORT
+   For accessibility compliance
+   ============================================================ */
+
+@media (prefers-contrast: more) {
+    :root {
+        /* Increase border width and shadow for better contrast */
+        --branding-border-width: 2px;
+        --branding-text-muted: #555555;
+        --branding-shadow-md: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* ============================================================
+   REDUCED MOTION SUPPORT
+   For accessibility and user preferences
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --branding-transition: none;
+        --branding-transition-fast: none;
+        --branding-transition-slow: none;
+    }
+
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   Quick classes for applying branding colors
+   ============================================================ */
+
+.text-primary {
+    color: var(--branding-primary);
+}
+
+.text-secondary {
+    color: var(--branding-secondary);
+}
+
+.text-accent {
+    color: var(--branding-accent);
+}
+
+.text-success {
+    color: var(--branding-success);
+}
+
+.text-error {
+    color: var(--branding-error);
+}
+
+.text-warning {
+    color: var(--branding-warning);
+}
+
+.bg-primary {
+    background-color: var(--branding-primary);
+    color: var(--branding-text-on-primary);
+}
+
+.bg-secondary {
+    background-color: var(--branding-secondary);
+    color: var(--branding-text-on-primary);
+}
+
+.bg-accent {
+    background-color: var(--branding-accent);
+    color: var(--branding-text-on-accent);
+}
+
+.bg-light {
+    background-color: var(--branding-light-bg);
+    color: var(--branding-text);
+}
+
+.border-primary {
+    border-color: var(--branding-primary);
+}
+
+.border-accent {
+    border-color: var(--branding-accent);
+}
+
+/* ============================================================
+   DOCUMENTATION: HOW TO USE BRANDING VARIABLES
+   ============================================================
+
+   1. INCLUDE IN ALL PAGES:
+      - Add to renderPageMeta() stylesheets array
+      - Or use <link rel="stylesheet" href="css/branding-variables.css">
+
+   2. GENERATE EVENT-SPECIFIC OVERRIDES:
+      - Use getBrandingCSS() from lib/branding.php
+      - Output as inline <style> in page <head>
+      - Example:
+        <style>
+            :root {
+                --branding-primary: #2E7D32;
+                --branding-accent: #F57C00;
+            }
+        </style>
+
+   3. USE IN CSS:
+      - Reference variables in your stylesheets
+      - Example: background: var(--branding-primary);
+      - Fallback: background: var(--branding-primary, #2E7D32);
+
+   4. DYNAMIC UPDATES:
+      - Fetch branding from /api/event/branding.php
+      - Update CSS variables via JavaScript:
+        document.documentElement.style.setProperty('--branding-primary', '#newcolor');
+      - All elements automatically update
+
+   5. DEFAULT COLORS:
+      Primary: #2E7D32 (Green)
+      Secondary: #1976D2 (Blue)
+      Accent: #F57C00 (Orange)
+      Background: #FFFFFF (White)
+      Text: #212121 (Dark Gray)
+
+   6. OVERRIDE PRIORITY:
+      1. Inline style on element (highest)
+      2. Event-specific CSS override in <style> tag
+      3. Global branding-variables.css
+      4. Main CSS files (lowest)
+
+============================================================ */

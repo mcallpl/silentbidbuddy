@@ -37,7 +37,7 @@ function renderPageMeta($options = []) {
     $canonical = $options['canonical'] ?? currentCanonicalUrl();
     $image = $options['image'] ?? absoluteAssetUrl('images/brand/silent-bid-buddy-social-1200x630.png');
     $type = $options['type'] ?? 'website';
-    $stylesheets = $options['stylesheets'] ?? ['css/main.css', 'css/mobile.css'];
+    $stylesheets = $options['stylesheets'] ?? ['css/branding-variables.css', 'css/main.css', 'css/branding.css', 'css/mobile.css'];
     ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,6 +69,11 @@ function renderPageMeta($options = []) {
     <?php foreach ($stylesheets as $stylesheet): ?>
         <link rel="stylesheet" href="<?php echo htmlspecialchars(assetUrlWithVersion($stylesheet)); ?>">
     <?php endforeach; ?>
+    <?php
+    // Inject branding CSS variables if available
+    require_once __DIR__ . '/branding-helper.php';
+    renderBrandingStyleTag();
+    ?>
     <?php
 }
 ?>

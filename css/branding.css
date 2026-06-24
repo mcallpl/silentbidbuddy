@@ -1,0 +1,324 @@
+/* ============================================================
+   EVENT BRANDING STYLES
+   Dynamic color application for event branding
+   Uses CSS variables from branding-variables.css:
+   --branding-primary, --branding-accent, --branding-text-on-primary
+   ============================================================ */
+
+/* ============================================================
+   EVENT BANNER
+   Organization logo, name, event details, mission
+   ============================================================ */
+
+.event-banner {
+    background: linear-gradient(135deg, var(--branding-primary) 0%, var(--branding-accent) 100%);
+    color: var(--branding-text-on-primary, #ffffff);
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.event-banner-logo {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.event-banner-logo .org-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.event-banner-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.event-banner-org {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.95;
+}
+
+.event-banner-title {
+    margin: 0.25rem 0 1rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #ffffff;
+}
+
+.event-banner-date,
+.event-banner-location,
+.event-banner-mission {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.95;
+}
+
+.event-banner-mission {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-style: italic;
+}
+
+/* ============================================================
+   STATUS BADGES WITH BRANDING COLORS
+   Winning, Outbid, Won, Watching status indicators
+   ============================================================ */
+
+.badge-winning {
+    background-color: var(--branding-primary);
+    color: var(--branding-text-on-primary, #ffffff);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-outbid {
+    background-color: var(--branding-error);
+    color: var(--branding-text-on-primary, #ffffff);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-paid {
+    background-color: var(--branding-success);
+    color: var(--branding-text-on-primary, #ffffff);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-watching {
+    background-color: var(--branding-accent);
+    color: var(--branding-text-on-accent, #ffffff);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-won {
+    background-color: var(--branding-primary);
+    color: var(--branding-text-on-primary, #ffffff);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ============================================================
+   BUTTON STYLING WITH BRAND COLORS
+   Primary buttons use brand primary color
+   ============================================================ */
+
+.btn-primary {
+    background-color: var(--branding-primary);
+    border-color: var(--branding-primary);
+    color: var(--branding-text-on-primary, #ffffff);
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-primary:focus:not(:disabled) {
+    background-color: var(--branding-primary-dark);
+    border-color: var(--branding-primary-dark);
+}
+
+.btn-primary:active:not(:disabled) {
+    background-color: var(--branding-primary-dark);
+    border-color: var(--branding-primary-dark);
+    opacity: 0.8;
+}
+
+/* Accent button variant */
+.btn-accent {
+    background-color: var(--branding-accent);
+    border-color: var(--branding-accent);
+    color: var(--branding-text-on-accent, #ffffff);
+}
+
+.btn-accent:hover:not(:disabled),
+.btn-accent:focus:not(:disabled) {
+    background-color: var(--branding-accent-dark);
+    border-color: var(--branding-accent-dark);
+}
+
+.btn-accent:active:not(:disabled) {
+    background-color: var(--branding-accent-dark);
+    border-color: var(--branding-accent-dark);
+    opacity: 0.8;
+}
+
+/* ============================================================
+   CARD ACCENTS AND BORDERS
+   ============================================================ */
+
+.item-card {
+    border-top: 3px solid var(--branding-primary);
+}
+
+.item-card:hover {
+    border-top-color: var(--branding-accent);
+}
+
+.bid-summary-card {
+    border-left: 4px solid var(--branding-primary);
+}
+
+.bid-summary-card:hover {
+    border-left-color: var(--branding-accent);
+}
+
+/* ============================================================
+   HERO SECTIONS
+   ============================================================ */
+
+.landing-btn-primary {
+    background-color: var(--branding-primary);
+    border-color: var(--branding-primary);
+}
+
+.landing-btn-primary:hover,
+.landing-btn-primary:focus {
+    background-color: var(--branding-primary-dark);
+}
+
+/* ============================================================
+   LINKS AND TEXT STYLING
+   ============================================================ */
+
+a:where([href]) {
+    color: var(--branding-primary);
+}
+
+a:where([href]):hover {
+    color: var(--branding-primary-dark);
+    text-decoration: underline;
+}
+
+a:where([href]):focus {
+    outline: 2px solid var(--branding-primary);
+    outline-offset: 2px;
+}
+
+/* Links inside branded elements */
+.event-banner a:where([href]) {
+    color: inherit;
+    text-decoration: underline;
+}
+
+/* ============================================================
+   FOCUS STATES FOR ACCESSIBILITY
+   ============================================================ */
+
+*:focus {
+    outline-color: var(--branding-primary);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--branding-primary);
+    box-shadow: 0 0 0 3px rgba(var(--branding-primary-rgb, 46, 125, 50), 0.1);
+}
+
+/* ============================================================
+   LOADING & ANIMATION STATES
+   ============================================================ */
+
+@keyframes brandingPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.pulse-primary {
+    animation: brandingPulse 2s infinite;
+    background-color: var(--branding-primary);
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .event-banner {
+        padding: 1.5rem 1rem;
+    }
+
+    .event-banner-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .event-banner-logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .event-banner-title {
+        font-size: 1.5rem;
+    }
+
+    .event-banner-date,
+    .event-banner-location,
+    .event-banner-mission {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .event-banner {
+        padding: 1rem 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .event-banner-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .event-banner-title {
+        font-size: 1.25rem;
+    }
+
+    .event-banner-date,
+    .event-banner-location {
+        font-size: 0.85rem;
+    }
+}

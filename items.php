@@ -10,9 +10,11 @@ require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/events.php';
 require_once __DIR__ . '/includes/favorites.php';
 require_once __DIR__ . '/includes/public-nav.php';
+require_once __DIR__ . '/includes/branding-helper.php';
 
 // Check authentication
 $user = getCurrentUser();
+$branding = getBrandingData();
 
 $event = getActiveEvent();
 $categories = $event ? getEventCategories((int)$event['id']) : [];
@@ -91,21 +93,34 @@ $page_title = $event_name . ' - ' . APP_NAME;
     <?php renderPublicHeader(['user' => $user]); ?>
 
     <div class="container items-container">
-        <!-- Event Header -->
-        <section class="event-hero">
-            <p class="event-org"><?php echo htmlspecialchars($organization_name); ?></p>
-            <h2><?php echo htmlspecialchars($event_name); ?></h2>
-            <?php if (!empty($event['auction_end_time'])): ?>
-                <p class="event-close">Main auction closes <?php echo date('M j, Y g:i A', strtotime($event['auction_end_time'])); ?></p>
-            <?php endif; ?>
-            <div class="event-actions">
-                <?php if ($is_authenticated): ?>
-                    <a href="my-bids.php" class="btn btn-secondary">My Bids</a>
-                <?php else: ?>
-                    <a href="bid.php?return=<?php echo urlencode('items.php'); ?>" class="btn btn-primary">Sign In to Bid</a>
+        <!-- Event Banner with Branding -->
+        <?php if ($branding): ?>
+            <?php renderEventBanner(['show_logo' => true, 'show_mission' => false]); ?>
+        <?php else: ?>
+            <section class="event-hero">
+                <p class="event-org"><?php echo htmlspecialchars($organization_name); ?></p>
+                <h2><?php echo htmlspecialchars($event_name); ?></h2>
+                <?php if (!empty($event['auction_end_time'])): ?>
+                    <p class="event-close">Main auction closes <?php echo date('M j, Y g:i A', strtotime($event['auction_end_time'])); ?></p>
                 <?php endif; ?>
-            </div>
-        </section>
+                <div class="event-actions">
+                    <?php if ($is_authenticated): ?>
+                        <a href="my-bids.php" class="btn btn-secondary">My Bids</a>
+                    <?php else: ?>
+                        <a href="bid.php?return=<?php echo urlencode('items.php'); ?>" class="btn btn-primary">Sign In to Bid</a>
+                    <?php endif; ?>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- Browse Actions -->
+        <div class="event-actions" style="padding: 1rem 0; text-align: center;">
+            <?php if ($is_authenticated): ?>
+                <a href="my-bids.php" class="btn btn-secondary">My Bids</a>
+            <?php else: ?>
+                <a href="bid.php?return=<?php echo urlencode('items.php'); ?>" class="btn btn-primary">Sign In to Bid</a>
+            <?php endif; ?>
+        </div>
 
         <!-- Browse Controls -->
         <section class="browse-controls">

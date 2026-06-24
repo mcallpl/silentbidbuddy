@@ -14,6 +14,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/favorites.php';
 require_once __DIR__ . '/includes/public-nav.php';
+require_once __DIR__ . '/includes/branding-helper.php';
 
 // Get item ID from URL
 $item_num = $_GET['id'] ?? 0;

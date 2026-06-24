@@ -10,8 +10,10 @@ require_once __DIR__ . '/includes/db-helpers.php';
 require_once __DIR__ . '/includes/events.php';
 require_once __DIR__ . '/includes/favorites.php';
 require_once __DIR__ . '/includes/public-nav.php';
+require_once __DIR__ . '/includes/branding-helper.php';
 
 $user = getCurrentUser();
+$branding = getBrandingData();
 if (!$user) {
     header('Location: bid.php?return=' . urlencode('my-bids.php'));
     exit;
@@ -206,11 +208,19 @@ $page_title = 'My Bids - ' . APP_NAME;
     <?php renderPublicHeader(['back_href' => 'items.php', 'back_label' => '← Items', 'user' => $user]); ?>
 
     <main class="container my-bids-container">
-        <section class="event-hero">
-            <p class="event-org"><?php echo htmlspecialchars($event['organization_name'] ?? APP_NAME); ?></p>
-            <h2>My Bids</h2>
-            <p class="event-close">Welcome back, <?php echo htmlspecialchars($user['full_name'] ?: 'friend'); ?>.</p>
-        </section>
+        <?php if ($branding): ?>
+            <?php renderEventBanner(['show_logo' => false, 'show_mission' => false]); ?>
+        <?php else: ?>
+            <section class="event-hero">
+                <p class="event-org"><?php echo htmlspecialchars($event['organization_name'] ?? APP_NAME); ?></p>
+                <h2>My Bids</h2>
+                <p class="event-close">Welcome back, <?php echo htmlspecialchars($user['full_name'] ?: 'friend'); ?>.</p>
+            </section>
+        <?php endif; ?>
+
+        <div style="padding: 0.5rem 0; text-align: center; color: var(--color-medium); font-size: 0.9rem;">
+            Welcome back, <?php echo htmlspecialchars($user['full_name'] ?: 'friend'); ?>
+        </div>
 
         <section class="bid-summary-grid" aria-label="Bid summary">
             <div class="bid-summary-card">

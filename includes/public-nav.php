@@ -5,6 +5,7 @@
 // ============================================================
 
 require_once __DIR__ . '/page-meta.php';
+require_once __DIR__ . '/branding-helper.php';
 
 function renderPublicHeader($options = []) {
     $title = $options['title'] ?? APP_NAME;

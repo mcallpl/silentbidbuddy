@@ -6,8 +6,10 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/page-meta.php';
+require_once __DIR__ . '/includes/branding-helper.php';
 
 $page_title = APP_NAME . ' - Silent Auctions Made Warm, Simple, and Professional';
+$branding = getBrandingData();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +34,10 @@ $page_title = APP_NAME . ' - Silent Auctions Made Warm, Simple, and Professional
     </header>
 
     <main>
+        <?php if ($branding): ?>
+            <?php renderEventBanner(['show_logo' => true, 'show_mission' => true]); ?>
+        <?php endif; ?>
+
         <section class="landing-hero" aria-labelledby="landingHeroTitle">
             <div class="landing-hero-bg" aria-hidden="true"></div>
             <div class="landing-hero-content">
