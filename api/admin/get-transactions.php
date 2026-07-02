@@ -15,13 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     die(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
 }
 
-requireAdminAuth();
+$admin = requireAdminAuth();
 
 $page = (int)($_GET['page'] ?? 1);
 $limit = (int)($_GET['limit'] ?? 50);
 $status = $_GET['status'] ?? '';
 $page = max(1, $page);
-$limit = min($limit, 100);
+$limit = max(1, min($limit, 100));
 
 $offset = ($page - 1) * $limit;
 
@@ -34,13 +34,16 @@ if (!empty($status)) {
     $params[] = $status;
 }
 
-// Get total count
-$count_query = "SELECT COUNT(*) as count FROM transactions t WHERE " . $where;
-if (!empty($params)) {
-    $total = dbGetRow($count_query, $params)['count'];
-} else {
-    $total = dbCount('transactions');
-}
+// Multi-tenant scoping via the joined items table.
+list($scopeSql, $scopeParams) = adminEventScopeClause($admin, 'i.event_id');
+$where .= $scopeSql;
+$params = array_merge($params, $scopeParams);
+
+// Get total count (scoped — must use the items join)
+$total = (int)dbGetValue(
+    "SELECT COUNT(*) FROM transactions t JOIN items i ON t.item_id = i.id WHERE " . $where,
+    $params
+);
 
 // Get transactions
 $query = "SELECT

@@ -95,8 +95,10 @@ function getDefaultBranding() {
  * @param string $color Color value (e.g., #2E7D32 or #2E7)
  * @return bool True if valid hex color
  */
+if (!function_exists('isValidHexColor')) {
 function isValidHexColor($color) {
-    return preg_match('/^#[A-Fa-f0-9]{3}(?:[A-Fa-f0-9]{3})?$/', $color) === 1;
+    return preg_match('/^#[A-Fa-f0-9]{3}(?:[A-Fa-f0-9]{3})?$/', (string)$color) === 1;
+}
 }
 
 /**

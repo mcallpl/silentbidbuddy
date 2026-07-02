@@ -175,6 +175,8 @@ $page_title = $event_name . ' - ' . APP_NAME;
                                 <?php if ($item['image_url']): ?>
                                     <img src="<?php echo htmlspecialchars($item['image_url']); ?>"
                                          alt="<?php echo htmlspecialchars($item['title']); ?>"
+                                         loading="lazy"
+                                         onerror="this.onerror=null;this.src='images/items/placeholder.svg';"
                                     />
                                 <?php else: ?>
                                     <div class="image-placeholder-card">

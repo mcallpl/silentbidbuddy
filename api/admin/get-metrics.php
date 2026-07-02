@@ -19,11 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Require admin authentication
-requireAdminAuth();
+$admin = requireAdminAuth();
 
-// Get metrics
-$metrics = getLiveMetrics();
-$summary = getAuctionSummary();
+// Multi-tenant scoping: super admins see all (or a selected event), non-super
+// admins see only their assigned events.
+$eventIds = adminAllowedEventIds($admin);
+
+// Get metrics (scoped)
+$metrics = getLiveMetrics($eventIds);
+$summary = getAuctionSummary($eventIds);
 
 http_response_code(200);
 echo json_encode([

@@ -439,13 +439,17 @@ die(json_encode([
  * @param string $color Color value (e.g., #2f6f5e)
  * @return bool True if valid hex color
  */
+// NOTE: defined unconditionally (not function_exists-guarded) because it is
+// called earlier in this file and PHP only hoists unconditional definitions.
+// This endpoint is a standalone entry point that does not include any other file
+// defining isValidHexColor(), so there is no redeclaration risk here.
 function isValidHexColor($color) {
     if (empty($color)) {
-        return true; // Allow null/empty
+        return true; // Allow null/empty (this endpoint treats blank as "unset")
     }
 
-    // Check if it's a valid hex color (3, 4, 6, or 8 characters)
-    return preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color) === 1;
+    // Check if it's a valid hex color (3- or 6-digit)
+    return preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', (string)$color) === 1;
 }
 
 /**

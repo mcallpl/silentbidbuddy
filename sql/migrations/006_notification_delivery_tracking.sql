@@ -1,10 +1,17 @@
 -- ============================================================
 -- MIGRATION: Add notification delivery tracking and retry support
 -- Created: 2026-06-21
+-- Revised: 2026-07-02 — original used MariaDB/Postgres-only syntax
+--   (`ADD COLUMN IF NOT EXISTS`, partial `CREATE INDEX ... WHERE`) that is
+--   invalid on MySQL 8/9, so it never actually applied. Rewritten for MySQL.
 -- ============================================================
 
--- Add delivery_status column to existing notifications table if it doesn't exist
-ALTER TABLE notifications ADD COLUMN IF NOT EXISTS delivery_status ENUM('pending', 'sent', 'failed') DEFAULT 'pending';
+-- Add delivery_status column to the notifications table.
+-- NOTE: MySQL does not support `ADD COLUMN IF NOT EXISTS`. If this column
+-- already exists (e.g. partial prior run), this statement will error 1060 —
+-- that is safe to ignore.
+ALTER TABLE notifications
+    ADD COLUMN delivery_status ENUM('pending', 'sent', 'failed') DEFAULT 'pending';
 
 -- Create notifications_log table for tracking delivery attempts and retries
 CREATE TABLE IF NOT EXISTS notifications_log (
@@ -28,16 +35,9 @@ CREATE TABLE IF NOT EXISTS notifications_log (
     FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
 
     INDEX idx_notification_id (notification_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_delivery_status (delivery_status),
-    INDEX idx_attempt_number (attempt_number),
-    INDEX idx_next_retry_at (next_retry_at),
-    INDEX idx_created_at (created_at)
+    -- Covers both the "pending retries due" scan and per-user delivery lookups.
+    -- (MySQL has no partial/filtered indexes, so the original WHERE-clause
+    -- indexes were dropped; these composite indexes serve the same queries.)
+    INDEX idx_retry_scan (delivery_status, next_retry_at, attempt_number),
+    INDEX idx_user_delivery (user_id, delivery_status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Add index for querying notifications that need retry
-CREATE INDEX IF NOT EXISTS idx_pending_retries ON notifications_log (delivery_status, next_retry_at)
-WHERE next_retry_at <= NOW() AND attempt_number < max_attempts;
-
--- Add composite index for efficient delivery tracking per user
-CREATE INDEX IF NOT EXISTS idx_user_delivery_status ON notifications_log (user_id, delivery_status, created_at);

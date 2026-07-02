@@ -24,10 +24,12 @@ function checkAdminOrgAccess($admin_id, $org_id) {
         return ['role' => 'manager'];
     }
 
-    // Check admin_organizations bridge table
+    // Check admin_organizations bridge table.
+    // (Removed a WHERE on a non-existent `is_active` column, which made this query
+    // error out and always fail closed.)
     return dbGetRow(
         "SELECT id, admin_id, organization_id, role FROM admin_organizations
-         WHERE admin_id = ? AND organization_id = ? AND is_active IS NOT FALSE",
+         WHERE admin_id = ? AND organization_id = ?",
         [(int)$admin_id, (int)$org_id]
     );
 }

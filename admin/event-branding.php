@@ -47,6 +47,19 @@ if ($selected_org_id) {
          ORDER BY event_date DESC",
         [$selected_org_id]
     );
+
+    // Secondary/text colors live in event_branding (not on organizations); load
+    // the current values from any event in this org so the pickers show reality.
+    $org_branding = dbGetRow(
+        "SELECT eb.secondary_color, eb.text_color
+         FROM event_branding eb
+         JOIN events e ON e.id = eb.event_id
+         WHERE e.organization_id = ?
+         ORDER BY eb.updated_at DESC LIMIT 1",
+        [$selected_org_id]
+    );
+    $selected_org_secondary = $org_branding['secondary_color'] ?? '#f4f7f2';
+    $selected_org_text = $org_branding['text_color'] ?? '#172235';
 }
 ?>
 <!DOCTYPE html>
@@ -620,13 +633,13 @@ if ($selected_org_id) {
                                                 type="color"
                                                 id="secondaryColor"
                                                 class="color-picker"
-                                                value="<?php echo htmlspecialchars($_GET['secondary_color'] ?? '#f4f7f2'); ?>"
+                                                value="<?php echo htmlspecialchars($selected_org_secondary ?? '#f4f7f2'); ?>"
                                             />
                                             <input
                                                 type="text"
                                                 id="secondaryColorHex"
                                                 class="color-text-input"
-                                                value="<?php echo htmlspecialchars($_GET['secondary_color'] ?? '#f4f7f2'); ?>"
+                                                value="<?php echo htmlspecialchars($selected_org_secondary ?? '#f4f7f2'); ?>"
                                                 placeholder="#f4f7f2"
                                                 maxlength="7"
                                             />
@@ -662,13 +675,13 @@ if ($selected_org_id) {
                                                 type="color"
                                                 id="textColor"
                                                 class="color-picker"
-                                                value="<?php echo htmlspecialchars($_GET['text_color'] ?? '#172235'); ?>"
+                                                value="<?php echo htmlspecialchars($selected_org_text ?? '#172235'); ?>"
                                             />
                                             <input
                                                 type="text"
                                                 id="textColorHex"
                                                 class="color-text-input"
-                                                value="<?php echo htmlspecialchars($_GET['text_color'] ?? '#172235'); ?>"
+                                                value="<?php echo htmlspecialchars($selected_org_text ?? '#172235'); ?>"
                                                 placeholder="#172235"
                                                 maxlength="7"
                                             />
@@ -1050,9 +1063,12 @@ if ($selected_org_id) {
             const contactEmail = document.getElementById('contactEmail').value;
             const primaryColor = document.getElementById('primaryColor').value;
             const accentColor = document.getElementById('accentColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const textColor = document.getElementById('textColor').value;
 
             // Validate colors
-            if (!isValidHex(primaryColor) || !isValidHex(accentColor)) {
+            if (!isValidHex(primaryColor) || !isValidHex(accentColor)
+                || !isValidHex(secondaryColor) || !isValidHex(textColor)) {
                 showMessage('error', 'Please enter valid hex color codes (e.g., #172235)');
                 return;
             }
@@ -1082,7 +1098,9 @@ if ($selected_org_id) {
                         logo_url: logoUrl,
                         contact_email: contactEmail,
                         brand_primary: primaryColor,
-                        brand_accent: accentColor
+                        brand_accent: accentColor,
+                        secondary_color: secondaryColor,
+                        text_color: textColor
                     })
                 });
 

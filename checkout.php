@@ -35,16 +35,18 @@ if (!$item_id) {
 
 // Fetch item
 $item = dbGetRow(
-    "SELECT id, title, current_high_bid, current_high_bidder_id FROM items WHERE id = ?",
+    "SELECT id, title, current_high_bid, current_high_bidder_id, is_closed FROM items WHERE id = ?",
     [(int)$item_id]
 );
 
-if (!$item || $item['current_high_bidder_id'] != $user['id']) {
+// Payment is only available to the winning bidder AND only after the auction
+// has closed (mirrors the server-side guard in create-session.php).
+if (!$item || $item['current_high_bidder_id'] != $user['id'] || empty($item['is_closed'])) {
     renderPublicMessagePage([
         'status' => 403,
         'title' => 'Checkout',
         'heading' => 'This checkout is not available',
-        'message' => 'Only the winning bidder can pay for this item. Check My Bids for items ready for payment.',
+        'message' => 'Payment opens to the winning bidder once the auction closes. Check My Bids for items ready for payment.',
         'actions' => [
             ['href' => 'my-bids.php', 'label' => 'View My Bids', 'class' => 'btn-primary'],
             ['href' => 'items.php', 'label' => 'Browse Items', 'class' => 'btn-secondary']

@@ -56,6 +56,17 @@ $next_minimum = $item['current_high_bid'] > 0
 // Check if current user is winning
 $is_user_winning = $user && $item['current_high_bidder_id'] == $user['id'];
 
+// Determine the high-bidder label. An item with no bids has no high bidder —
+// previously this wrongly showed "Someone else", manufacturing a fake competitor.
+$has_bids = (float)$item['current_high_bid'] > 0 && !empty($item['current_high_bidder_id']);
+if (!$has_bids) {
+    $high_bidder_name = 'No bids yet';
+} elseif ($is_user_winning) {
+    $high_bidder_name = 'You';
+} else {
+    $high_bidder_name = 'Someone else';
+}
+
 // Build response
 $response = [
     'status' => 'ok',
@@ -75,7 +86,7 @@ $response = [
         'time_remaining_ms' => $time_remaining_ms,
         'is_closed' => (bool)$item['is_closed'],
         'is_user_winning' => $is_user_winning,
-        'high_bidder_name' => $is_user_winning ? 'You' : 'Someone else'
+        'high_bidder_name' => $high_bidder_name
     ]
 ];
 

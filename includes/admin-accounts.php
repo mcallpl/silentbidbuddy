@@ -171,16 +171,60 @@ function logoutAdmin() {
  * Get current admin session from cookie
  * @return string|null Session token or null
  */
+if (!function_exists('getAdminSessionToken')) {
 function getAdminSessionToken() {
-    return getSessionCookie(ADMIN_SESSION_COOKIE_NAME);
+    $cookie = getSessionCookie(ADMIN_SESSION_COOKIE_NAME);
+    if (!empty($cookie)) {
+        return $cookie;
+    }
+    // Also accept a Bearer token (equivalent to the middleware version, so the
+    // function_exists guard is safe regardless of include order).
+    $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if (preg_match('/Bearer\s+(\S+)/', $auth_header, $m)) {
+        return $m[1];
+    }
+    return null;
+}
 }
 
 /**
- * Check if admin is logged in (has valid session cookie)
+ * Check if admin is logged in.
+ * SECURITY: validates the session token against admin_accounts in the database —
+ * cookie presence alone is NOT sufficient (that was a full auth bypass).
  * @return bool
  */
+if (!function_exists('isAdminLoggedIn')) {
 function isAdminLoggedIn() {
-    return hasSessionCookie(ADMIN_SESSION_COOKIE_NAME);
+    return !empty(getAuthenticatedAdminAccount());
+}
+}
+
+/**
+ * Resolve and validate the current admin account from the session token.
+ * Accepts the session cookie or a Bearer Authorization header. Returns the
+ * full admin row only if the token belongs to a real, active account.
+ * @return array|false
+ */
+function getAuthenticatedAdminAccount() {
+    $token = getSessionCookie(ADMIN_SESSION_COOKIE_NAME);
+
+    if (empty($token)) {
+        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if (!empty($auth_header) && preg_match('/Bearer\s+(\S+)/', $auth_header, $m)) {
+            $token = $m[1];
+        }
+    }
+
+    if (empty($token)) {
+        return false;
+    }
+
+    return dbGetRow(
+        "SELECT id, username, email, full_name, is_super_admin, is_active, organization_id
+         FROM admin_accounts
+         WHERE admin_session_token = ? AND is_active = 1",
+        [(string)$token]
+    );
 }
 
 /**

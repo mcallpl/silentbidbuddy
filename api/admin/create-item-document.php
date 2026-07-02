@@ -47,32 +47,35 @@ foreach ($required as $field) {
     }
 }
 
-// Generate QR code if it doesn't exist
+// Generate QR code if it doesn't exist. Link shortening (Rebrandly) is a nicety,
+// not a hard requirement — if it's unavailable (no API key, network error) we
+// fall back to the full item URL so document generation still works. The PDF
+// generator already supports a null/plain short URL.
 if (empty($item['qr_code_url']) || empty($item['short_url'])) {
+    $qr_target_url = APP_DOMAIN . '/item-qr.php?id=' . $item_id;
+    $short_url = null;
+    $qr_code_url = null;
     try {
-        $qr_target_url = APP_DOMAIN . '/item-qr.php?id=' . $item_id;
         $short_url = RebrandlyUtils::createShortUrl($qr_target_url, 'Item ' . $item['item_number'] . ': ' . $item['title']);
-
-        if ($short_url) {
-            $qr_code_url = RebrandlyUtils::getQRCode($short_url);
-
-            // Store QR code URLs in database
-            dbUpdate(
-                "UPDATE items SET qr_code_url = ?, short_url = ? WHERE id = ?",
-                [$qr_code_url, $short_url, $item_id]
-            );
-
-            $item['qr_code_url'] = $qr_code_url;
-            $item['short_url'] = $short_url;
-        } else {
-            http_response_code(500);
-            die(json_encode(['status' => 'error', 'message' => 'Failed to generate QR code. Please try again.']));
-        }
     } catch (Exception $e) {
-        error_log("Error generating QR code: " . $e->getMessage());
-        http_response_code(500);
-        die(json_encode(['status' => 'error', 'message' => 'Error generating QR code: ' . $e->getMessage()]));
+        error_log("[DOC] Rebrandly short URL failed, using full URL: " . $e->getMessage());
     }
+
+    // Fall back to the full URL if shortening didn't produce one.
+    $effective_url = $short_url ?: $qr_target_url;
+    try {
+        $qr_code_url = RebrandlyUtils::getQRCode($effective_url);
+    } catch (Exception $e) {
+        error_log("[DOC] QR image generation failed: " . $e->getMessage());
+    }
+
+    // Persist whatever we have (may be the full URL / null QR).
+    dbUpdate(
+        "UPDATE items SET qr_code_url = ?, short_url = ? WHERE id = ?",
+        [$qr_code_url, $effective_url, $item_id]
+    );
+    $item['qr_code_url'] = $qr_code_url;
+    $item['short_url'] = $effective_url;
 }
 
 // Use database values, not form values - ensures PDF always matches saved data

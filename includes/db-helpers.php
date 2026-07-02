@@ -160,7 +160,9 @@ function dbUpdate($sql, $params = []) {
     }
 
     $affectedRows = $stmt->affected_rows;
-    error_log("✓ [DB UPDATE] Success - Affected rows: " . $affectedRows . " SQL: " . $sql);
+    if (defined('DEBUG_LOG') && DEBUG_LOG) {
+        error_log("✓ [DB UPDATE] Success - Affected rows: " . $affectedRows . " SQL: " . $sql);
+    }
     $stmt->close();
 
     // Return true on successful execution (statement executed without error)

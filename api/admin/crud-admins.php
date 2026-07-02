@@ -11,10 +11,18 @@ require_once __DIR__ . '/../../includes/session-manager.php';
 
 header('Content-Type: application/json');
 
-// Check if admin is logged in
-if (!isAdminLoggedIn()) {
+// SECURITY: managing admin accounts requires SUPER ADMIN privileges. Previously
+// this only checked isAdminLoggedIn(), so any authenticated admin (even a
+// single-event, non-super admin) could create super-admin accounts or reset
+// any admin's password — a privilege-escalation hole.
+$currentAdmin = getAuthenticatedAdminAccount();
+if (!$currentAdmin) {
     http_response_code(401);
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Admin session required.']));
+}
+if (empty($currentAdmin['is_super_admin'])) {
+    http_response_code(403);
+    die(json_encode(['status' => 'error', 'message' => 'Forbidden. Super admin privileges required.']));
 }
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
@@ -110,12 +118,20 @@ function handleCreateAdmin() {
 }
 
 function handleUpdateAdmin() {
+    global $currentAdmin;
     $input = json_decode(file_get_contents('php://input'), true);
     $admin_id = (int)($_GET['admin_id'] ?? 0);
 
     if (!$admin_id || !$input) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'admin_id and body required']));
+    }
+
+    // Prevent an admin from stripping their own super-admin role (self-lockout).
+    if ($admin_id === (int)$currentAdmin['id']
+        && isset($input['is_super_admin']) && !(int)$input['is_super_admin']) {
+        http_response_code(400);
+        die(json_encode(['status' => 'error', 'message' => 'You cannot remove your own super-admin role.']));
     }
 
     $updates = [];
@@ -152,10 +168,17 @@ function handleUpdateAdmin() {
 }
 
 function handleToggleActive() {
+    global $currentAdmin;
     $admin_id = (int)($_GET['admin_id'] ?? 0);
     if (!$admin_id) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'admin_id required']));
+    }
+
+    // Prevent an admin from deactivating their own account (self-lockout).
+    if ($admin_id === (int)$currentAdmin['id']) {
+        http_response_code(400);
+        die(json_encode(['status' => 'error', 'message' => 'You cannot deactivate your own account.']));
     }
 
     $success = dbUpdate(

@@ -13,14 +13,20 @@ require_once __DIR__ . '/includes/public-nav.php';
 $session_id = $_GET['session_id'] ?? '';
 $user = getCurrentUser();
 
-// Fetch transaction by session ID
+// Fetch transaction by session ID (including owner for the authorization check)
 $transaction = dbGetRow(
-    "SELECT t.id, t.item_id, t.amount, t.status, i.title
+    "SELECT t.id, t.user_id, t.item_id, t.amount, t.status, i.title
      FROM transactions t
      JOIN items i ON i.id = t.item_id
      WHERE t.stripe_checkout_session_id = ?",
     [$session_id]
 );
+
+// Only the owning user may view their payment record — don't leak another
+// bidder's item/amount to anyone who obtains a session_id.
+if ($transaction && (!$user || (int)$transaction['user_id'] !== (int)$user['id'])) {
+    $transaction = null;
+}
 
 if (!$transaction) {
     renderPublicMessagePage([
@@ -37,6 +43,27 @@ if (!$transaction) {
 }
 
 $page_title = 'Payment Successful - ' . APP_NAME;
+
+// The webhook may not have landed yet (status 'pending'), or the payment may
+// have actually failed — don't claim success unconditionally.
+$is_paid = ($transaction['status'] === 'paid');
+$is_failed = in_array($transaction['status'], ['failed', 'cancelled'], true);
+if ($is_paid) {
+    $success_icon = '🎉';
+    $success_heading = 'Thank You!';
+    $success_text = 'Your payment has been received.';
+    $status_badge_class = 'badge-success';
+} elseif ($is_failed) {
+    $success_icon = '⚠️';
+    $success_heading = 'Payment did not go through';
+    $success_text = 'Your payment was not completed. You can try again from My Bids.';
+    $status_badge_class = 'badge-error';
+} else {
+    $success_icon = '⏳';
+    $success_heading = 'Payment processing';
+    $success_text = 'We have received your checkout and are confirming payment. This page will reflect the final status shortly.';
+    $status_badge_class = 'badge-warning';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,15 +78,15 @@ $page_title = 'Payment Successful - ' . APP_NAME;
 
     <div class="container success-container">
         <section class="success-message">
-            <div class="success-icon">🎉</div>
-            <h1>Thank You!</h1>
-            <p class="success-text">Your payment has been received.</p>
+            <div class="success-icon"><?php echo $success_icon; ?></div>
+            <h1><?php echo htmlspecialchars($success_heading); ?></h1>
+            <p class="success-text"><?php echo htmlspecialchars($success_text); ?></p>
 
             <div class="success-details">
                 <h3><?php echo htmlspecialchars($transaction['title']); ?></h3>
                 <p class="amount">$<?php echo number_format($transaction['amount'], 2); ?></p>
                 <p class="status">
-                    Status: <span class="badge badge-success">
+                    Status: <span class="badge <?php echo $status_badge_class; ?>">
                         <?php echo ucfirst($transaction['status']); ?>
                     </span>
                 </p>

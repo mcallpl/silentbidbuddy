@@ -24,6 +24,15 @@ SBB.Bidding = {
             quickBidBtn.addEventListener('click', () => this.quickBid());
         }
 
+        // Buy It Now button
+        const buyNowBtn = document.getElementById('buyNowBtn');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', () => {
+                const price = parseFloat(buyNowBtn.dataset.buyNowPrice);
+                this.buyNow(price);
+            });
+        }
+
         // Custom bid form
         const toggleBtn = document.querySelector('.toggle-custom-bid');
         console.log('[SETUP] Looking for .toggle-custom-bid button:', toggleBtn);
@@ -183,10 +192,23 @@ SBB.Bidding = {
         this.showBidModal(customAmount, maxAmount);
     },
 
-    showBidModal(amount, maxBid = null) {
-        this.pendingBid = { amount, maxBid };
+    buyNow(price) {
+        if (!price || price <= 0) return;
+        // Buy Now wins immediately and closes the auction — confirm the commitment.
+        this.showBidModal(price, null, true);
+    },
+
+    showBidModal(amount, maxBid = null, isBuyNow = false) {
+        this.pendingBid = { amount, maxBid, isBuyNow };
         document.getElementById('modalBidAmount').textContent = SBB.Utils.formatCurrency(amount);
-        document.getElementById('bidModal').style.display = 'block';
+        const modal = document.getElementById('bidModal');
+        // Reflect the buy-now intent in the confirm button label, if present.
+        const confirmBtn = document.getElementById('confirmBidBtn');
+        if (confirmBtn) {
+            confirmBtn.dataset.defaultLabel = confirmBtn.dataset.defaultLabel || confirmBtn.textContent;
+            confirmBtn.textContent = isBuyNow ? 'Confirm Purchase' : (confirmBtn.dataset.defaultLabel || 'Confirm Bid');
+        }
+        modal.style.display = 'block';
     },
 
     closeBidModal() {
@@ -219,6 +241,15 @@ SBB.Bidding = {
 
             if (response.status === 'success') {
                 console.log('[BID SYNC] ✓ Bid placed successfully:', response);
+
+                // Buy It Now closes the auction and wins immediately — reload so the
+                // page reflects the closed/won state and the "Complete Payment" link.
+                if (response.buy_now || response.is_closed) {
+                    this.closeBidModal();
+                    this.showSuccessNotification('You won this item with Buy It Now! Redirecting to payment…');
+                    setTimeout(() => window.location.reload(), 1200);
+                    return;
+                }
 
                 // Update UI
                 this.updateItemDisplay(response);

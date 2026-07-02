@@ -19,7 +19,11 @@ class ItemPDFGenerator {
         $html = $this->buildHTML();
 
         $filename = $this->getFilename();
-        file_put_contents($filename, $html);
+        // Fail loudly if the file can't be written (e.g. documents/ not writable
+        // on production) instead of silently returning a path that 404s.
+        if (file_put_contents($filename, $html) === false) {
+            throw new RuntimeException('Unable to write document file (check permissions on the documents/ directory): ' . $filename);
+        }
 
         return $filename;
     }
@@ -420,8 +424,11 @@ HTML;
     private function getFilename() {
         $itemId = $this->item['id'];
         $dir = __DIR__ . '/../documents/';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+            throw new RuntimeException('Unable to create documents/ directory: ' . $dir);
+        }
+        if (!is_writable($dir)) {
+            throw new RuntimeException('documents/ directory is not writable: ' . $dir);
         }
         return $dir . 'item-' . $itemId . '.html';
     }

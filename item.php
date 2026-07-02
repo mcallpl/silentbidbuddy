@@ -95,6 +95,7 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
                 <img src="<?php echo htmlspecialchars($imageUrl); ?>"
                      alt="<?php echo htmlspecialchars($item['title']); ?>"
                      class="item-image"
+                     onerror="this.onerror=null;this.src='images/items/placeholder.svg';"
                 />
             <?php else: ?>
                 <div class="image-placeholder">
@@ -199,6 +200,17 @@ $is_favorited = $is_authenticated && $has_favorites && isItemFavorited((int)$use
                             <button type="submit" class="btn btn-primary">Place Custom Bid</button>
                         </form>
                     </div>
+
+                    <?php if (!empty($item['buy_now_price']) && (float)$item['buy_now_price'] > 0): ?>
+                        <!-- Buy It Now -->
+                        <div class="buy-now-section">
+                            <button id="buyNowBtn" class="btn btn-secondary btn-large btn-buy-now"
+                                    data-buy-now-price="<?php echo (float)$item['buy_now_price']; ?>">
+                                Buy It Now for $<?php echo number_format((float)$item['buy_now_price'], 2); ?>
+                            </button>
+                            <p class="buy-now-hint">Skip the bidding — win this item instantly and close the auction.</p>
+                        </div>
+                    <?php endif; ?>
 
                     <div id="bidError" class="error-message" style="display: none;"></div>
                 <?php endif; ?>

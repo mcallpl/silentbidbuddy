@@ -58,14 +58,19 @@ function handleUpdateOrganization($input) {
     $contact_email = trim($input['contact_email'] ?? '');
     $brand_primary = trim($input['brand_primary'] ?? '');
     $brand_accent = trim($input['brand_accent'] ?? '');
+    // Secondary/text colors are optional; they live only in event_branding.
+    $secondary_color = trim($input['secondary_color'] ?? '');
+    $text_color = trim($input['text_color'] ?? '');
 
     if (empty($name)) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'Organization name is required']));
     }
 
-    // Validate hex colors
-    if (!isValidHexColor($brand_primary) || !isValidHexColor($brand_accent)) {
+    // Validate hex colors (primary/accent required; secondary/text optional)
+    if (!isValidHexColor($brand_primary) || !isValidHexColor($brand_accent)
+        || ($secondary_color !== '' && !isValidHexColor($secondary_color))
+        || ($text_color !== '' && !isValidHexColor($text_color))) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'Invalid hex color format. Use format: #RRGGBB']));
     }
@@ -101,7 +106,42 @@ function handleUpdateOrganization($input) {
         die(json_encode(['status' => 'error', 'message' => 'Failed to update organization']));
     }
 
-    error_log('[BRANDING API] ✓ Organization ' . $org_id . ' branding updated successfully');
+    // CRITICAL: the public site renders its CSS from the per-event branding
+    // (event_branding table, with the events.* columns as fallback) — NOT from
+    // organizations.brand_*. Without this propagation, saving branding here
+    // updated a table nothing reads, so colors never actually changed on the
+    // live site. Sync the org-level primary/accent/logo/name down to every event
+    // in this organization so the change is visible.
+    // Only overwrite secondary/text when provided; otherwise keep existing values.
+    $sec = $secondary_color !== '' ? $secondary_color : null;
+    $txt = $text_color !== '' ? $text_color : null;
+
+    $org_events = dbGetAll("SELECT id FROM events WHERE organization_id = ?", [$org_id]);
+    foreach ($org_events as $ev) {
+        $eid = (int)$ev['id'];
+        dbQuery(
+            "INSERT INTO event_branding
+                (event_id, primary_color, accent_color, secondary_color, text_color, organization_name, organization_logo_url)
+             VALUES (?, ?, ?, COALESCE(?, '#f4f7f2'), COALESCE(?, '#172235'), ?, ?)
+             ON DUPLICATE KEY UPDATE
+                primary_color = VALUES(primary_color),
+                accent_color = VALUES(accent_color),
+                secondary_color = COALESCE(?, secondary_color),
+                text_color = COALESCE(?, text_color),
+                organization_name = VALUES(organization_name),
+                organization_logo_url = VALUES(organization_logo_url)",
+            [$eid, $brand_primary, $brand_accent, $sec, $txt, $name, ($logo_url !== '' ? $logo_url : null), $sec, $txt]
+        );
+        // Keep the events.* fallback columns consistent too.
+        dbUpdate(
+            "UPDATE events SET primary_color = ?, accent_color = ?,
+                secondary_color = COALESCE(?, secondary_color), text_color = COALESCE(?, text_color),
+                organization_name = ?, organization_logo_url = ? WHERE id = ?",
+            [$brand_primary, $brand_accent, $sec, $txt, $name, ($logo_url !== '' ? $logo_url : null), $eid]
+        );
+    }
+
+    error_log('[BRANDING API] ✓ Organization ' . $org_id . ' branding updated + propagated to ' . count($org_events) . ' event(s)');
 
     echo json_encode([
         'status' => 'ok',
@@ -236,10 +276,13 @@ function handleUpdateEvent($input) {
 }
 
 /**
- * Validate hex color format
+ * Validate hex color format (3- or 6-digit).
+ * NOTE: defined unconditionally so PHP hoists it (it is called earlier in this
+ * file). This endpoint is a standalone entry point that includes no other file
+ * defining isValidHexColor(), so there is no redeclaration risk.
  */
 function isValidHexColor($color) {
-    return preg_match('/^#[0-9A-F]{6}$/i', $color) === 1;
+    return preg_match('/^#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$/', (string)$color) === 1;
 }
 
 /**

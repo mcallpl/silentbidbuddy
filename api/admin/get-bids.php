@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     die(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
 }
 
-requireAdminAuth();
+$admin = requireAdminAuth();
 
 $page = (int)($_GET['page'] ?? 1);
 $limit = (int)($_GET['limit'] ?? 50);
@@ -25,7 +25,7 @@ $sort_by = $_GET['sort_by'] ?? 'created_at'; // column to sort by
 $sort_order = $_GET['sort_order'] ?? 'DESC'; // ASC or DESC
 
 $page = max(1, $page);
-$limit = min($limit, 100);
+$limit = max(1, min($limit, 100));
 $sort_order = strtoupper($sort_order) === 'ASC' ? 'ASC' : 'DESC';
 
 // Whitelist sort columns
@@ -50,6 +50,11 @@ if ($item_id > 0) {
     $where .= " AND b.item_id = ?";
     $params[] = $item_id;
 }
+
+// Multi-tenant scoping via the joined items table.
+list($scopeSql, $scopeParams) = adminEventScopeClause($admin, 'i.event_id');
+$where .= $scopeSql;
+$params = array_merge($params, $scopeParams);
 
 // Get total count
 $count_query = "SELECT COUNT(*) FROM bids b JOIN items i ON i.id = b.item_id WHERE " . $where;
