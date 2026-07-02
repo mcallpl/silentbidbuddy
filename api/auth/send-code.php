@@ -49,10 +49,14 @@ if (isPhoneRateLimited($normalized_phone)) {
 // Create verification code
 $code = createVerificationCode($normalized_phone);
 
-// Send via Twilio
-$sms_sent = sendVerificationCode($normalized_phone, $code);
+// Send via Twilio. sendVerificationCode() returns an array
+// ['success'=>bool, ...], NOT a boolean — the old `if (!$sms_sent)` check was
+// always false (a non-empty array is truthy), so delivery failures were reported
+// to the user as success. Check the actual success flag.
+$sms_result = sendVerificationCode($normalized_phone, $code);
 
-if (!$sms_sent) {
+if (empty($sms_result['success'])) {
+    error_log('[AUTH] SMS send failed: ' . ($sms_result['error'] ?? 'unknown error'));
     http_response_code(500);
     die(json_encode([
         'status' => 'error',

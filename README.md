@@ -369,8 +369,11 @@ Manually close all active auctions:
 For production, add these cron jobs:
 
 ```bash
-# Close expired auctions every 30 seconds
-* * * * * /usr/bin/php /var/www/silentbidbuddy/api/admin/close-auction.php >/dev/null 2>&1
+# Close expired auctions every minute.
+# IMPORTANT: run the standalone CLI script, NOT api/admin/close-auction.php —
+# that endpoint requires admin authentication (cookie/token) which a CLI cron
+# invocation does not have, so it would 401 and never close anything.
+* * * * * /usr/bin/php /var/www/silentbidbuddy/cron-close-auctions.php >/dev/null 2>&1
 
 # Cleanup old verification codes and sessions (daily)
 0 2 * * * /usr/bin/php -r 'require("/var/www/silentbidbuddy/config.php"); require("/var/www/silentbidbuddy/includes/auction-engine.php"); cleanupExpiredRecords();' >/dev/null 2>&1

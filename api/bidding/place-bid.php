@@ -71,18 +71,25 @@ if ($result['status'] !== 'success') {
 
 error_log('[BID] ✓ SUCCESS - Bid ' . $result['bid_id'] . ' placed for $' . $bid_amount);
 
-// Send notifications to previous bidder if applicable
+// Send notifications to previous bidder if applicable.
+// The bid is ALREADY committed at this point, so a notification failure must
+// never turn a successful bid into an error response. Isolate it defensively.
 if ($result['previous_high_bidder_id']) {
-    $item = getItemState($item_id);
+    try {
+        $item = getItemState($item_id);
 
-    // Unified notification dispatch (push + SMS)
-    notifyBidPlaced(
-        $item_id,
-        $user['id'],
-        $result['previous_high_bidder_id'],
-        $item['title'],
-        $bid_amount
-    );
+        // Unified notification dispatch (push + SMS)
+        notifyBidPlaced(
+            $item_id,
+            $user['id'],
+            $result['previous_high_bidder_id'],
+            $item['title'],
+            $bid_amount
+        );
+    } catch (\Throwable $e) {
+        // Log and swallow — the bid stands regardless of notification outcome.
+        error_log('[BID] Notification dispatch failed (bid still succeeded): ' . $e->getMessage());
+    }
 }
 
 http_response_code(200);

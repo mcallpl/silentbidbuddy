@@ -11,16 +11,42 @@ require_once __DIR__ . '/../../includes/session-manager.php';
 
 header('Content-Type: application/json');
 
-// Check if admin is logged in
-if (!isAdminLoggedIn()) {
+// Check if admin is logged in (DB-validated) and capture identity for scoping.
+$currentAdmin = getAuthenticatedAdminAccount();
+if (!$currentAdmin) {
     error_log('[ADMIN CRUD] ❌ Admin not logged in - Auth check failed');
     http_response_code(401);
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Admin session required.']));
 }
 
-error_log('[ADMIN CRUD] ✓ Admin authenticated - Proceeding with action: ' . ($action ?? 'none'));
-
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
+error_log('[ADMIN CRUD] ✓ Admin authenticated - Proceeding with action: ' . ($action ?: 'none'));
+
+/**
+ * Allowed event IDs for the current admin: null = all (super admin), else a list.
+ */
+function currentAdminAllowedEvents($admin) {
+    if (!empty($admin['is_super_admin'])) {
+        return null;
+    }
+    $rows = dbGetAll("SELECT event_id FROM admin_events WHERE admin_id = ?", [(int)($admin['id'] ?? 0)]);
+    return array_map(static fn($r) => (int)$r['event_id'], $rows ?: []);
+}
+
+/**
+ * Can the current admin manage this item (tenant isolation by event)?
+ */
+function adminCanAccessItem($admin, $item_id) {
+    if (!empty($admin['is_super_admin'])) {
+        return true;
+    }
+    $event_id = dbGetValue("SELECT event_id FROM items WHERE id = ?", [(int)$item_id]);
+    if ($event_id === null || $event_id === false) {
+        return false;
+    }
+    $allowed = currentAdminAllowedEvents($admin);
+    return in_array((int)$event_id, $allowed ?? [], true);
+}
 
 switch ($action) {
     case 'list':
@@ -44,19 +70,37 @@ switch ($action) {
 }
 
 function handleListItems() {
-    $page = (int)($_GET['page'] ?? 1);
-    $limit = (int)($_GET['limit'] ?? 20);
+    global $currentAdmin;
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $limit = max(1, min(100, (int)($_GET['limit'] ?? 20)));
     $offset = ($page - 1) * $limit;
+
+    // Multi-tenant scoping.
+    $requested = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
+    $allowed = currentAdminAllowedEvents($currentAdmin); // null = all
+    $where = "1=1";
+    $params = [];
+    if ($allowed === null) {
+        if ($requested > 0) { $where .= " AND event_id = ?"; $params[] = $requested; }
+    } elseif ($requested > 0) {
+        if (!in_array($requested, $allowed, true)) { $where .= " AND 1=0"; }
+        else { $where .= " AND event_id = ?"; $params[] = $requested; }
+    } elseif (empty($allowed)) {
+        $where .= " AND 1=0";
+    } else {
+        $ph = implode(',', array_fill(0, count($allowed), '?'));
+        $where .= " AND event_id IN ($ph)";
+        $params = array_merge($params, $allowed);
+    }
 
     $items = dbGetAll(
         "SELECT id, item_number, title, starting_bid, current_high_bid, current_high_bidder_id,
                 auction_start_time, auction_end_time, is_closed, created_at
-         FROM items ORDER BY item_number ASC LIMIT ? OFFSET ?",
-        [$limit, $offset]
+         FROM items WHERE {$where} ORDER BY item_number ASC LIMIT ? OFFSET ?",
+        array_merge($params, [$limit, $offset])
     );
 
-    $count_result = dbGetRow("SELECT COUNT(*) as count FROM items");
-    $total = $count_result['count'] ?? 0;
+    $total = (int)dbGetValue("SELECT COUNT(*) FROM items WHERE {$where}", $params);
 
     echo json_encode([
         'status' => 'ok',
@@ -71,10 +115,16 @@ function handleListItems() {
 }
 
 function handleGetItem() {
+    global $currentAdmin;
     $item_id = (int)($_GET['item_id'] ?? 0);
     if (!$item_id) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'item_id required']));
+    }
+
+    if (!adminCanAccessItem($currentAdmin, $item_id)) {
+        http_response_code(403);
+        die(json_encode(['status' => 'error', 'message' => 'Forbidden: item belongs to another event.']));
     }
 
     $item = dbGetRow(
@@ -93,13 +143,14 @@ function handleGetItem() {
 }
 
 function handleCreateItem() {
+    global $currentAdmin;
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'Invalid JSON']));
     }
 
-    $required = ['item_number', 'title', 'starting_bid', 'auction_end_time'];
+    $required = ['title', 'starting_bid', 'auction_end_time'];
     foreach ($required as $field) {
         if (!isset($input[$field])) {
             http_response_code(400);
@@ -107,12 +158,37 @@ function handleCreateItem() {
         }
     }
 
+    // Auto-assign the next lot number if the form didn't supply one (the item
+    // form has no item_number field).
+    $item_number = (int)($input['item_number'] ?? 0);
+    if ($item_number <= 0) {
+        $item_number = ((int)dbGetValue("SELECT COALESCE(MAX(item_number), 100) FROM items")) + 1;
+    }
+
+    // An item MUST belong to an event, or it is invisible to bidders (the public
+    // catalog filters by event_id). Require and authorize the event.
+    $event_id = (int)($input['event_id'] ?? 0);
+    if (!$event_id) {
+        http_response_code(400);
+        die(json_encode(['status' => 'error', 'message' => 'event_id is required to create an item.']));
+    }
+    $allowed = currentAdminAllowedEvents($currentAdmin);
+    if ($allowed !== null && !in_array($event_id, $allowed, true)) {
+        http_response_code(403);
+        die(json_encode(['status' => 'error', 'message' => 'Forbidden: you cannot add items to that event.']));
+    }
+    if (!dbGetValue("SELECT id FROM events WHERE id = ?", [$event_id])) {
+        http_response_code(404);
+        die(json_encode(['status' => 'error', 'message' => 'Event not found.']));
+    }
+
     $item_id = dbInsert(
-        "INSERT INTO items (item_number, title, description, starting_bid, min_increment,
+        "INSERT INTO items (event_id, item_number, title, description, starting_bid, min_increment,
                            auction_start_time, auction_end_time, is_closed)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 0)",
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)",
         [
-            (int)$input['item_number'],
+            $event_id,
+            $item_number,
             $input['title'],
             $input['description'] ?? '',
             (float)$input['starting_bid'],
@@ -145,6 +221,12 @@ function handleUpdateItem() {
     if (!$item_check) {
         http_response_code(404);
         die(json_encode(['status' => 'error', 'message' => 'Item not found']));
+    }
+
+    // Tenant isolation: only manage items in your own event(s).
+    if (!adminCanAccessItem($GLOBALS['currentAdmin'], $item_id)) {
+        http_response_code(403);
+        die(json_encode(['status' => 'error', 'message' => 'Forbidden: item belongs to another event.']));
     }
 
     $updates = [];
@@ -185,13 +267,37 @@ function handleUpdateItem() {
 }
 
 function handleDeleteItem() {
+    global $currentAdmin;
     $item_id = (int)($_GET['item_id'] ?? 0);
     if (!$item_id) {
         http_response_code(400);
         die(json_encode(['status' => 'error', 'message' => 'item_id required']));
     }
 
+    if (!adminCanAccessItem($currentAdmin, $item_id)) {
+        http_response_code(403);
+        die(json_encode(['status' => 'error', 'message' => 'Forbidden: item belongs to another event.']));
+    }
+
+    // Deleting an item CASCADES to its bids and transactions (FK ON DELETE
+    // CASCADE). Refuse to destroy financial records: block deletion if a paid
+    // transaction exists for this item.
+    $paid = (int)dbGetValue(
+        "SELECT COUNT(*) FROM transactions WHERE item_id = ? AND status = 'paid'",
+        [$item_id]
+    );
+    if ($paid > 0) {
+        http_response_code(409);
+        die(json_encode(['status' => 'error', 'message' => 'Cannot delete: this item has completed (paid) transactions.']));
+    }
+
     $success = dbDelete("DELETE FROM items WHERE id = ?", [$item_id]);
+
+    // Audit trail for a destructive action.
+    dbInsert(
+        "INSERT INTO audit_log (event_type, description, created_at) VALUES (?, ?, NOW())",
+        ['ITEM_DELETED', 'Admin ' . (int)($currentAdmin['id'] ?? 0) . ' deleted item ' . $item_id]
+    );
 
     echo json_encode([
         'status' => $success ? 'ok' : 'error',

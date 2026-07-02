@@ -1379,6 +1379,14 @@ const AdminDashboard = {
             endTime.setSeconds(endTime.getSeconds() + seconds);
 
             data.auction_end_time = endTime.toISOString();
+
+            // Items must belong to the currently-selected event, or they are
+            // invisible to bidders (the public catalog filters by event_id).
+            if (!this.state.selectedEventId) {
+                alert('Please select an event before creating an item.');
+                return;
+            }
+            data.event_id = this.state.selectedEventId;
         }
 
         try {

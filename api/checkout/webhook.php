@@ -39,12 +39,15 @@ if ($event['type'] === 'checkout.session.completed') {
     $event_id = (int)($session['metadata']['event_id'] ?? 0);
 }
 
-// Verify webhook signature (tries event-specific, then global)
-if ($signature && (STRIPE_WEBHOOK_SECRET || $event_id)) {
-    if (!verifyStripeSignature($payload, $signature, $event_id)) {
-        http_response_code(401);
-        die(json_encode(['status' => 'error', 'message' => 'Invalid signature']));
-    }
+// SECURITY: webhook signature verification is MANDATORY and fail-closed.
+// Previously this ran only `if ($signature && ...)`, so an attacker who simply
+// omitted the Stripe-Signature header skipped verification entirely and could
+// POST a forged "checkout.session.completed" to mark any item paid. Now a
+// missing signature, a missing/misconfigured secret, or a failed check all
+// reject the request before any processing.
+if (empty($signature) || !verifyStripeSignature($payload, $signature, $event_id)) {
+    http_response_code(401);
+    die(json_encode(['status' => 'error', 'message' => 'Invalid or missing signature']));
 }
 
 $event_type = $event['type'] ?? '';
@@ -63,20 +66,37 @@ switch ($event_type) {
         break;
 
     case 'charge.failed':
-        $charge = $event['data']['object'] ?? [];
-        if (!empty($charge['payment_intent'])) {
+    case 'payment_intent.payment_failed':
+        $obj = $event['data']['object'] ?? [];
+        // charge.failed carries payment_intent; payment_intent.* IS the intent (id).
+        $pi = $obj['payment_intent'] ?? ($event_type === 'payment_intent.payment_failed' ? ($obj['id'] ?? '') : '');
+        if (!empty($pi)) {
             dbUpdate(
                 "UPDATE transactions SET status = ? WHERE stripe_payment_intent_id = ?",
-                ['failed', $charge['payment_intent']]
+                ['failed', $pi]
             );
         }
         dbInsert(
             "INSERT INTO audit_log (event_type, description, created_at)
              VALUES (?, ?, NOW())",
-            ['PAYMENT_FAILED', 'Payment failed for charge: ' . ($charge['id'] ?? 'unknown')]
+            ['PAYMENT_FAILED', 'Payment failed (' . $event_type . '): ' . ($obj['id'] ?? 'unknown')]
         );
         http_response_code(200);
-        echo json_encode(['status' => 'ok', 'message' => 'Charge failed recorded']);
+        echo json_encode(['status' => 'ok', 'message' => 'Payment failure recorded']);
+        break;
+
+    case 'checkout.session.expired':
+        // Bidder abandoned Stripe Checkout — move the pending transaction to
+        // cancelled so it doesn't linger as "pending" forever.
+        $session = $event['data']['object'] ?? [];
+        if (!empty($session['id'])) {
+            dbUpdate(
+                "UPDATE transactions SET status = ? WHERE stripe_checkout_session_id = ? AND status = 'pending'",
+                ['cancelled', $session['id']]
+            );
+        }
+        http_response_code(200);
+        echo json_encode(['status' => 'ok', 'message' => 'Checkout expiry recorded']);
         break;
 
     default:

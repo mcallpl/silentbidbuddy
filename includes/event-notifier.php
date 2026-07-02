@@ -19,7 +19,8 @@ require_once __DIR__ . '/notifications.php';
  * @return int|false Notification ID for follow-up retry
  */
 function logNotificationDelivery($user_id, $item_id, $type, $delivery_channel, $status, $error_message = null) {
-    global $mysqli;
+    // Use the shared singleton connection (there is no global $mysqli).
+    $mysqli = getDB();
 
     $metadata = json_encode([
         'channel' => $delivery_channel,
@@ -99,8 +100,6 @@ function logNotificationDelivery($user_id, $item_id, $type, $delivery_channel, $
  * @return array Summary of retry results
  */
 function retryFailedNotifications() {
-    global $mysqli;
-
     $results = [
         'total_retried' => 0,
         'successful' => 0,
@@ -249,28 +248,35 @@ function sendPushNotifications($user_ids, $payload) {
  * @return bool Success
  */
 function sendPushMessageToEndpoint($endpoint, $auth, $p256dh, $payload) {
-    // Encrypt the payload
-    $encryptedPayload = encryptPayload(
-        json_encode($payload),
-        base64_decode($p256dh),
-        base64_decode($auth)
-    );
+    // Encrypt the payload (RFC 8291 aes128gcm). A failure here means we can't
+    // produce a decryptable message, so report failure honestly rather than
+    // POSTing garbage the browser will silently drop.
+    try {
+        $body = encryptPayload(
+            json_encode($payload),
+            base64_decode(strtr($p256dh, '-_', '+/')),
+            base64_decode(strtr($auth, '-_', '+/'))
+        );
+    } catch (\Throwable $e) {
+        error_log('[PUSH] Encryption failed: ' . $e->getMessage());
+        return false;
+    }
 
     // Create Authorization header
     $vapidHeader = createVAPIDHeader($endpoint);
 
-    // Send to push service
+    // Send to push service (aes128gcm: single Content-Encoding header, body carries salt+key).
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $endpoint);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/octet-stream',
-        'Content-Length: ' . strlen($encryptedPayload['ciphertext']),
-        'Authorization: ' . $vapidHeader,
-        'Crypto-Key: dh=' . $encryptedPayload['dh'],
-        'Encryption: salt=' . $encryptedPayload['salt']
+        'Content-Encoding: aes128gcm',
+        'TTL: 2419200',
+        'Content-Length: ' . strlen($body),
+        'Authorization: ' . $vapidHeader
     ]);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $encryptedPayload['ciphertext']);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
@@ -283,50 +289,92 @@ function sendPushMessageToEndpoint($endpoint, $auth, $p256dh, $payload) {
     $success = in_array($httpCode, [200, 201]);
 
     if (!$success) {
-        error_log("[PUSH] Push delivery failed ($httpCode): " . substr($response, 0, 200));
+        error_log("[PUSH] Push delivery failed ($httpCode): " . substr((string)$response, 0, 200));
     }
 
     return $success;
 }
 
 /**
- * Encrypt payload using ECDH and AES-GCM
- * @param string $message Message to encrypt
- * @param string $userPublicKey User's P256 public key
- * @param string $userAuth User's auth secret
- * @return array {ciphertext, dh, salt}
+ * Wrap a raw uncompressed P-256 public point (65 bytes: 0x04||X||Y) as a PEM
+ * SubjectPublicKeyInfo so openssl can import it. Uses the fixed ASN.1 prefix for
+ * id-ecPublicKey / prime256v1.
+ */
+function p256RawPointToPem($raw65) {
+    $prefix = hex2bin('3059301306072a8648ce3d020106082a8648ce3d030107034200');
+    $der = $prefix . $raw65;
+    return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode($der), 64, "\n") . "-----END PUBLIC KEY-----\n";
+}
+
+/**
+ * Encrypt a Web Push payload per RFC 8291 (aes128gcm content encoding), using a
+ * real ECDH shared secret. Returns the binary message body ready to POST with a
+ * "Content-Encoding: aes128gcm" header, or throws on failure.
+ *
+ * NOTE: this replaces a prior stub that never performed ECDH (it HKDF'd only the
+ * auth secret), so browsers could never decrypt the payload even though the push
+ * service returned 200/201. This implementation follows RFC 8291 + RFC 8188.
+ *
+ * @param string $message      Plaintext (JSON) payload
+ * @param string $userPublicKey Raw 65-byte subscriber P-256 public key (decoded)
+ * @param string $userAuth     Raw 16-byte subscriber auth secret (decoded)
+ * @return string Binary aes128gcm message body
  */
 function encryptPayload($message, $userPublicKey, $userAuth) {
-    // Generate ephemeral key pair
+    if (strlen($userPublicKey) !== 65 || $userPublicKey[0] !== "\x04") {
+        throw new RuntimeException('Invalid subscriber p256dh key');
+    }
+
+    // Ephemeral (application server) EC key pair.
     $ephemeral = openssl_pkey_new([
         'private_key_type' => OPENSSL_KEYTYPE_EC,
         'curve_name' => 'prime256v1'
     ]);
-
-    // Extract public key
+    if ($ephemeral === false) {
+        throw new RuntimeException('Failed to create ephemeral EC key');
+    }
     $details = openssl_pkey_get_details($ephemeral);
-    $ephemeralPublicKey = $details['key'];
+    $asX = str_pad($details['ec']['x'], 32, "\x00", STR_PAD_LEFT);
+    $asY = str_pad($details['ec']['y'], 32, "\x00", STR_PAD_LEFT);
+    $asPublic = "\x04" . $asX . $asY; // 65-byte uncompressed point
 
-    // ECDH shared secret (simplified - real implementation needs full ECDH)
-    // For production, use a proper Web Push library
-    $salt = openssl_random_pseudo_bytes(16);
-    $nonce = openssl_random_pseudo_bytes(12);
+    // Import subscriber public key and derive the ECDH shared secret.
+    $peer = openssl_pkey_get_public(p256RawPointToPem($userPublicKey));
+    if ($peer === false) {
+        throw new RuntimeException('Failed to import subscriber public key');
+    }
+    $sharedSecret = openssl_pkey_derive($peer, $ephemeral, 32);
+    if ($sharedSecret === false) {
+        throw new RuntimeException('ECDH derivation failed');
+    }
 
-    // AES-128-GCM encryption
-    $encryptedMessage = openssl_encrypt(
-        $message,
+    // RFC 8291: combine the ECDH secret with the auth secret to get the IKM.
+    $keyInfo = "WebPush: info\x00" . $userPublicKey . $asPublic;
+    $ikm = hash_hkdf('sha256', $sharedSecret, 32, $keyInfo, $userAuth);
+
+    // RFC 8188 aes128gcm: derive content-encryption key and nonce from a salt.
+    $salt = random_bytes(16);
+    $cek = hash_hkdf('sha256', $ikm, 16, "Content-Encoding: aes128gcm\x00", $salt);
+    $nonce = hash_hkdf('sha256', $ikm, 12, "Content-Encoding: nonce\x00", $salt);
+
+    // Single record: plaintext followed by the 0x02 last-record delimiter.
+    $tag = '';
+    $ciphertext = openssl_encrypt(
+        $message . "\x02",
         'aes-128-gcm',
-        substr(hash_hkdf('sha256', $userAuth . chr(0), $salt, 'Content-Encoding: aes128gcm'), 0, 16),
+        $cek,
         OPENSSL_RAW_DATA,
         $nonce,
         $tag
     );
+    if ($ciphertext === false) {
+        throw new RuntimeException('AES-128-GCM encryption failed');
+    }
 
-    return [
-        'ciphertext' => $nonce . $encryptedMessage . $tag,
-        'dh' => base64_encode(substr($ephemeralPublicKey, -65)), // P256 point format
-        'salt' => base64_encode($salt)
-    ];
+    // Header: salt(16) || record_size(uint32=4096) || idlen(1)=65 || as_public(65)
+    $header = $salt . pack('N', 4096) . chr(strlen($asPublic)) . $asPublic;
+
+    return $header . $ciphertext . $tag;
 }
 
 /**

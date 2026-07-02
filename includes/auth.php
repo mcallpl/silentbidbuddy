@@ -93,11 +93,15 @@ function getSessionToken() {
 
     // Check cookie
     if (!empty($_COOKIE['session_token'])) {
-        error_log('[SESSION] Found session_token in cookie: ' . substr($_COOKIE['session_token'], 0, 10) . '...');
+        if (defined('DEBUG_LOG') && DEBUG_LOG) {
+            error_log('[SESSION] Found session_token in cookie: ' . substr($_COOKIE['session_token'], 0, 10) . '...');
+        }
         return $_COOKIE['session_token'];
     }
 
-    error_log('[SESSION] No session_token found. Cookie domain: ' . COOKIE_DOMAIN . ', Available cookies: ' . json_encode(array_keys($_COOKIE)));
+    if (defined('DEBUG_LOG') && DEBUG_LOG) {
+        error_log('[SESSION] No session_token found. Cookie domain: ' . COOKIE_DOMAIN . ', Available cookies: ' . json_encode(array_keys($_COOKIE)));
+    }
     return null;
 }
 
@@ -126,60 +130,141 @@ function requireAuth() {
  * @return array|void Admin data if using account system, or dies if invalid
  */
 function requireAdminAuth() {
-    // First check for new admin account session
-    $admin_session_token = $_COOKIE[ADMIN_SESSION_COOKIE_NAME] ?? null;
-    if (!empty($admin_session_token)) {
-        $admin_data = getAdminFromSession($admin_session_token);
-        if ($admin_data) {
-            return $admin_data;
+    // Primary path: DB-validated admin account session (cookie or Bearer token).
+    $admin_data = getAdminFromSession();
+    if ($admin_data) {
+        return $admin_data;
+    }
+
+    // Legacy ADMIN_TOKEN fallback for backward compatibility. Only usable if a
+    // token is actually configured; compared in constant time.
+    if (!empty(ADMIN_TOKEN)) {
+        $token = null;
+
+        // Bearer Authorization header first
+        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if (!empty($auth_header) && preg_match('/Bearer\s+(\S+)/', $auth_header, $m)) {
+            $token = $m[1];
+        }
+
+        // Legacy login.php stores the raw ADMIN_TOKEN in the same cookie. That
+        // value already failed the DB lookup in getAdminFromSession above, so the
+        // only way past the constant-time check below is an exact secret match.
+        if (empty($token)) {
+            $token = $_COOKIE[ADMIN_SESSION_COOKIE_NAME] ?? '';
+        }
+
+        if (!empty($token) && hash_equals((string)ADMIN_TOKEN, (string)$token)) {
+            // Synthetic super-admin identity for the single-tenant legacy token.
+            return [
+                'id' => 0,
+                'username' => 'legacy-admin',
+                'email' => null,
+                'full_name' => 'Legacy Admin',
+                'is_super_admin' => 1,
+                'is_active' => 1,
+                'organization_id' => null,
+                'legacy' => true,
+            ];
         }
     }
 
-    // Fall back to legacy token auth for backward compatibility
-    if (empty(ADMIN_TOKEN)) {
-        http_response_code(401);
-        die(json_encode(['status' => 'error', 'message' => 'Admin not authenticated']));
-    }
-
-    $token = null;
-
-    // Check Authorization header first
-    $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-    if (!empty($auth_header)) {
-        $parts = explode(' ', $auth_header);
-        $token = $parts[1] ?? '';
-    }
-
-    // Fall back to admin session cookie (legacy)
-    if (empty($token)) {
-        $token = $_COOKIE['admin_session_token'] ?? '';
-    }
-
-    if ($token !== ADMIN_TOKEN) {
-        http_response_code(401);
-        die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Invalid admin token.']));
-    }
+    http_response_code(401);
+    die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Admin authentication required.']));
 }
 
 /**
- * Get current admin from session (new account system)
- * Session token is just a cookie, no DB lookup needed
- * @return array|false Admin data or false if not logged in
+ * Build an event-scoping SQL clause for admin list endpoints.
+ *
+ * Enforces multi-tenant isolation: super admins see all events (or a single
+ * requested event via ?event_id=), while a non-super admin is restricted to the
+ * events assigned to them in admin_events. Returns a clause fragment (already
+ * prefixed with " AND ...", or "" for unrestricted) plus its bound params.
+ *
+ * @param array  $admin   The admin row from requireAdminAuth()
+ * @param string $column  Fully-qualified event_id column, e.g. "items.event_id"
+ * @return array [string $sqlFragment, array $params]
+ */
+function adminEventScopeClause($admin, $column) {
+    $requested = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
+
+    // Super admin (or the legacy single-tenant token): unrestricted, but honor a
+    // specific ?event_id= filter when the dashboard sends one.
+    if (!empty($admin['is_super_admin'])) {
+        return $requested > 0 ? [" AND {$column} = ?", [$requested]] : ['', []];
+    }
+
+    // Non-super admin: limited to their assigned events.
+    $rows = dbGetAll("SELECT event_id FROM admin_events WHERE admin_id = ?", [(int)($admin['id'] ?? 0)]);
+    $allowed = array_map(static fn($r) => (int)$r['event_id'], $rows ?: []);
+
+    if ($requested > 0) {
+        // Requested a specific event they don't have access to → return nothing.
+        if (!in_array($requested, $allowed, true)) {
+            return [' AND 1=0', []];
+        }
+        return [" AND {$column} = ?", [$requested]];
+    }
+
+    // No specific event requested → restrict to all their assigned events.
+    if (empty($allowed)) {
+        return [' AND 1=0', []];
+    }
+    $placeholders = implode(',', array_fill(0, count($allowed), '?'));
+    return [" AND {$column} IN ({$placeholders})", $allowed];
+}
+
+/**
+ * Resolve the list of event IDs an admin request is scoped to.
+ * @return array|null  null = all events (unrestricted super admin, no filter),
+ *                     [] = no access (return nothing),
+ *                     [ids...] = restrict to these event IDs.
+ */
+function adminAllowedEventIds($admin) {
+    $requested = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
+
+    if (!empty($admin['is_super_admin'])) {
+        return $requested > 0 ? [$requested] : null;
+    }
+
+    $rows = dbGetAll("SELECT event_id FROM admin_events WHERE admin_id = ?", [(int)($admin['id'] ?? 0)]);
+    $allowed = array_map(static fn($r) => (int)$r['event_id'], $rows ?: []);
+
+    if ($requested > 0) {
+        return in_array($requested, $allowed, true) ? [$requested] : [];
+    }
+    return $allowed;
+}
+
+/**
+ * Get current admin from session (new account system).
+ * SECURITY: the token is validated against admin_accounts in the database —
+ * a non-empty cookie alone is NOT sufficient (that was a full auth bypass).
+ * Accepts the token from the session cookie or a Bearer Authorization header.
+ * @return array|false Full admin row or false if not authenticated
  */
 function getAdminFromSession() {
-    // Check if session cookie exists
     $admin_session_token = $_COOKIE[ADMIN_SESSION_COOKIE_NAME] ?? null;
+
+    // Also accept a Bearer token for API clients
+    if (empty($admin_session_token)) {
+        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if (!empty($auth_header) && preg_match('/Bearer\s+(\S+)/', $auth_header, $m)) {
+            $admin_session_token = $m[1];
+        }
+    }
+
     if (empty($admin_session_token)) {
         return false;
     }
 
-    // For now, if the cookie exists and is HTTP-only, we trust it's valid
-    // To improve security, could store session tokens in admin_sessions table
-    // and validate them here. But the current system relies on cookie expiration.
-
-    // Return a minimal admin object since we don't have admin_id in the cookie
-    // This is sufficient for requireAdminAuth() to know the user is authenticated
-    return ['authenticated' => true];
+    // The token must belong to a real, active admin account.
+    return dbGetRow(
+        "SELECT id, username, email, full_name, is_super_admin, is_active, organization_id
+         FROM admin_accounts
+         WHERE admin_session_token = ? AND is_active = 1",
+        [(string)$admin_session_token]
+    );
 }
 
 /**
@@ -250,18 +335,29 @@ function getOrCreateUser($phone, $full_name = '', $email = '') {
         return $user['id'];
     }
 
-    // Create new user
+    // Create new user. A UNIQUE key on phone_number (uq_phone) enforces one
+    // global identity per phone. Use INSERT ... ON DUPLICATE KEY UPDATE so two
+    // concurrent first-time verifications for the same phone can't create a
+    // duplicate row (the loser of the race no-ops and we re-select the id below).
     if ($has_email_column) {
-        return dbInsert(
-            "INSERT INTO users (phone_number, full_name, email) VALUES (?, ?, ?)",
+        dbQuery(
+            "INSERT INTO users (phone_number, full_name, email) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+                full_name = COALESCE(NULLIF(VALUES(full_name), ''), full_name),
+                email = COALESCE(NULLIF(VALUES(email), ''), email)",
             [$phone, $full_name, $email]
+        );
+    } else {
+        dbQuery(
+            "INSERT INTO users (phone_number, full_name) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE
+                full_name = COALESCE(NULLIF(VALUES(full_name), ''), full_name)",
+            [$phone, $full_name]
         );
     }
 
-    return dbInsert(
-        "INSERT INTO users (phone_number, full_name) VALUES (?, ?)",
-        [$phone, $full_name]
-    );
+    $row = dbGetRow("SELECT id FROM users WHERE phone_number = ?", [$phone]);
+    return $row ? (int)$row['id'] : false;
 }
 
 /**
@@ -303,41 +399,51 @@ function createVerificationCode($phone) {
  * @return bool
  */
 function verifyCode($phone, $code) {
-    // Get the code record, fetching Unix timestamp to avoid timezone issues
+    // Look up the most recent unused code for this phone number ONLY.
+    // CRITICAL: do NOT filter by the guessed code here. The old query matched on
+    // `code = ?`, so a wrong guess matched zero rows and the `attempts` counter
+    // never incremented — making the 5-attempt brute-force lockout dead code.
     $record = dbGetRow(
-        "SELECT id, attempts, is_used, UNIX_TIMESTAMP(expires_at) as expires_ts FROM verification_codes
-         WHERE phone_number = ? AND code = ? AND is_used = 0
+        "SELECT id, code, attempts, UNIX_TIMESTAMP(expires_at) as expires_ts
+         FROM verification_codes
+         WHERE phone_number = ? AND is_used = 0
          ORDER BY created_at DESC LIMIT 1",
-        [$phone, (string)$code]
+        [$phone]
     );
 
     if (!$record) {
         return false;
     }
 
-    // Check if expired (compare using Unix timestamps to avoid timezone confusion)
+    // Expired? (compare via Unix timestamps to avoid timezone confusion)
     if ((int)$record['expires_ts'] < time()) {
         return false;
     }
 
-    // Check attempt count
-    if ($record['attempts'] >= MAX_VERIFICATION_ATTEMPTS) {
+    // Too many prior attempts: lock out and burn the code so it can't be reused.
+    if ((int)$record['attempts'] >= MAX_VERIFICATION_ATTEMPTS) {
+        dbUpdate("UPDATE verification_codes SET is_used = 1 WHERE id = ?", [(int)$record['id']]);
         return false;
     }
 
-    // Increment attempts
-    dbUpdate(
-        "UPDATE verification_codes SET attempts = attempts + 1 WHERE id = ?",
-        [(int)$record['id']]
-    );
+    // Constant-time comparison of the guess against the real code.
+    if (!hash_equals((string)$record['code'], (string)$code)) {
+        // Wrong guess counts toward the lockout.
+        dbUpdate("UPDATE verification_codes SET attempts = attempts + 1 WHERE id = ?", [(int)$record['id']]);
+        return false;
+    }
 
-    // Mark as used on successful verification
-    dbUpdate(
-        "UPDATE verification_codes SET is_used = 1 WHERE id = ?",
-        [(int)$record['id']]
-    );
+    // Correct code: consume it atomically. The `AND is_used = 0` guard plus the
+    // affected-rows check closes a TOCTOU race where two simultaneous requests
+    // with the correct code could both create a session from one code.
+    $db = getDB();
+    $stmt = $db->prepare("UPDATE verification_codes SET is_used = 1 WHERE id = ? AND is_used = 0");
+    $stmt->bind_param('i', $record['id']);
+    $stmt->execute();
+    $consumed = $stmt->affected_rows === 1;
+    $stmt->close();
 
-    return true;
+    return $consumed;
 }
 
 /**

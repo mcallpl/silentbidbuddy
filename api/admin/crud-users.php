@@ -38,8 +38,8 @@ switch ($action) {
 }
 
 function handleListUsers() {
-    $page = (int)($_GET['page'] ?? 1);
-    $limit = (int)($_GET['limit'] ?? 20);
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $limit = max(1, min(100, (int)($_GET['limit'] ?? 20))); // clamp 1..100
     $offset = ($page - 1) * $limit;
 
     $has_email_column = dbColumnExists('users', 'email');

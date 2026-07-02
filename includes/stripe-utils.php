@@ -237,6 +237,13 @@ function processCheckoutCompleted($session) {
     try {
         $transaction = getPaymentRequestByCheckoutSession($session['id']);
 
+        // Idempotency: Stripe retries/redelivers webhooks. If this transaction is
+        // already marked paid, do nothing (prevents duplicate PAYMENT_COMPLETED
+        // audit rows and redundant updates).
+        if ($transaction && ($transaction['status'] ?? '') === 'paid') {
+            return true;
+        }
+
         // Get metadata
         $item_id = $session['metadata']['item_id'] ?? 0;
         $user_id = $session['metadata']['user_id'] ?? 0;

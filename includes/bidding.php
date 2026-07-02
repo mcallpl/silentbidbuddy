@@ -131,11 +131,19 @@ function validateBidAmount($bid_amount, $current_high_bid, $min_increment, $star
  * @return array ['status' => 'success'|'error', 'message' => string, ...]
  */
 function placeBidWithLocking($item_id, $user_id, $bid_amount, $max_bid_amount = null) {
-    global $mysqli;
+    // Use the shared singleton connection so the FOR UPDATE lock below and the
+    // queries inside placeBid() (which go through getDB()) run on the SAME
+    // connection/transaction. Previously this used an undefined `global $mysqli`
+    // (always null), which fatally crashed every bid.
+    $mysqli = getDB();
 
     try {
-        // Start transaction with row-level locking
-        $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_COMMITTED);
+        // Start a transaction; the SELECT ... FOR UPDATE below takes the row lock
+        // that actually prevents concurrent bids from racing. (The previous code
+        // passed MYSQLI_TRANS_START_READ_COMMITTED, which is not a real mysqli
+        // constant — READ COMMITTED is an isolation level, not a start flag — and
+        // fatally errored.)
+        $mysqli->begin_transaction();
 
         // Lock the item row for update - this prevents other transactions from modifying it
         $lockStmt = $mysqli->prepare("SELECT current_high_bid, current_high_bidder_id, auction_end_time, is_closed FROM items WHERE id = ? FOR UPDATE");
@@ -222,6 +230,56 @@ function placeBid($item_id, $user_id, $bid_amount, $max_bid_amount = null) {
     // Validate max_bid if provided
     if ($max_bid_amount !== null && $max_bid_amount < $bid_amount) {
         return ['status' => 'error', 'message' => 'Max bid must be >= current bid'];
+    }
+
+    // --- Buy It Now ---
+    // If the item has a buy-now price and the bid meets or exceeds it, this is an
+    // instant purchase: the bidder wins immediately at the buy-now price and the
+    // auction closes. (Runs inside the same locked transaction as a normal bid.)
+    $buy_now_price = isset($item['buy_now_price']) ? (float)$item['buy_now_price'] : 0.0;
+    if ($buy_now_price > 0 && $bid_amount >= $buy_now_price) {
+        $win_amount = normalizeBidMoney($buy_now_price);
+        $prior_bidder = (int)($item['current_high_bidder_id'] ?? 0);
+
+        $bid_id = dbInsert(
+            "INSERT INTO bids (item_id, user_id, bid_amount, max_bid_amount, created_at)
+             VALUES (?, ?, ?, ?, NOW())",
+            [(int)$item_id, (int)$user_id, $win_amount, null]
+        );
+        if (!$bid_id) {
+            return ['status' => 'error', 'message' => 'Failed to place bid'];
+        }
+
+        // Win + close immediately.
+        dbUpdate(
+            "UPDATE items SET current_high_bid = ?, current_high_bidder_id = ?, is_closed = 1 WHERE id = ?",
+            [$win_amount, (int)$user_id, (int)$item_id]
+        );
+
+        dbInsert(
+            "INSERT INTO audit_log (event_type, user_id, item_id, description, created_at)
+             VALUES (?, ?, ?, ?, NOW())",
+            ['BUY_NOW', (int)$user_id, (int)$item_id, 'Bought now for $' . $win_amount]
+        );
+
+        return [
+            'status' => 'success',
+            'message' => 'Purchased with Buy It Now',
+            'bid_id' => $bid_id,
+            'proxy_bid_id' => null,
+            'new_high_bid' => (float)$win_amount,
+            'next_minimum' => (float)$win_amount,
+            'auction_end_time' => $item['auction_end_time'],
+            'time_remaining_ms' => 0,
+            'was_anti_sniping_applied' => false,
+            'was_proxy_applied' => false,
+            'is_user_winning' => true,
+            'is_closed' => true,
+            'buy_now' => true,
+            'proxy_message' => '',
+            // Notify a prior high bidder (if any, and not the buyer) that they lost.
+            'previous_high_bidder_id' => ($prior_bidder && $prior_bidder !== (int)$user_id) ? $prior_bidder : null
+        ];
     }
 
     $previous_high_bidder_id = $item['current_high_bidder_id'];

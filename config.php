@@ -91,6 +91,11 @@ if (!defined('APP_DOMAIN')) {
     }
 }
 if (!defined('APP_NAME')) define('APP_NAME', 'Silent Bid Buddy');
+
+// Verbose debug logging (full SQL, session-token fragments, cookie dumps). Off by
+// default so production logs don't leak sensitive data; enable via the
+// SBB_DEBUG_LOG environment variable when diagnosing an issue.
+if (!defined('DEBUG_LOG')) define('DEBUG_LOG', getenv('SBB_DEBUG_LOG') === '1');
 if (!defined('PUBLIC_SITE_URL')) define('PUBLIC_SITE_URL', getenv('PUBLIC_SITE_URL') ?: 'https://silentbidbuddy.com');
 
 // ============================================================

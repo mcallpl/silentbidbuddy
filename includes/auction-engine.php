@@ -28,31 +28,44 @@ function closeExpiredAuctions() {
 
     foreach ($expired_items as $item) {
         try {
-            // Mark as closed
-            dbUpdate(
-                "UPDATE items SET is_closed = 1 WHERE id = ?",
-                [(int)$item['id']]
-            );
-
-            $closed_count++;
-
-            // Process winner if exists
+            // Process the winner BEFORE marking the item closed. Previously the
+            // item was closed first and processWinner()'s result was discarded,
+            // so a failed transaction/notification silently left the winner with
+            // no payment request and no way to retry (the closed item is excluded
+            // from the next run). Now: only close once winner processing succeeds,
+            // so a transient failure is retried on the next cron tick and shows up
+            // in the returned errors meanwhile.
             if ($item['current_high_bidder_id']) {
                 $winner = dbGetRow(
                     "SELECT id, phone_number, full_name FROM users WHERE id = ?",
                     [(int)$item['current_high_bidder_id']]
                 );
 
-                if ($winner) {
-                    processWinner(
+                if (!$winner) {
+                    // Unrecoverable (winner user is gone). Log, close so we don't
+                    // loop on it forever, and move on.
+                    $errors[] = "Item {$item['id']}: high bidder {$item['current_high_bidder_id']} not found; closing without winner processing";
+                    error_log($errors[count($errors) - 1]);
+                } else {
+                    $ok = processWinner(
                         (int)$item['id'],
                         (int)$winner['id'],
                         (float)$item['current_high_bid'],
                         $item['title'],
                         $winner['phone_number']
                     );
+                    if (!$ok) {
+                        // Retryable — leave the item OPEN so the next run tries again.
+                        $errors[] = "Item {$item['id']}: winner processing failed; left open for retry";
+                        error_log($errors[count($errors) - 1]);
+                        continue;
+                    }
                 }
             }
+
+            // Mark as closed (no winner, or winner processed successfully / unrecoverable)
+            dbUpdate("UPDATE items SET is_closed = 1 WHERE id = ?", [(int)$item['id']]);
+            $closed_count++;
 
             // Log audit event
             dbInsert(
@@ -127,28 +140,53 @@ function cleanupExpiredRecords() {
 }
 
 /**
+ * Build an event-scope SQL fragment for metrics queries.
+ * @param array|null $eventIds  null = all, [] = none, [ids] = restrict
+ * @param string $col           qualified event_id column
+ * @return array [sqlFragment, params]
+ */
+function metricsEventFilter($eventIds, $col) {
+    if ($eventIds === null) {
+        return ['', []];
+    }
+    if (empty($eventIds)) {
+        return [" AND 1=0", []]; // no accessible events → match nothing
+    }
+    $ph = implode(',', array_fill(0, count($eventIds), '?'));
+    return [" AND {$col} IN ({$ph})", $eventIds];
+}
+
+/**
  * Get live auction metrics
+ * @param array|null $eventIds Optional event scope (null=all, []=none, [ids])
  * @return array Metrics data
  */
-function getLiveMetrics() {
+function getLiveMetrics($eventIds = null) {
+    list($fi, $pi) = metricsEventFilter($eventIds, 'event_id');   // items table
+    list($fbi, $pbi) = metricsEventFilter($eventIds, 'i.event_id'); // bids joined to items
+
     $active_items = dbGetValue(
-        "SELECT COUNT(*) FROM items WHERE is_closed = 0 AND auction_end_time > NOW()"
+        "SELECT COUNT(*) FROM items WHERE is_closed = 0 AND auction_end_time > NOW(){$fi}",
+        $pi
     );
 
     $active_bidders = dbGetValue(
-        "SELECT COUNT(DISTINCT user_id) FROM bids
-         WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)"
+        "SELECT COUNT(DISTINCT b.user_id) FROM bids b JOIN items i ON i.id = b.item_id
+         WHERE b.created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR){$fbi}",
+        $pbi
     );
 
     $total_bids = dbGetValue(
-        "SELECT COUNT(*) FROM bids
-         WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)"
+        "SELECT COUNT(*) FROM bids b JOIN items i ON i.id = b.item_id
+         WHERE b.created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR){$fbi}",
+        $pbi
     );
 
     // Total raised from CLOSED items only
     $total_raised = dbGetValue(
         "SELECT SUM(current_high_bid) FROM items
-         WHERE is_closed = 1 AND current_high_bid > 0"
+         WHERE is_closed = 1 AND current_high_bid > 0{$fi}",
+        $pi
     );
 
     $recent_bids = dbGetAll(
@@ -156,19 +194,22 @@ function getLiveMetrics() {
          FROM bids b
          JOIN items i ON i.id = b.item_id
          JOIN users u ON u.id = b.user_id
-         WHERE b.created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+         WHERE b.created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE){$fbi}
          ORDER BY b.created_at DESC
-         LIMIT 10"
+         LIMIT 10",
+        $pbi
     );
 
-    // High traffic items - show all items ranked by bid count
+    // High traffic items - ranked by bid count
     $high_traffic_items = dbGetAll(
         "SELECT i.id, i.title, i.image_url, COUNT(b.id) as bid_count, i.current_high_bid, i.is_closed
          FROM items i
          LEFT JOIN bids b ON b.item_id = i.id
+         WHERE 1=1{$fi}
          GROUP BY i.id, i.title, i.image_url, i.current_high_bid, i.is_closed
          ORDER BY bid_count DESC
-         LIMIT 5"
+         LIMIT 5",
+        $pi
     );
 
     return [
@@ -183,17 +224,26 @@ function getLiveMetrics() {
 
 /**
  * Get auction summary (for admin reporting)
+ * @param array|null $eventIds Optional event scope (null=all, []=none, [ids])
  * @return array Summary data
  */
-function getAuctionSummary() {
-    $total_items = dbGetValue("SELECT COUNT(*) FROM items");
-    $closed_items = dbGetValue("SELECT COUNT(*) FROM items WHERE is_closed = 1");
-    $total_bidders = dbGetValue("SELECT COUNT(DISTINCT user_id) FROM bids");
-    $total_bids = dbGetValue("SELECT COUNT(*) FROM bids");
+function getAuctionSummary($eventIds = null) {
+    list($fi, $pi) = metricsEventFilter($eventIds, 'event_id');    // items
+    list($fbi, $pbi) = metricsEventFilter($eventIds, 'i.event_id'); // bids/tx joined to items
+
+    $total_items = dbGetValue("SELECT COUNT(*) FROM items WHERE 1=1{$fi}", $pi);
+    $closed_items = dbGetValue("SELECT COUNT(*) FROM items WHERE is_closed = 1{$fi}", $pi);
+    $total_bidders = dbGetValue(
+        "SELECT COUNT(DISTINCT b.user_id) FROM bids b JOIN items i ON i.id = b.item_id WHERE 1=1{$fbi}", $pbi);
+    $total_bids = dbGetValue(
+        "SELECT COUNT(*) FROM bids b JOIN items i ON i.id = b.item_id WHERE 1=1{$fbi}", $pbi);
     // Total raised from CLOSED items only
-    $total_raised = dbGetValue("SELECT SUM(current_high_bid) FROM items WHERE is_closed = 1 AND current_high_bid > 0");
-    $pending_payments = dbGetValue("SELECT COUNT(*) FROM transactions WHERE status = 'pending'");
-    $completed_payments = dbGetValue("SELECT SUM(amount) FROM transactions WHERE status = 'paid'");
+    $total_raised = dbGetValue(
+        "SELECT SUM(current_high_bid) FROM items WHERE is_closed = 1 AND current_high_bid > 0{$fi}", $pi);
+    $pending_payments = dbGetValue(
+        "SELECT COUNT(*) FROM transactions t JOIN items i ON i.id = t.item_id WHERE t.status = 'pending'{$fbi}", $pbi);
+    $completed_payments = dbGetValue(
+        "SELECT SUM(t.amount) FROM transactions t JOIN items i ON i.id = t.item_id WHERE t.status = 'paid'{$fbi}", $pbi);
 
     return [
         'total_items' => (int)$total_items,
@@ -204,6 +254,6 @@ function getAuctionSummary() {
         'total_raised' => (float)($total_raised ?? 0),
         'pending_payments' => (int)$pending_payments,
         'completed_payments' => (float)($completed_payments ?? 0),
-        'completion_rate' => $closed_items > 0 ? round(($closed_items / $total_items) * 100, 1) : 0
+        'completion_rate' => $total_items > 0 ? round(((int)$closed_items / (int)$total_items) * 100, 1) : 0
     ];
 }

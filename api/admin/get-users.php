@@ -15,13 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     die(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
 }
 
-requireAdminAuth();
+$admin = requireAdminAuth();
 
 $page = (int)($_GET['page'] ?? 1);
 $limit = (int)($_GET['limit'] ?? 50);
 $search = $_GET['search'] ?? '';
 $page = max(1, $page);
-$limit = min($limit, 100);
+$limit = max(1, min($limit, 100));
 
 $offset = ($page - 1) * $limit;
 $has_email_column = dbColumnExists('users', 'email');
@@ -43,18 +43,18 @@ if (!empty($search)) {
     }
 }
 
-// Get total count
-if (!empty($search)) {
-    $count_params = ['%' . $search . '%', '%' . $search . '%'];
-    $count_where = "full_name LIKE ? OR phone_number LIKE ?";
-    if ($has_email_column) {
-        $count_where .= " OR email LIKE ?";
-        $count_params[] = '%' . $search . '%';
-    }
-    $total = dbGetRow("SELECT COUNT(*) as count FROM users WHERE {$count_where}", $count_params)['count'];
-} else {
-    $total = dbCount('users');
+// Multi-tenant scoping: restrict to users who have bid on an item in the
+// admin's event(s). (users.event_id is unreliable — many rows are NULL — so we
+// scope by actual bidding activity in the allowed events.)
+list($scopeSql, $scopeParams) = adminEventScopeClause($admin, 'ix.event_id');
+if ($scopeSql !== '') {
+    $where .= " AND EXISTS (SELECT 1 FROM bids bx JOIN items ix ON ix.id = bx.item_id
+                            WHERE bx.user_id = u.id" . $scopeSql . ")";
+    $params = array_merge($params, $scopeParams);
 }
+
+// Get total count (same filters, no LIMIT/OFFSET yet)
+$total = (int)dbGetValue("SELECT COUNT(DISTINCT u.id) FROM users u WHERE " . $where, $params);
 
 // Get users with aggregated data
 // First get base user data with bid counts
